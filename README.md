@@ -1,2 +1,2 @@
-# ordex
+# Ordex
 Ordex — Autonomous Commerce Support
