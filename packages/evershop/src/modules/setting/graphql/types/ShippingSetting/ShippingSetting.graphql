@@ -1,0 +1,4 @@
+extend type Setting {
+  weightUnit: String
+  dimensionUnit: String
+}

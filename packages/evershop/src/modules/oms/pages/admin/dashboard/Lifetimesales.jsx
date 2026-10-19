@@ -1,0 +1,173 @@
+// Modified for Ordex on 19 October 2026.
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@components/common/ui/Card.js';
+import { toast } from '@components/common/ui/Sonner.js';
+import { _ } from '@evershop/evershop/lib/locale/translate/_';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import './Lifetimesales.scss';
+
+const COLORS = ['#7a9861', '#dbcbb2', '#e8eedf'];
+
+const Dot = ({ variant }) => (
+  <span
+    className="w-2 h-2 rounded-full inline-block"
+    style={{
+      backgroundColor:
+        { info: '#8f9e78', success: '#62864a', critical: '#b68e69' }[variant] ||
+        '#8f9e78'
+    }}
+  />
+);
+
+Dot.propTypes = {
+  variant: PropTypes.oneOf(['info', 'success', 'critical'])
+};
+
+export default function LifetimeSale({ api }) {
+  const [data, setData] = React.useState({});
+  const [fetching, setFetching] = React.useState(true);
+  const { orders, total, completed_percentage, cancelled_percentage } = data;
+
+  const chartData = [
+    { name: _('Completed'), value: completed_percentage },
+    { name: _('Cancelled'), value: cancelled_percentage },
+    {
+      name: _('Others'),
+      value: 100 - completed_percentage - cancelled_percentage
+    }
+  ];
+
+  React.useEffect(() => {
+    if (window !== undefined) {
+      fetch(api, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          setData(json);
+          setFetching(false);
+        })
+        .catch((error) => {
+          toast.error(error.message);
+        });
+    }
+  }, []);
+
+  if (fetching) {
+    return (
+      <Card title="Lifetime Sales">
+        <CardHeader>
+          <CardTitle>{_('Order health')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="skeleton-wrapper-lifetime">
+            <div className="skeleton" />
+            <div className="skeleton" />
+            <div className="skeleton" />
+            <div className="skeleton" />
+          </div>
+        </CardContent>
+        <CardContent>
+          <div className="skeleton-wrapper-lifetime">
+            <div className="skeleton-chart" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  } else {
+    return (
+      <Card title="Lifetime Sales">
+        <CardHeader>
+          <CardTitle>{_('Order health')}</CardTitle>
+          <CardDescription>
+            {_(
+              'Overview of total sales and order status over the lifetime of your store'
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-2">
+            <div className="flex space-x-2 items-center">
+              <Dot variant="info" />
+              <div className="self-center">
+                {_('${count} orders', { count: orders })}
+              </div>
+            </div>
+            <div className="flex space-x-2 items-center">
+              <Dot variant="info" />
+              <div className="self-center">
+                {_('${total} lifetime sale', { total })}
+              </div>
+            </div>
+            <div className="flex space-x-2 items-center">
+              <Dot variant="success" />
+              <div className="self-center">
+                {_('${pct}% of orders completed', {
+                  pct: completed_percentage
+                })}
+              </div>
+            </div>
+            <div className="flex space-x-2 items-center">
+              <Dot variant="critical" />
+              <div className="self-center">
+                {_('${pct}% of orders cancelled', {
+                  pct: cancelled_percentage
+                })}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardContent>
+          <div style={{ height: '200px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  innerRadius={58}
+                  outerRadius={82}
+                  paddingAngle={3}
+                  labelLine={false}
+                  fill="#7a9861"
+                  dataKey="value"
+                  isAnimationActive={false}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+}
+
+LifetimeSale.propTypes = {
+  api: PropTypes.string.isRequired
+};
+
+export const layout = {
+  areaId: 'rightSide',
+  sortOrder: 10
+};
+
+export const query = `
+  query Query {
+    api: url(routeId: "lifetimesales")    
+  }
+`;

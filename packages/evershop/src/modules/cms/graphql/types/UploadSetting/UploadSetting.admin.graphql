@@ -1,0 +1,40 @@
+extend type Setting {
+  """
+  The saved per-file upload size limit in MB (null = the 10 MB default). When
+  pinned by `system.upload_max_file_size`, the pinned value is returned.
+  """
+  uploadMaxFileSize: Float
+  uploadMaxFileSizePinned: Boolean!
+  """
+  Per-type size overrides as [{ type, maxSize }] rows — exact MIME types
+  (video/mp4) or family wildcards (video/*). When pinned by
+  `system.upload_max_file_size_per_type`, the pinned map is returned as rows.
+  """
+  uploadMaxFileSizePerType: JSON!
+  uploadMaxFileSizePerTypePinned: Boolean!
+  """
+  The admin's saved allowed-type selection ([] = nothing saved, the built-in
+  image defaults apply). Only catalog entries are returned.
+  """
+  uploadAllowedMimeTypes: JSON!
+  """
+  The selectable type catalog as [{ value, label }] — SVG and script-like
+  types are deliberately not offered.
+  """
+  uploadMimeTypeOptions: JSON!
+  """
+  Extra types allowed by the `system.upload_allowed_mime_types` config on top
+  of the selection (operator-managed, read-only in the admin).
+  """
+  uploadAllowedMimeTypesConfigExtras: JSON!
+  """
+  The allowlist actually enforced on upload: the admin's selection (or the
+  built-in image defaults when nothing is selected) plus the config extras.
+
+  Exposed as one field rather than left to the client to recombine from the
+  three above, because this is the exact list `fileFilter` checks — a second
+  derivation of the same rule would eventually disagree with it, and the
+  symptom would be a file picker that offers a type the server then rejects.
+  """
+  uploadAllowedMimeTypesEffective: JSON!
+}

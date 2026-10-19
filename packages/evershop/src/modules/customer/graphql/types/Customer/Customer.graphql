@@ -1,0 +1,45 @@
+"""
+Represent a customer address
+"""
+type CustomerAddress implements Address {
+  customerAddressId: Int!
+  uuid: String!
+  recipient: String
+  givenName: String
+  familyName: String
+  organization: String
+  addressLine1: String
+  addressLine2: String
+  addressLine3: String
+  dependentLocality: Region
+  locality: Region
+  administrativeArea: Region
+  postalCode: String
+  sortingCode: String
+  country: Country
+  telephone: String
+  extra: JSON
+  formatted: [String!]!
+  isDefault: Boolean
+  updateApi: String!
+  deleteApi: String!
+}
+
+"""
+Represents a customer
+"""
+type Customer {
+  customerId: Int!
+  uuid: String!
+  status: Int!
+  email: String!
+  addresses: [CustomerAddress]
+  addAddressApi: String!
+  updateProfileApi: String!
+  fullName: String!
+  createdAt: Date!
+}
+
+extend type Query {
+  currentCustomer: Customer
+}

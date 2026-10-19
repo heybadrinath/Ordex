@@ -1,0 +1,53 @@
+Total,மொத்தம்
+Order,ஆர்டர்
+Sku,பொருள் குறியீடு
+Continue to shipping,அனுப்புதலுக்கு தொடரவும்
+Continue shopping,வாங்குவதைக் தொடரவும்
+Continue Shopping,வாங்குவதைக் தொடரவும்
+Shopping cart,வணிக வண்டி
+Product,பொருள்
+Price,விலை
+Quantity,அளவு
+Remove,அகற்று
+Qty,அளவு
+Sub total,துணை மொத்தம்
+Discount($coupon),தள்ளுபடி ($coupon)
+Order summary,ஆர்டர் சுருக்கம்
+Taxes and shipping calculated at checkout,வரி மற்றும் அனுப்புதல் கட்டணம் செக்அவுட் போது கணக்கிடப்படும்
+Checkout,செக்அவுட் செய்
+Change,மாற்று
+Payment Method,கட்டண முறைகள்
+Shipping Method,அனுப்பும் முறை
+No payment methods available,கட்டண முறைகள் இல்லை
+Place Order,ஆர்டரை வைக்கவும்
+My billing address is same as shipping address,என் பில்லிங் முகவரி அனுப்பும் முகவரியுடன் ஒரே மாதிரியாகும்
+$count items,$count பொருட்கள்
+Discount,தள்ளுபடி
+Shipping,அனுப்புதல்
+No tax,வரி இல்லை
+Tax,வரி
+Sorry,மன்னிக்கவும்
+Please enter a shipping address in order to see shipping quotes,அனுப்புதல் கட்டணங்களைப் பார்க்க அனுப்பும் முகவரியை உள்ளிடவும்
+Continue to payment,கட்டணத்துக்கு தொடரவும்
+No payment method available,கட்டண முறை இல்லை
+Ship to,அனுப்பும் இடம்
+Shipment,அனுப்புதல்
+Thank you $name!,நன்றி $name!
+Order #$orderNumber,ஆர்டர் எண் #$orderNumber
+Add to cart,வண்டியில் சேர்
+Please select variant options,மாறுபாடு விருப்பங்களைத் தேர்ந்தெடுக்கவும்
+VIEW CART ($count),வண்டியைப் பார்க்கவும் ($count)
+JUST ADDED TO YOUR CART,உங்கள் வண்டியில் சேர்க்கப்பட்டது
+Promotion code?,பிரச்சார குறியீடு?
+Enter coupon code,கூப்பன் குறியீட்டை உள்ளிடவும்
+Apply,பயன்படுத்தவும்
+Your cart is empty!,உங்கள் வண்டி காலியாக உள்ளது!
+Inclusive of tax,வரியுடன் சேர்த்து
+Proceed to checkout,செக்அவுட்டிற்குச் செல்
+Your cart,உங்கள் கார்ட்
+${count} items in your cart,உங்கள் கார்ட்டில் ${count} பொருட்கள்
+No payment required,கட்டணம் தேவையில்லை
+Your order total is 0 — no payment is needed to place this order.,உங்கள் ஆர்டரின் மொத்தத் தொகை 0 — இந்த ஆர்டரை வழங்க கட்டணம் தேவையில்லை.
+Thank you for your order!,உங்கள் ஆர்டருக்கு நன்றி!
+Order #${orderNumber} is confirmed. We’ve emailed a receipt to ${email}.,ஆர்டர் #${orderNumber} உறுதிப்படுத்தப்பட்டது. ${email} க்கு ரசீது அனுப்பப்பட்டுள்ளது.
+Shipping is not available at the moment. Please contact us to complete your order.,தற்போது அனுப்புதல் கிடைக்கவில்லை. உங்கள் ஆர்டரை முடிக்க எங்களைத் தொடர்பு கொள்ளவும்.

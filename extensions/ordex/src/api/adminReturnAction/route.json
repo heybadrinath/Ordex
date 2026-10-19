@@ -1,0 +1,5 @@
+{
+  "path": "/returns/admin/:id",
+  "methods": ["POST"],
+  "access": "private"
+}

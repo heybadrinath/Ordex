@@ -1,0 +1,52 @@
+"""
+Represents a price based cost tier. Used by CoreShippingMethodRate.
+"""
+type PriceBasedCostItem {
+  minPrice: Price!
+  cost: Price!
+}
+
+"""
+Represents a weight based cost tier. Used by CoreShippingMethodRate.
+"""
+type WeightBasedCostItem {
+  minWeight: Price!
+  cost: Price!
+}
+
+"""
+A region restriction on a zone: the stored `key` at `level` for `country`,
+its display name, and whether a data refresh has retired the key (with the
+successor when the data knows it). A retired key never matches an address.
+"""
+type ZoneRegion {
+  country: String!
+  level: String!
+  key: String!
+  name: String!
+  retired: Boolean!
+  mergedInto: Region
+}
+
+"""
+Represents a shipping zone — a geographic region used to attach providers.
+
+Coverage is defined by `countries` (multi-country) plus optional per-country
+`regions` restrictions. A zone with no regions for a given country covers
+the whole country.
+"""
+type ShippingZone {
+  shippingZoneId: Int!
+  uuid: String!
+  name: String!
+  countries: [Country!]!
+  regions: [ZoneRegion!]!
+  providers: [ShippingZoneProvider!]!
+  updateApi: String!
+  deleteApi: String!
+}
+
+extend type Query {
+  shippingZones: [ShippingZone]
+  shippingZone(id: String!): ShippingZone
+}

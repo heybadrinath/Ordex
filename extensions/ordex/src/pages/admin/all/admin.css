@@ -1,0 +1,276 @@
+@font-face {
+  font-family: Manrope;
+  src: url('/assets/ordex/manrope.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/assets/ordex/dm-sans.woff2') format('woff2');
+  font-weight: 100 1000;
+  font-display: swap;
+}
+:root {
+  --background: #f5f7f0;
+  --foreground: #253126;
+  --primary: #3d6245;
+  --primary-foreground: #fff;
+  --muted: #edf1e5;
+  --muted-foreground: #75806c;
+  --border: #dfe6d5;
+  --ring: #719365;
+}
+body {
+  font-family: 'DM Sans', Arial, sans-serif;
+  background: #f5f7f0;
+  color: #253126;
+  font-size: 14px;
+}
+h1,
+h2,
+h3 {
+  font-family: Manrope, Arial, sans-serif;
+  letter-spacing: -0.5px;
+}
+:focus-visible {
+  outline: 2px solid #527844;
+  outline-offset: 3px;
+}
+.header {
+  height: 68px;
+  border-bottom: 1px solid #dfe6d5;
+  box-shadow: none;
+  padding-inline: 25px;
+  align-items: center;
+  background: #fff;
+}
+.header .logo {
+  width: auto;
+  min-width: 190px;
+}
+.ordex-admin-brand {
+  font-family: Manrope, sans-serif;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  text-decoration: none;
+  color: #253c26;
+}
+.ordex-admin-brand small {
+  font: 10px 'DM Sans', sans-serif;
+  padding: 5px 8px;
+  border-radius: 20px;
+  background: #edf3e1;
+  margin-left: 5px;
+  letter-spacing: 0.02em;
+}
+.content-wrapper {
+  margin-top: 68px;
+}
+.admin-navigation {
+  border-right: 1px solid #e0e6d6;
+  background: #fff;
+}
+.admin-nav-container {
+  background: #fff;
+  top: 68px;
+  padding: 22px 15px;
+}
+.admin-nav-container a {
+  border-radius: 8px;
+  padding-block: 9px;
+}
+.admin-nav-container a:hover {
+  background: #f0f5e7;
+}
+.admin-nav-container a.active {
+  background: #e8f0dc;
+  color: #365c28;
+}
+.admin-nav-container svg {
+  stroke-width: 1.6;
+}
+.content-wrapper .main-content .main-content-inner {
+  padding: 32px 40px;
+}
+.main-content h1 {
+  font-size: 30px;
+  font-weight: 500;
+}
+.main-content [data-slot='card'] {
+  background: #fff;
+  border-color: #dfe6d5;
+  box-shadow: none;
+  border-radius: 16px;
+}
+.main-content button {
+  border-radius: 8px;
+}
+.main-content table th {
+  color: #748164;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f8faf3;
+}
+.main-content table td {
+  font-size: 12px;
+  padding-block: 16px;
+}
+.main-content input,
+.main-content select {
+  border-color: #dae2cf;
+}
+.seller-returns {
+  padding-top: 0;
+}
+.seller-returns .workspace-heading {
+  margin-top: 0;
+}
+.seller-returns .primary-button,
+.seller-returns .secondary-button {
+  border-radius: 999px;
+}
+.adminLogin .main-content-inner {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 10% 90%, #e5eecf 0, transparent 65%),
+    #f4f6ee;
+}
+.adminLogin .admin-login-form {
+  max-width: 460px;
+  border: 1px solid #dce5d1;
+  border-radius: 25px;
+  box-shadow: 0 18px 65px #3149240b;
+  padding: 40px;
+}
+.admin-login-intro {
+  text-align: center;
+  margin-bottom: 26px;
+}
+.admin-login-intro .ordex-admin-brand {
+  justify-content: center;
+}
+.admin-login-intro h1 {
+  font-size: 25px;
+  margin: 20px 0 8px;
+}
+.admin-login-intro p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #768168;
+}
+.adminLogin input {
+  min-height: 45px;
+  border-radius: 10px;
+}
+.adminLogin button {
+  border-radius: 999px;
+  text-transform: none;
+}
+.adminLogin .content-wrapper .main-content {
+  margin-left: 0;
+}
+.adminLogin .footer {
+  display: none;
+}
+.chart-key {
+  display: flex;
+  gap: 18px;
+  font-size: 11px;
+  color: #738366;
+  margin-bottom: 18px;
+}
+.chart-key span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.chart-key i {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: #678b53;
+}
+.chart-key span:last-child i {
+  background: #d5dfc0;
+}
+.mobile-studio-nav {
+  display: none;
+}
+@media (max-width: 900px) {
+  .content-wrapper .main-content .main-content-inner {
+    padding: 22px 18px;
+  }
+}
+@media (max-width: 760px) {
+  .admin-navigation {
+    display: none;
+  }
+  .content-wrapper .main-content {
+    margin-left: 0;
+  }
+  .header {
+    height: 100px;
+    flex-wrap: wrap;
+    padding: 10px 18px;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .header > .relative {
+    display: none;
+  }
+  .content-wrapper {
+    margin-top: 100px;
+  }
+  .mobile-studio-nav {
+    display: flex;
+    order: 100;
+    width: 100%;
+    gap: 25px;
+    font-size: 12px;
+  }
+  .adminLogin .mobile-studio-nav {
+    display: none;
+  }
+  body.dashboard .main-content-inner {
+    margin-top: 0;
+  }
+  body.dashboard .main-content-inner > .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  body.dashboard .main-content-inner > .grid > div {
+    grid-column: 1;
+    min-width: 0;
+  }
+  body.dashboard [data-slot='card-header'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.dashboard [data-slot='card-action'] {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+body.dashboard .main-content-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+body.dashboard .page-heading {
+  max-width: none;
+}
+.admin-nav-container .active > a {
+  background: #edf3e3;
+  color: #3b612e;
+}

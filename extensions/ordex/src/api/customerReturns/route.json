@@ -1,0 +1,5 @@
+{
+  "path": "/returns/customer",
+  "methods": ["GET", "POST"],
+  "access": "public"
+}

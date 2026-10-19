@@ -1,0 +1,228 @@
+import Area from '@components/common/Area.js';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from '@components/common/ui/Card.js';
+import { toast } from '@components/common/ui/Sonner.js';
+import {
+  useCartDispatch,
+  useCartState
+} from '@components/frontStore/cart/CartContext.js';
+import {
+  useCheckout,
+  useCheckoutDispatch
+} from '@components/frontStore/checkout/CheckoutContext.js';
+import { ShippingMethods } from '@components/frontStore/checkout/shipment/ShippingMethods.js';
+import CustomerAddressForm from '@components/frontStore/customer/address/addressForm/Index.js';
+import {
+  geographicFieldsReady,
+  requoteKey,
+  requoteParamsFor,
+  serverAddressErrors,
+  storedRequoteParams
+} from '@components/frontStore/customer/address/addressFormLogic.js';
+import { useAddressSchema } from '@components/frontStore/customer/address/useAddressSchema.js';
+import { _ } from '@evershop/evershop/lib/locale/translate/_';
+import React, { useEffect, useRef } from 'react';
+import { useWatch } from 'react-hook-form';
+
+export function Shipment() {
+  const {
+    data: {
+      shippingAddress,
+      noShippingRequired,
+      availableShippingMethods,
+      shippingMethod: selectedShippingMethod
+    },
+    loadingStates: { fetchingShippingMethods }
+  } = useCartState();
+
+  // Early return if no shipping is required
+  if (noShippingRequired) {
+    return null;
+  }
+
+  const {
+    addShippingAddress,
+    addShippingMethod,
+    fetchAvailableShippingMethods
+  } = useCartDispatch();
+  const { form } = useCheckout();
+  const { updateCheckoutData } = useCheckoutDispatch();
+
+  // Use useWatch for better performance and cleaner code
+  const watchedShippingAddress = useWatch({
+    control: form.control,
+    name: 'shippingAddress'
+  });
+
+  const dirtyFields = form.formState.dirtyFields;
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // The schema of the country being entered drives the re-quote: its
+  // geographic tokens (C S Z D) plus the country, never the name or telephone
+  // (spec § 3.10). urql shares this request with the address form's own.
+  const { schema } = useAddressSchema(
+    (watchedShippingAddress?.country as string | undefined) ||
+      shippingAddress?.country?.code ||
+      null,
+    'shipping'
+  );
+  // Baseline: the stored shipping address, so an untouched form never
+  // re-quotes on mount and editing a field back to its value is a no-op.
+  const lastFetchParamsRef = useRef<string | null>(
+    requoteKey(storedRequoteParams(shippingAddress))
+  );
+
+  useEffect(() => {
+    const fetchShippingMethods = async () => {
+      try {
+        const params = requoteParamsFor(
+          schema,
+          form.getValues('shippingAddress') as Record<string, unknown>
+        );
+        if (!params) {
+          return;
+        }
+        // Skip when nothing a carrier quotes on has changed.
+        const key = requoteKey(params);
+        if (lastFetchParamsRef.current === key) {
+          return;
+        }
+        lastFetchParamsRef.current = key;
+        await fetchAvailableShippingMethods(params);
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : _('Failed to update shipment')
+        );
+      }
+    };
+
+    if (watchedShippingAddress && dirtyFields.shippingAddress) {
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      // Set new timeout
+      debounceTimeoutRef.current = setTimeout(() => {
+        fetchShippingMethods();
+      }, 800);
+    }
+
+    // Cleanup function
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [watchedShippingAddress, dirtyFields.shippingAddress, schema]);
+
+  const updateShipment = async (method: {
+    code: string;
+    name: string;
+    providerCode: string;
+  }) => {
+    try {
+      const validate = await form.trigger('shippingAddress');
+      if (!validate) {
+        return false;
+      }
+      const shippingAddress = form.getValues('shippingAddress');
+
+      // `providerCode` MUST flow through. Silently defaulting to 'core' (the
+      // earlier behavior) mis-routes any non-core method through
+      // `resolveShippingQuote(coreProvider, …)`, which then fails validation
+      // because the method isn't in Core's list — surfacing as "method no
+      // longer available." availableShippingMethods always carries it from
+      // the server (AvailableShippingMethod.providerCode is `String!`); if
+      // the field is missing here that's a strip bug upstream, not a
+      // legitimate fallback case.
+      if (!method.providerCode) {
+        throw new Error(
+          `Shipping method "${method.code}" is missing providerCode — refusing to guess.`
+        );
+      }
+      await addShippingAddress(shippingAddress);
+      await addShippingMethod(method.code, method.name, method.providerCode);
+      // Stash BOTH method code and provider in checkoutData so the eventual
+      // POST to `cart.checkoutApi` carries the provider through. The server's
+      // checkout service no longer assumes 'core'; without
+      // `shippingProvider` the request would 422 with "Selected shipping
+      // method is no longer available" when the cart's persisted provider
+      // disagrees.
+      updateCheckoutData({
+        shippingAddress,
+        shippingMethod: method.code,
+        shippingProvider: method.providerCode
+      });
+      return true;
+    } catch (error) {
+      // Field-targeted errors from the server land on the inputs (spec § 3.8);
+      // anything else is toasted.
+      const { applied, unassigned } = serverAddressErrors(
+        error,
+        'shippingAddress',
+        (name, err) => form.setError(name, err)
+      );
+      toast.error(
+        applied > 0
+          ? _('Please check the highlighted fields')
+          : unassigned[0] ??
+              (error instanceof Error
+                ? error.message
+                : _('Failed to update shipment'))
+      );
+      return false;
+    }
+  };
+
+  return (
+    <>
+      <Area id="checkoutShipmentBefore" />
+      <div className="checkout__shipment space-y-6 mt-6">
+        <Card className="rounded-lg border border-border shadow-none ring-0 transition-all overflow-hidden duration-200">
+          <CardHeader>
+            <CardTitle>
+              <div className="flex items-center gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  2
+                </span>
+                <span className="text-base font-semibold">
+                  {_('Shipping Address')}
+                </span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CustomerAddressForm
+              surface="shipping"
+              namePrefix="shippingAddress"
+              address={shippingAddress}
+            />
+          </CardContent>
+        </Card>
+        <Area id="checkoutShippingMethodsBefore" noOuter />
+        <ShippingMethods
+          methods={availableShippingMethods?.map((method) => ({
+            ...method,
+            isSelected: method.code === selectedShippingMethod
+          }))}
+          shippingAddress={shippingAddress}
+          addressReady={geographicFieldsReady(
+            schema,
+            (watchedShippingAddress as Record<string, unknown> | undefined) ??
+              form.getValues('shippingAddress')
+          )}
+          onSelect={updateShipment}
+          isLoading={fetchingShippingMethods}
+        />
+        <Area id="checkoutShippingMethodsAfter" noOuter />
+      </div>
+      <Area id="checkoutShipmentAfter" />
+    </>
+  );
+}

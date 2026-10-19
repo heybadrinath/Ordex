@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+.evershop/
+media/
+.DS_Store
+*.log
+coverage/
+test-results/
+playwright-report/
+.project-local/
+AGENTS.md
