@@ -41,7 +41,7 @@ The demonstration catalog uses downloaded photographs from Unsplash under the [U
 | `public/ordex/catalog/picnic-edit.jpg` | Svitlana | [View source](https://unsplash.com/photos/NjQ_gzJfeiw) |
 | `public/ordex/catalog/weekend-shades.jpg` | Unsplash contributor | [View source](https://unsplash.com/photos/DQcu4QOdj5c) |
 
-`seed/photography.json` records the source and download URL for each asset. Existing EverShop seed images retain their upstream provenance. Font licenses are included in `LICENSES/`.
+`seed/photography.json` records the source and download URL for each asset. The images in `public/ordex/base-catalog` are bundled copies of the existing EverShop demo images and retain their upstream provenance; the white cup uses the NordWood Themes photograph credited above. Bundling these files keeps the sample variants available when the initialization job exits. Font licenses are included in `LICENSES/`.
 
 Poppins is distributed under the SIL Open Font License; see `LICENSES/Poppins-OFL.txt`. Source: [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/poppins).
 

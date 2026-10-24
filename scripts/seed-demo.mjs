@@ -99,6 +99,7 @@ for (const product of products) {
   if (price)
     await updateProduct(product.uuid, {
       price,
+      images: [`/assets/ordex/base-catalog/${product.sku.toLowerCase()}.jpg`],
       category_id: catalogCategory?.id || product.category_id,
       tax_class: product.tax_class || catalogTaxClass?.id
     });

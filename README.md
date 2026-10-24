@@ -35,9 +35,9 @@ These are public demonstration accounts. All customer identities, addresses, ord
 
 ## Hosted deployment
 
-Northflank's Heroku buildpack runs `npm run heroku-build`; the web process runs `npm start`. Build without database credentials. At runtime, provide `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE=verify-full`, a private `SESSION_SECRET`, `NODE_ENV=production` and the public service's `PORT`.
+Northflank's Heroku buildpack runs `npm run heroku-build`; the web process runs `npm start`. Build without database credentials. At runtime, provide `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE=verify-full`, a private `SESSION_SECRET`, `EVERSHOP_HOME_URL` set to the public HTTPS origin, `NODE_ENV=production` and the public service's `PORT`.
 
-Set `RUN_BACKGROUND_WORKERS=false` on the web service and run `npm run start:worker` as a second service using the same build and database. This keeps the native scheduled jobs and event subscribers online without fitting all three processes into one small container. The worker has no public port and must run as a single instance. Both services need access to the same runtime secrets.
+Set `RUN_BACKGROUND_WORKERS=false` on the web service and run `npm run start:worker` as a second service using the same release and database. This keeps the native scheduled jobs and event subscribers online without fitting all three processes into one small container. The worker has no public port and must run as a single instance. Both services need access to the same runtime secrets.
 
 Initialize a new hosted database once with `node scripts/setup-demo.mjs`. Set `ORDEX_ADMIN_PASSWORD` to a private password of at least 16 characters for this setup job. Production setup rejects the public local password and never creates a local database. The setup does not reset an existing seller's password. Remove this setup-only secret after initialization. Optionally run `npm run demo:history` to add the extended synthetic order history.
 
