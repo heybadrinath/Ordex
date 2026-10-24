@@ -1,14 +1,68 @@
-.loading-bar {
-  background: #058c8c;
-  height: 4px;
-  display: block;
+.page-progress {
   position: fixed;
-  top: 0;
-  left: 0;
-  -webkit-transition: width 1.5s;
-  -moz-transition: width 1.5s;
-  -o-transition: width 1.5s;
-  transition: width 1.5s;
-  width: 0%;
-  z-index: 1001;
+  inset: 0 0 auto;
+  z-index: 10000;
+  pointer-events: none;
+  color: var(--primary, #6050dc);
+  animation: ordex-progress-appear 180ms ease-out both;
+}
+.loading-bar {
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+.loading-bar::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 38%;
+  border-radius: 0 4px 4px 0;
+  background: currentColor;
+  animation: ordex-page-travel 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.page-progress-label {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border: 1px solid var(--border, #e5e7ef);
+  border-radius: 100px;
+  background: var(--card, #fff);
+  color: var(--foreground, #222430);
+  font: 500 12px var(--font-body, sans-serif);
+  box-shadow: 0 4px 18px #18264b12;
+}
+.page-progress-label svg {
+  width: 21px;
+  height: 21px;
+  color: var(--primary, #6050dc);
+}
+@keyframes ordex-page-travel {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(365%);
+  }
+}
+@keyframes ordex-progress-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-progress,
+  .loading-bar::after {
+    animation: none;
+  }
+  .loading-bar::after {
+    width: 100%;
+  }
 }

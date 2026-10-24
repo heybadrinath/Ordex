@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import React, { useEffect, useState } from 'react';
 import Area from '@components/common/Area.js';
 import {
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import OrderCalendar from './OrderCalendar.js';
 import { MetricCard } from '@components/admin/MetricCard.js';
+import { LoadingState } from '@components/common/LoadingState.js';
 
 type Summary = {
   orders: number;
@@ -179,7 +181,13 @@ export default function Overview({ summaryUrl }: { summaryUrl: string }) {
                 >
                   <span className="activity-product-image">
                     {order.thumbnail ? (
-                      <img src={order.thumbnail} alt="" />
+                      <Image
+                        unoptimized
+                        src={order.thumbnail}
+                        alt=""
+                        width={72}
+                        height={72}
+                      />
                     ) : (
                       <Box size={18} />
                     )}
@@ -205,9 +213,7 @@ export default function Overview({ summaryUrl }: { summaryUrl: string }) {
                 <p className="dashboard-empty">New orders will appear here.</p>
               )}
               {!data && !error && (
-                <p role="status" className="dashboard-empty">
-                  Loading activity…
-                </p>
+                <LoadingState label="Loading activity…" rows={2} />
               )}
             </div>
           </section>
@@ -292,9 +298,7 @@ export default function Overview({ summaryUrl }: { summaryUrl: string }) {
             <p className="dashboard-empty">New orders will appear here.</p>
           )}
           {!data && !error && (
-            <p role="status" className="dashboard-empty">
-              Loading recent orders…
-            </p>
+            <LoadingState label="Loading recent orders…" rows={3} />
           )}
         </div>
       </section>

@@ -25,6 +25,7 @@ const SubmitButton: React.FC = () => {
         type="submit"
         size="lg"
         isLoading={isSubmitting}
+        loadingText={_('Signing in…')}
         className="w-full"
       >
         {_('Sign In')}

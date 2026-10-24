@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import React from 'react';
 import {
   ArrowUpRight,
@@ -10,7 +11,10 @@ import { ProductList } from '@components/frontStore/catalog/ProductList.js';
 import { ProductData } from '@components/frontStore/catalog/ProductContext.js';
 
 export default function Editorial({
-  smallJoys, paperEdit, tableEdit, weekendEdit
+  smallJoys,
+  paperEdit,
+  tableEdit,
+  weekendEdit
 }: {
   smallJoys: { products: { items: ProductData[] } };
   paperEdit: { products: { items: ProductData[] } };
@@ -21,11 +25,12 @@ export default function Editorial({
     <>
       <section className="routine-banner" aria-labelledby="routine-heading">
         <div className="routine-photo">
-          <img
+          <Image
+            unoptimized
             src="/assets/ordex/catalog/workspace.jpg"
             alt="A considered workspace with room to think"
-            width="800"
-            height="620"
+            width={800}
+            height={620}
             loading="lazy"
           />
           <span className="routine-sticker">
@@ -60,20 +65,36 @@ export default function Editorial({
       <section className="paper-discovery" aria-labelledby="paper-heading">
         <div className="paper-discovery-story">
           <span className="eyebrow">For your next good idea</span>
-          <h2 id="paper-heading">A little paper.<br />A lot of possibility.</h2>
+          <h2 id="paper-heading">
+            A little paper.
+            <br />A lot of possibility.
+          </h2>
           <p>Plans, doodles, big ideas. Make room for them all.</p>
-          <a className="text-link" href="/stationery">Explore paper & stationery <ArrowUpRight size={18} /></a>
-          <img src="/assets/ordex/catalog/stationery-set.jpg" alt="Pastel pencils and paper for your next idea" width="600" height="640" loading="lazy" />
+          <a className="text-link" href="/stationery">
+            Explore paper & stationery <ArrowUpRight size={18} />
+          </a>
+          <Image
+            unoptimized
+            src="/assets/ordex/catalog/stationery-set.jpg"
+            alt="Pastel pencils and paper for your next idea"
+            width={600}
+            height={640}
+            loading="lazy"
+          />
         </div>
-        <ProductList products={paperEdit?.products.items.slice(0, 4) || []} gridColumns={2} />
+        <ProductList
+          products={paperEdit?.products.items.slice(0, 4) || []}
+          gridColumns={2}
+        />
       </section>
       <section className="moments-grid" aria-label="Shop your everyday rituals">
         <a className="moment-card moment-coffee" href="/kitchen">
-          <img
+          <Image
+            unoptimized
             src="/assets/ordex/catalog/french-press.jpg"
             alt="French press and coffee cup in the morning light"
-            width="800"
-            height="500"
+            width={800}
+            height={500}
             loading="lazy"
           />
           <div>
@@ -86,11 +107,12 @@ export default function Editorial({
           </div>
         </a>
         <a className="moment-card moment-home" href="/living">
-          <img
+          <Image
+            unoptimized
             src="/assets/ordex/catalog/lamp.jpg"
             alt="A woven table lamp for a softer evening"
-            width="800"
-            height="500"
+            width={800}
+            height={500}
             loading="lazy"
           />
           <div>
@@ -121,17 +143,57 @@ export default function Editorial({
       </section>
       <section className="table-discovery" aria-labelledby="table-heading">
         <div className="section-heading">
-          <div><span className="eyebrow">Pull up a chair</span><h2 id="table-heading">Set a little scene.</h2><p>Good food. Good company. Everyday pieces worth gathering around.</p></div>
-          <a className="text-link" href="/tableware">Shop the table <ArrowUpRight size={18} /></a>
+          <div>
+            <span className="eyebrow">Pull up a chair</span>
+            <h2 id="table-heading">Set a little scene.</h2>
+            <p>
+              Good food. Good company. Everyday pieces worth gathering around.
+            </p>
+          </div>
+          <a className="text-link" href="/tableware">
+            Shop the table <ArrowUpRight size={18} />
+          </a>
         </div>
-        <ProductList products={tableEdit?.products.items.slice(0, 4) || []} gridColumns={4} />
+        <ProductList
+          products={tableEdit?.products.items.slice(0, 4) || []}
+          gridColumns={4}
+        />
       </section>
       <section className="weekend-discovery" aria-labelledby="weekend-heading">
-        <a className="weekend-discovery-image" href="/outdoors"><img src="/assets/ordex/catalog/picnic-basket.jpg" alt="A woven picnic basket on a blanket in the sunshine" width="1000" height="700" loading="lazy" /><span>Permission to take it slow. <ArrowUpRight size={24} /></span></a>
-        <div className="weekend-discovery-copy"><span className="eyebrow">Off the clock</span><h2 id="weekend-heading">Take the<br />scenic route.</h2><p>Fresh air, a sunny spot and the things you love to take along. Here’s to a slower weekend.</p><a className="primary-button" href="/outdoors">Meet your weekend essentials <ArrowUpRight size={19} /></a></div>
+        <a className="weekend-discovery-image" href="/outdoors">
+          <Image
+            unoptimized
+            src="/assets/ordex/catalog/picnic-basket.jpg"
+            alt="A woven picnic basket on a blanket in the sunshine"
+            width={1000}
+            height={700}
+            loading="lazy"
+          />
+          <span>
+            Permission to take it slow. <ArrowUpRight size={24} />
+          </span>
+        </a>
+        <div className="weekend-discovery-copy">
+          <span className="eyebrow">Off the clock</span>
+          <h2 id="weekend-heading">
+            Take the
+            <br />
+            scenic route.
+          </h2>
+          <p>
+            Fresh air, a sunny spot and the things you love to take along.
+            Here’s to a slower weekend.
+          </p>
+          <a className="primary-button" href="/outdoors">
+            Meet your weekend essentials <ArrowUpRight size={19} />
+          </a>
+        </div>
       </section>
       <section className="weekend-products" aria-label="Weekend essentials">
-        <ProductList products={weekendEdit?.products.items.slice(0, 4) || []} gridColumns={3} />
+        <ProductList
+          products={weekendEdit?.products.items.slice(0, 4) || []}
+          gridColumns={3}
+        />
       </section>
       <section className="care-strip" aria-label="Shopping with Ordex">
         <div>

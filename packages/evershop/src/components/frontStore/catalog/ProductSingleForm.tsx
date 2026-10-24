@@ -127,6 +127,7 @@ export function ProductSingleForm() {
                             }}
                             className="mt-2 w-full"
                             isLoading={addingToCart || state.isLoading}
+                            loadingText={_('Adding…')}
                           >
                             {_('Add to cart')}
                           </Button>

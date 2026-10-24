@@ -48,21 +48,43 @@ function Button({
   variant = 'default',
   size = 'default',
   isLoading = false,
+  loadingText,
   disabled,
   children,
   ...props
 }: ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
     isLoading?: boolean;
+    loadingText?: string;
   }) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        'button-feedback'
+      )}
       disabled={disabled || isLoading}
       {...props}
+      aria-busy={isLoading || undefined}
+      aria-label={
+        isLoading
+          ? loadingText ||
+            props['aria-label'] ||
+            (typeof children === 'string'
+              ? `${children} — in progress`
+              : 'Working')
+          : props['aria-label']
+      }
+      data-loading={isLoading || undefined}
     >
-      {isLoading ? <Spinner /> : children}
+      <span className="button-label" aria-hidden={isLoading || undefined}>
+        {children}
+      </span>
+      <span className="button-progress" aria-hidden="true">
+        <Spinner aria-hidden="true" />
+        {loadingText && <span>{loadingText}</span>}
+      </span>
     </ButtonPrimitive>
   );
 }

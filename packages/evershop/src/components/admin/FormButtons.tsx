@@ -29,6 +29,7 @@ const FormButtons: React.FC<{
           );
         }}
         isLoading={isSubmitting}
+        loadingText={_('Saving…')}
       >
         {_(submitLabel)}
       </Button>

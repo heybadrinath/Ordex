@@ -153,13 +153,18 @@ export function Form<T extends FieldValues = FieldValues>({
             return;
           }
           event.stopPropagation();
+          if (isSubmitting || loading) {
+            event.preventDefault();
+            return;
+          }
           handleSubmit(handleFormSubmit, onValidationError)(event);
         }}
         className={className}
         noValidate={noValidate}
         {...props}
+        aria-busy={isSubmitting || loading || undefined}
       >
-        <fieldset disabled={loading}>
+        <fieldset disabled={loading || isSubmitting}>
           {demoProfile && <DemoFormDefaults profile={demoProfile} />}
           {children}
         </fieldset>
@@ -175,6 +180,7 @@ export function Form<T extends FieldValues = FieldValues>({
               type="submit"
               size={submitBtnSize}
               isLoading={isSubmitting || loading}
+              loadingText={_('Saving…')}
             >
               {submitBtnText}
             </Button>

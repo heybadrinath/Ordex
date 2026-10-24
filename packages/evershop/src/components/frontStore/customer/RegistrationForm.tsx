@@ -24,6 +24,7 @@ const SubmitButton: React.FC<{ formId: string }> = ({ formId }) => {
           );
         }}
         isLoading={isSubmitting}
+        loadingText={_('Creating account…')}
       >
         {_(isSubmitting ? 'Signing Up...' : 'Sign Up')}
       </Button>

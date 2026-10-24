@@ -2,7 +2,11 @@ import { Area } from '@components/common/Area.js';
 import { Image } from '@components/common/Image.js';
 import { ProductNoThumbnail } from '@components/common/ProductNoThumbnail.js';
 import { useCatalogImageDimensions } from '@components/common/useCatalogImageDimensions.js';
-import { CartItem } from '@components/frontStore/cart/CartContext.js';
+import {
+  CartItem,
+  useCartState
+} from '@components/frontStore/cart/CartContext.js';
+import { Spinner } from '@components/common/ui/Spinner.js';
 import { ItemQuantity } from '@components/frontStore/cart/ItemQuantity.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import { deriveProductImageSize } from '@evershop/evershop/lib/util/deriveProductImageSize';
@@ -30,6 +34,7 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
   loading = false,
   onRemoveItem
 }) => {
+  const { loadingStates } = useCartState();
   // Fixed 96px square display (h-24 w-24 + object-cover); base 200 keeps it sharp on retina.
   const thumbSize = deriveProductImageSize(200, useCatalogImageDimensions());
   return (
@@ -37,11 +42,17 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
       <Area id="cartItemListBefore" noOuter />
       <div className="cart__items divide-y divide-border">
         {items.map((row) => {
+          const updating = loadingStates.updatingItem === row.cartItemId;
+          const removing = loadingStates.removingItem === row.cartItemId;
           const totalValue = showPriceIncludingTax
             ? row.lineTotalInclTax?.text
             : row.lineTotal?.text;
           return (
-            <div key={row.cartItemId} className="cart__item flex gap-4 py-5">
+            <div
+              key={row.cartItemId}
+              className="cart__item flex gap-4 py-5"
+              aria-busy={updating || removing || undefined}
+            >
               <div className="shrink-0">
                 {row.thumbnail ? (
                   <Image
@@ -108,7 +119,11 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                           <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="w-8 text-center text-sm tabular-nums">
-                          {quantity}
+                          {updating ? (
+                            <Spinner aria-label={_('Updating quantity')} />
+                          ) : (
+                            quantity
+                          )}
                         </span>
                         <button
                           type="button"
@@ -133,10 +148,16 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                       e.preventDefault();
                       onRemoveItem?.(row.cartItemId);
                     }}
+                    disabled={loading}
+                    aria-busy={removing || undefined}
                     className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    {_('Remove')}
+                    {removing ? (
+                      <Spinner aria-hidden="true" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
+                    {_(removing ? 'Removing…' : 'Remove')}
                   </button>
                 </div>
               </div>

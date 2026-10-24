@@ -11,7 +11,9 @@ import React from 'react';
  * filter calls it "configurable" and `Product.variantGroup` returns null for the others, both on
  * the same rule.
  */
-export function hasVariants(product: Pick<ProductData, 'variantGroupId'>): boolean {
+export function hasVariants(
+  product: Pick<ProductData, 'variantGroupId'>
+): boolean {
   return Boolean(product.variantGroupId);
 }
 
@@ -76,6 +78,8 @@ export function ProductListAddToCart({
           size={size}
           className={className}
           disabled={!state.canAddToCart || state.isLoading}
+          isLoading={state.isLoading}
+          loadingText={_('Adding…')}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

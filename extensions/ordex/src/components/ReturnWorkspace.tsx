@@ -1,5 +1,8 @@
+import { Image } from '@components/common/Image.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { AccountNav } from '@components/frontStore/customer/AccountNav.js';
+import { LoadingState } from '@components/common/LoadingState.js';
+import { Button } from '@components/common/ui/Button.js';
 const ReturnInsights = React.lazy(() =>
   import('./ReturnInsights.js').then((module) => ({
     default: module.ReturnInsights
@@ -65,7 +68,8 @@ async function request(url, body?) {
 export default function ReturnWorkspace({ admin = false }) {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState('');
+  const busy = Boolean(pendingAction);
   const [selected, setSelected] = useState('');
   const [composing, setComposing] = useState(false);
   const [filter, setFilter] = useState(admin ? 'open' : 'all');
@@ -156,7 +160,8 @@ export default function ReturnWorkspace({ admin = false }) {
         o.items?.some((item) => item.remaining_qty > 0)
     ) || [];
   async function act(action) {
-    setBusy(true);
+    if (busy) return;
+    setPendingAction(action);
     setError('');
     try {
       await request(`${url}/${selected}`, {
@@ -169,12 +174,13 @@ export default function ReturnWorkspace({ admin = false }) {
     } catch (e) {
       setError(e.message);
     } finally {
-      setBusy(false);
+      setPendingAction('');
     }
   }
   async function submit(event) {
     event.preventDefault();
-    setBusy(true);
+    if (busy) return;
+    setPendingAction('request');
     setError('');
     const key = requestKey || crypto.randomUUID();
     setRequestKey(key);
@@ -198,7 +204,7 @@ export default function ReturnWorkspace({ admin = false }) {
     } catch (e) {
       setError(e.message);
     } finally {
-      setBusy(false);
+      setPendingAction('');
     }
   }
   function chooseOrder(id) {
@@ -256,6 +262,7 @@ export default function ReturnWorkspace({ admin = false }) {
           <button
             type="button"
             className="primary-button start-return-button"
+            disabled={busy || !data}
             onClick={startReturn}
           >
             <RotateCcw size={17} /> Start a return
@@ -273,7 +280,13 @@ export default function ReturnWorkspace({ admin = false }) {
           {success}
         </div>
       )}
-      {!data && !error && <p role="status">Loading your returns…</p>}
+      {!data && !error && (
+        <LoadingState
+          label="Loading your returns…"
+          detail="Getting the latest requests and their progress."
+          rows={4}
+        />
+      )}
       {admin && data && (
         <div className="metric-strip return-workspace-metrics">
           {[
@@ -289,6 +302,7 @@ export default function ReturnWorkspace({ admin = false }) {
               }`}
               key={status}
               aria-pressed={filter === status}
+              disabled={busy}
               onClick={() => {
                 setFilter(status);
                 setSelected('');
@@ -321,6 +335,8 @@ export default function ReturnWorkspace({ admin = false }) {
       )}
       <div
         className="returns-layout"
+        hidden={!data}
+        style={data ? undefined : { display: 'none' }}
         data-detail-open={Boolean(current) || composing}
       >
         <section
@@ -346,6 +362,7 @@ export default function ReturnWorkspace({ admin = false }) {
                 key={f}
                 className={filter === f ? 'active' : ''}
                 aria-pressed={filter === f}
+                disabled={busy}
                 onClick={() => {
                   setFilter(f);
                   if (admin) setSelected('');
@@ -362,6 +379,7 @@ export default function ReturnWorkspace({ admin = false }) {
               <input
                 type="search"
                 aria-label="Search returns"
+                disabled={busy}
                 placeholder="Find an order or customer"
                 value={keyword}
                 onChange={(event) => {
@@ -378,11 +396,18 @@ export default function ReturnWorkspace({ admin = false }) {
               }`}
               key={r.return_id}
               aria-pressed={selected === r.return_id}
+              disabled={busy}
               onClick={() => selectReturn(r.return_id)}
             >
               <span className="return-avatar">
                 {admin && r.items?.[0]?.thumbnail ? (
-                  <img src={r.items[0].thumbnail} alt="" />
+                  <Image
+                    unoptimized
+                    src={r.items[0].thumbnail}
+                    alt=""
+                    width={72}
+                    height={72}
+                  />
                 ) : (
                   <Package size={21} />
                 )}
@@ -460,6 +485,7 @@ export default function ReturnWorkspace({ admin = false }) {
                 <button
                   className="icon-button"
                   aria-label="Close return details"
+                  disabled={busy}
                   onClick={closeDetails}
                 >
                   <X size={18} />
@@ -508,7 +534,15 @@ export default function ReturnWorkspace({ admin = false }) {
                 </span>
                 {current.items?.map((item) => (
                   <div className="return-item" key={item.id}>
-                    {item.thumbnail && <img src={item.thumbnail} alt="" />}
+                    {item.thumbnail && (
+                      <Image
+                        unoptimized
+                        src={item.thumbnail}
+                        alt=""
+                        width={72}
+                        height={72}
+                      />
+                    )}
                     <div>
                       <strong>{item.name}</strong>
                       <small>
@@ -541,30 +575,36 @@ export default function ReturnWorkspace({ admin = false }) {
                   <div className="return-actions">
                     {current.status === 'requested' && (
                       <>
-                        <button
+                        <Button
                           className="primary-button"
                           disabled={busy}
+                          isLoading={pendingAction === 'approve'}
+                          loadingText="Approving…"
                           onClick={() => act('approve')}
                         >
                           Approve return
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           className="secondary-button"
                           disabled={busy}
+                          isLoading={pendingAction === 'reject'}
+                          loadingText="Declining…"
                           onClick={() => act('reject')}
                         >
                           Decline
-                        </button>
+                        </Button>
                       </>
                     )}
                     {current.status === 'approved' && (
-                      <button
+                      <Button
                         className="primary-button"
                         disabled={busy}
+                        isLoading={pendingAction === 'receive'}
+                        loadingText="Recording receipt…"
                         onClick={() => act('receive')}
                       >
                         <Truck size={16} /> Mark items received
-                      </button>
+                      </Button>
                     )}
                     {current.status === 'received' && (
                       <div className="inspection-form">
@@ -573,6 +613,7 @@ export default function ReturnWorkspace({ admin = false }) {
                           <select
                             id="return-condition"
                             value={condition}
+                            disabled={busy}
                             onChange={(e) => setCondition(e.target.value)}
                           >
                             <option value="resellable">Resellable</option>
@@ -586,29 +627,34 @@ export default function ReturnWorkspace({ admin = false }) {
                           <textarea
                             id="return-inspection-note"
                             value={inspection}
+                            disabled={busy}
                             onChange={(e) => setInspection(e.target.value)}
                             placeholder="Record what you checked"
                             maxLength={1000}
                           />
                         </label>
-                        <button
+                        <Button
                           className="primary-button"
                           disabled={busy || !inspection.trim()}
+                          isLoading={pendingAction === 'inspect'}
+                          loadingText="Saving inspection…"
                           onClick={() => act('inspect')}
                         >
                           Save inspection
-                        </button>
+                        </Button>
                       </div>
                     )}
                     {current.status === 'inspected' && (
-                      <button
+                      <Button
                         className="primary-button"
                         disabled={busy}
+                        isLoading={pendingAction === 'refund'}
+                        loadingText="Processing refund…"
                         onClick={() => act('refund')}
                       >
                         Issue demo refund ·{' '}
                         {money(current.refund_minor / 100, current.currency)}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
@@ -670,7 +716,13 @@ export default function ReturnWorkspace({ admin = false }) {
                 <div className="return-next-preview">
                   <div className="return-next-product">
                     {filteredReturns[0].items?.[0]?.thumbnail ? (
-                      <img src={filteredReturns[0].items[0].thumbnail} alt="" />
+                      <Image
+                        unoptimized
+                        src={filteredReturns[0].items[0].thumbnail}
+                        alt=""
+                        width={72}
+                        height={72}
+                      />
                     ) : (
                       <Package size={30} />
                     )}
@@ -819,7 +871,13 @@ export default function ReturnWorkspace({ admin = false }) {
                             }
                           />
                           {item.thumbnail && (
-                            <img src={item.thumbnail} alt="" />
+                            <Image
+                              unoptimized
+                              src={item.thumbnail}
+                              alt=""
+                              width={72}
+                              height={72}
+                            />
                           )}
                           <span>
                             {item.name}
@@ -876,17 +934,19 @@ export default function ReturnWorkspace({ admin = false }) {
                   We’ll review your request first. A refund is issued after the
                   items arrive and are checked.
                 </p>
-                <button
+                <Button
                   className="primary-button"
+                  type="submit"
+                  isLoading={pendingAction === 'request'}
+                  loadingText="Sending request…"
                   disabled={
                     busy ||
                     !orderId ||
                     !Object.values(quantities).some((q) => q > 0)
                   }
                 >
-                  {busy ? 'Sending…' : 'Request return'}{' '}
-                  <ArrowUpRight size={16} />
-                </button>
+                  Request return <ArrowUpRight size={16} />
+                </Button>
               </form>
             </>
           )}
@@ -899,7 +959,9 @@ export default function ReturnWorkspace({ admin = false }) {
             <small>Reasons, volume and completed refunds</small>
             <span className="return-trends-action">Explore trends +</span>
           </summary>
-          <React.Suspense fallback={<p>Loading trends…</p>}>
+          <React.Suspense
+            fallback={<LoadingState label="Loading trends…" rows={2} />}
+          >
             <ReturnInsights records={returns} />
           </React.Suspense>
         </details>

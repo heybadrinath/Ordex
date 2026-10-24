@@ -1,9 +1,11 @@
 import Area from '@components/common/Area.js';
 import React from 'react';
+import { LoadingBar } from '@components/common/LoadingBar.js';
 
 export default function AdminLayout() {
   return (
     <div className="admin-shell">
+      <LoadingBar />
       <aside className="admin-navigation">
         <Area id="adminBrand" noOuter />
         <Area id="adminNavigation" noOuter />

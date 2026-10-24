@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import React, { useState } from 'react';
 import { ArrowUpRight, Asterisk, PackageCheck } from 'lucide-react';
 import { ProductList } from '@components/frontStore/catalog/ProductList.js';
@@ -80,11 +81,12 @@ export default function Home({
         </div>
         <div className="hero-picks">
           <a className="hero-room" href={heroProduct?.url || '/living'}>
-            <img
+            <Image
+              unoptimized
               src={heroProduct?.image?.url || '/assets/ordex/catalog/sofa.jpg'}
               alt={heroProduct?.name || 'Explore home and living'}
-              width="900"
-              height="620"
+              width={900}
+              height={620}
               fetchPriority="high"
             />
             <span className="hero-edit-tag">Make yourself at home</span>
@@ -113,13 +115,14 @@ export default function Home({
                 Find your everyday carry <ArrowUpRight size={17} />
               </span>
             </div>
-            <img
+            <Image
+              unoptimized
               src={
                 carryProduct?.image?.url || '/assets/ordex/catalog/backpack.jpg'
               }
               alt={carryProduct?.name || 'Everyday carry essentials'}
-              width="400"
-              height="360"
+              width={400}
+              height={360}
             />
           </a>
         </div>
@@ -136,11 +139,12 @@ export default function Home({
           return category ? (
             <a key={key} href={category.url}>
               {category.image && (
-                <img
+                <Image
+                  unoptimized
                   src={category.image.url}
                   alt=""
-                  width="80"
-                  height="80"
+                  width={80}
+                  height={80}
                   loading="lazy"
                 />
               )}
@@ -197,15 +201,52 @@ export default function Home({
           />
         </div>
       </section>
-      <section className="category-discovery" aria-labelledby="category-discovery-heading">
-        <div className="section-heading"><div><span className="eyebrow">A place for every part of your day</span><h2 id="category-discovery-heading">Find your kind of everyday.</h2><p>From your first coffee to your next little adventure.</p></div></div>
+      <section
+        className="category-discovery"
+        aria-labelledby="category-discovery-heading"
+      >
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">A place for every part of your day</span>
+            <h2 id="category-discovery-heading">Find your kind of everyday.</h2>
+            <p>From your first coffee to your next little adventure.</p>
+          </div>
+        </div>
         <div className="category-scenes">
-          {['kitchen', 'stationery', 'lighting', 'tableware', 'outdoors', 'audio'].map((key) => {
-            const category = categories.items.find((item) => item.urlKey === key);
-            return category && <a key={key} className="category-scene" href={category.url}>
-              {category.image && <img src={category.image.url} alt="" width="500" height="350" loading="lazy" />}
-              <span><span><strong>{category.name}</strong><small>{category.products.total} good finds</small></span><ArrowUpRight size={22} /></span>
-            </a>;
+          {[
+            'kitchen',
+            'stationery',
+            'lighting',
+            'tableware',
+            'outdoors',
+            'audio'
+          ].map((key) => {
+            const category = categories.items.find(
+              (item) => item.urlKey === key
+            );
+            return (
+              category && (
+                <a key={key} className="category-scene" href={category.url}>
+                  {category.image && (
+                    <Image
+                      unoptimized
+                      src={category.image.url}
+                      alt=""
+                      width={500}
+                      height={350}
+                      loading="lazy"
+                    />
+                  )}
+                  <span>
+                    <span>
+                      <strong>{category.name}</strong>
+                      <small>{category.products.total} good finds</small>
+                    </span>
+                    <ArrowUpRight size={22} />
+                  </span>
+                </a>
+              )
+            );
           })}
         </div>
       </section>

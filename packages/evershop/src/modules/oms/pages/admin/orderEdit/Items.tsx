@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import { Badge } from '@components/common/ui/Badge.js';
 import {
   Card,
@@ -77,10 +78,13 @@ function ItemRow({
       }`}
     >
       {item.thumbnail ? (
-        <img
+        <Image
+          unoptimized
           src={item.thumbnail}
           alt={item.productName}
           className="size-13 rounded-md object-cover border border-divider shrink-0"
+          width={72}
+          height={72}
         />
       ) : (
         <div className="size-13 rounded-md border border-divider bg-muted/40 shrink-0" />
