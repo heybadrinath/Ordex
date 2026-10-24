@@ -1,31 +1,26 @@
+// Modified for Ordex on 19 October 2026.
 import { PageHeading } from '@components/admin/PageHeading.js';
-import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
-
-export interface ProductGridPageHeadingProps {
-  backUrl: string;
-  product?: {
-    name?: string;
-  };
-}
-
-export default function ProductEditPageHeading({
-  backUrl,
-  product
-}: ProductGridPageHeadingProps) {
+import { Package } from 'lucide-react';
+import { WorkspaceSummary } from '@components/admin/WorkspaceSummary.js';
+import { ProductInsights } from '@components/admin/WorkspaceInsights.js';
+export default function ProductGridPageHeading({
+  summaryUrl
+}: {
+  summaryUrl: string;
+}) {
   return (
-    <PageHeading
-      backUrl={backUrl}
-      heading={
-        product
-          ? _('Editing ${name}', { name: product.name ?? '' })
-          : _('Create a new product')
-      }
-    />
+    <>
+      <PageHeading
+        heading="Products"
+        eyebrow="Catalog"
+        description="Manage your assortment, availability and stock in one place."
+        icon={<Package size={24} />}
+      />
+      <WorkspaceSummary kind="products" url={summaryUrl} />
+      <ProductInsights url={summaryUrl} />
+    </>
   );
 }
-
-export const layout = {
-  areaId: 'content',
-  sortOrder: 10
-};
+export const layout = { areaId: 'content', sortOrder: 10 };
+export const query = `query { summaryUrl: url(routeId:"studioSummary") }`;

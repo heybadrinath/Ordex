@@ -1,6 +1,7 @@
 import { PageHeading } from '@components/admin/PageHeading.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 
 export interface AttributeEditPageHeadingProps {
   backUrl?: string;
@@ -16,6 +17,9 @@ export default function AttributeEditPageHeading({
   return (
     <PageHeading
       backUrl={backUrl}
+      eyebrow="Catalog editor"
+      description="Define a consistent product detail and its available values."
+      icon={<SlidersHorizontal size={24} />}
       heading={
         attribute
           ? _('Editing ${name}', { name: attribute.attributeName || '' })

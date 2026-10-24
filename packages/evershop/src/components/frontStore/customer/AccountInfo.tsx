@@ -20,7 +20,7 @@ interface AccountInfoProps {
 /**
  * Save + Cancel on one row, inside the <Form> so the submit button drives the
  * form's own onSubmit. Reads `isSubmitting` from the form context to keep the
- * Save spinner. Cancel uses the destructive variant.
+ * Save spinner. Cancel leaves the saved profile unchanged.
  */
 function AccountInfoActions({ onCancel }: { onCancel: () => void }) {
   const {
@@ -31,7 +31,7 @@ function AccountInfoActions({ onCancel }: { onCancel: () => void }) {
       <Button type="submit" isLoading={isSubmitting}>
         {_('Save')}
       </Button>
-      <Button type="button" variant="destructive" onClick={onCancel}>
+      <Button type="button" variant="outline" onClick={onCancel}>
         {_('Cancel')}
       </Button>
     </div>

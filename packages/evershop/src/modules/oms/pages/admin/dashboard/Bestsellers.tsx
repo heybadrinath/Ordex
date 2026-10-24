@@ -1,23 +1,6 @@
+import React, { useState } from 'react';
+import { ArrowUpRight, Package } from 'lucide-react';
 import { Image } from '@components/common/Image.js';
-import { ProductNoThumbnail } from '@components/common/ProductNoThumbnail.js';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@components/common/ui/Card.js';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@components/common/ui/Table.js';
-import { _ } from '@evershop/evershop/lib/locale/translate/_';
-import React from 'react';
 
 interface BestSellersProps {
   bestSellers: Array<{
@@ -41,95 +24,131 @@ export default function BestSellers({
   bestSellers,
   listUrl
 }: BestSellersProps) {
+  const [view, setView] = useState<'chart' | 'list'>('chart');
+  const top = bestSellers.slice(0, 3);
+  const ceiling = Math.max(1, ...top.map((p) => p.soldQty));
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{_('Best Sellers')}</CardTitle>
-        <CardDescription>
-          {_('A list of best selling products')}
-        </CardDescription>
-        <CardAction>
-          <a href={listUrl} className="text-primary text-sm hover:underline">
-            {_('View All Products')}
+    <section
+      className="bestseller-card"
+      data-slot="card"
+      aria-label="Best sellers"
+    >
+      <div data-slot="card-header">
+        <h2 data-slot="card-title">
+          <Package size={16} /> Best sellers
+        </h2>
+        <div
+          className="insight-switch"
+          role="group"
+          aria-label="Best seller view"
+        >
+          <button
+            type="button"
+            aria-pressed={view === 'chart'}
+            onClick={() => setView('chart')}
+          >
+            Chart
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === 'list'}
+            onClick={() => setView('list')}
+          >
+            List
+          </button>
+        </div>
+      </div>
+      <div data-slot="card-content">
+        <div className="bestseller-intro">
+          <span>Units ordered · all time</span>
+          <a href={listUrl} aria-label="View all products">
+            <ArrowUpRight size={16} />
           </a>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        {/*
-          `table-fixed` is load-bearing: with the default auto layout a long
-          product name widens the table past the card and pushes the Price /
-          Sold columns out of view entirely. Fixed layout pins the numeric
-          columns and lets the name column absorb the remaining width, where
-          `line-clamp-2` caps it at two lines.
-        */}
-        <Table className="table-fixed">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{_('Product')}</TableHead>
-              <TableHead className="w-28 text-right">{_('Price')}</TableHead>
-              <TableHead className="w-16 text-right">{_('Sold')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bestSellers.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-muted-foreground py-6 text-center"
+        </div>
+        {!bestSellers.length && (
+          <p className="dashboard-empty">
+            Your most ordered products will appear here.
+          </p>
+        )}
+        {view === 'chart' ? (
+          <div className="bestseller-chart">
+            <div className="bestseller-axis" aria-hidden="true">
+              <span>{ceiling}</span>
+              <span>{Math.round(ceiling / 2)}</span>
+              <span>0</span>
+            </div>
+            <div className="bestseller-columns">
+              {top.map((product, index) => (
+                <a
+                  className="bestseller-column"
+                  href={product.editUrl}
+                  key={product.name}
+                  title={`${product.name}: ${product.soldQty} units, ${product.price.regular.text}`}
                 >
-                  {_('Look like you just started. No bestsellers yet.')}
-                </TableCell>
-              </TableRow>
-            )}
-            {bestSellers.map((p, i) => (
-              <TableRow key={i}>
-                {/* `whitespace-normal` overrides TableCell's default
-                    `whitespace-nowrap`, without which the name cannot wrap and
-                    `line-clamp-2` clips it to a single line mid-word. */}
-                <TableCell className="whitespace-normal">
-                  <div className="flex min-w-0 items-center gap-3">
-                    {/* Fixed box so a missing or broken image keeps the row
-                        the same height as its neighbours. */}
-                    <div className="border-divider text-border flex size-12 shrink-0 items-center justify-center overflow-hidden rounded border">
-                      {p.image?.url ? (
-                        <Image
-                          src={p.image.url}
-                          alt={p.name}
-                          width={40}
-                          height={40}
-                        />
-                      ) : (
-                        <ProductNoThumbnail width={40} height={40} />
-                      )}
-                    </div>
-                    <a
-                      href={p.editUrl || ''}
-                      title={p.name}
-                      className="line-clamp-2 min-w-0 font-medium hover:underline"
+                  <div className="bestseller-track">
+                    <div
+                      className={`bestseller-bar bar-${index}`}
+                      style={{
+                        height: `${Math.max(
+                          7,
+                          (product.soldQty / ceiling) * 100
+                        )}%`
+                      }}
                     >
-                      {p.name}
-                    </a>
+                      <strong>{product.soldQty}</strong>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {p.price.regular.text}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {p.soldQty}
-                </TableCell>
-              </TableRow>
+                  <span className="bestseller-product-image">
+                    {product.image?.url && (
+                      <Image
+                        src={product.image.url}
+                        alt=""
+                        width={34}
+                        height={34}
+                      />
+                    )}
+                  </span>
+                  <span className="bestseller-product-name">
+                    {product.name}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <ol className="bestseller-list">
+            {bestSellers.map((product, index) => (
+              <li key={product.name}>
+                <a href={product.editUrl}>
+                  <span className="bestseller-rank">{index + 1}</span>
+                  <span className="bestseller-product-image">
+                    {product.image?.url && (
+                      <Image
+                        src={product.image.url}
+                        alt=""
+                        width={34}
+                        height={34}
+                      />
+                    )}
+                  </span>
+                  <span>
+                    <strong>{product.name}</strong>
+                    <small>{product.price.regular.text}</small>
+                  </span>
+                  <b>
+                    {product.soldQty}
+                    <small>units</small>
+                  </b>
+                </a>
+              </li>
             ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          </ol>
+        )}
+      </div>
+    </section>
   );
 }
-
-export const layout = {
-  areaId: 'leftSide',
-  sortOrder: 20
-};
+export const layout = { areaId: 'dashboardProducts', sortOrder: 20 };
 
 export const query = `
   query Query {

@@ -5,6 +5,7 @@ import { getConfig } from '../../../../../lib/util/getConfig.js';
 import { toGraphqlAddress } from '../../../../base/services/address/graphqlAddress.js';
 import { getCarrier } from '../../../services/carrier/registry.js';
 import { getOrdersBaseQuery } from '../../../services/getOrdersBaseQuery.js';
+import { canCancelOrder } from '../../../services/cancelOrder.js';
 import { canAccessOrder } from '../../../services/orderAccess.js';
 import { getPhaseOf } from '../../../services/updateShipmentStatus.js';
 
@@ -31,10 +32,11 @@ export default {
      * `/orders/:uuid/track` page middleware via `setContextValue`. Returns
      * `null` on any page that doesn't set it.
      */
-    trackingTokenStatus: (_, __, context) =>
-      context.trackingStatus ?? null
+    trackingTokenStatus: (_, __, context) => context.trackingStatus ?? null
   },
   Order: {
+    canCancel: ({ paymentStatus, shipmentStatus }) =>
+      canCancelOrder(paymentStatus, shipmentStatus),
     /**
      * Re-shape the JSONB column into the camelCase GraphQL type. Same
      * conversion as Cart.shippingMethodData. Historical orders were
@@ -180,7 +182,11 @@ export default {
      * `shipped`) count correctly without this resolver needing to know about
      * them. Canceled-phase shipments are excluded — their qty is "uncommitted."
      */
-    fulfillmentBadge: async ({ orderItemId, noShippingRequired, qty }, _, { pool }) => {
+    fulfillmentBadge: async (
+      { orderItemId, noShippingRequired, qty },
+      _,
+      { pool }
+    ) => {
       if (noShippingRequired) return 'digital';
       const result = await pool.query(
         `SELECT s."status" AS status, si."qty" AS qty
@@ -284,10 +290,12 @@ export default {
     items: async ({ shipmentId, items }, _, { pool }) => {
       // Embedded by getShipmentsForOrder when available; fall back to a join
       // for direct Shipment lookups where items wasn't pre-loaded.
-      const rawItems = items ?? (await select()
-        .from('shipment_item')
-        .where('shipment_id', '=', shipmentId)
-        .execute(pool));
+      const rawItems =
+        items ??
+        (await select()
+          .from('shipment_item')
+          .where('shipment_id', '=', shipmentId)
+          .execute(pool));
       if (rawItems.length === 0) return [];
       const orderItemIds = rawItems.map((i) => i.order_item_id);
       const orderItems = await select()

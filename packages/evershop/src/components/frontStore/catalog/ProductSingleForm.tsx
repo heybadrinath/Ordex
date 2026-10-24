@@ -11,6 +11,7 @@ import {
 import { useProduct } from '@components/frontStore/catalog/ProductContext.js';
 import { VariantSelector } from '@components/frontStore/catalog/VariantSelector.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
+import { Minus, Plus } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -66,12 +67,47 @@ export function ProductSingleForm() {
                           <NumberField
                             name="qty"
                             label={_('Quantity')}
-                            className="w-24"
+                            className="text-center tabular-nums"
                             min={1}
+                            allowDecimals={false}
                             required
                             placeholder={_('Quantity')}
                             defaultValue={1}
-                            wrapperClassName="w-1/2"
+                            wrapperClassName="product-quantity"
+                            prefixIcon={
+                              <button
+                                type="button"
+                                aria-label={_('Decrease quantity')}
+                                disabled={Number(form.watch('qty') || 1) <= 1}
+                                onClick={() =>
+                                  form.setValue(
+                                    'qty',
+                                    Math.max(
+                                      1,
+                                      Number(form.getValues('qty') || 1) - 1
+                                    ),
+                                    { shouldValidate: true }
+                                  )
+                                }
+                              >
+                                <Minus size={16} />
+                              </button>
+                            }
+                            suffixIcon={
+                              <button
+                                type="button"
+                                aria-label={_('Increase quantity')}
+                                onClick={() =>
+                                  form.setValue(
+                                    'qty',
+                                    Number(form.getValues('qty') || 1) + 1,
+                                    { shouldValidate: true }
+                                  )
+                                }
+                              >
+                                <Plus size={16} />
+                              </button>
+                            }
                           />
                           <Button
                             variant={'default'}

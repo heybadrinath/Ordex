@@ -42,16 +42,7 @@ function Rate({ rate, getTaxClasses }: RateProps) {
         </td>
         <td className="border-none py-2">{rate.priority}</td>
         <td className="border-none py-2">
-          <DialogTrigger>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-            >
-              {_('Edit')}
-            </a>
-          </DialogTrigger>
+          <DialogTrigger className="text-primary">{_('Edit')}</DialogTrigger>
           <a
             href="#"
             className="text-destructive ml-5"

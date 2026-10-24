@@ -18,7 +18,7 @@ export interface CategoryStatusProps {
 
 export default function Status({ category }: CategoryStatusProps) {
   return (
-    <Card>
+    <Card id="category-visibility" className="editor-section-card">
       <CardHeader>
         <CardTitle>{_('Status')}</CardTitle>
         <CardDescription>

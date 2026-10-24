@@ -1,4 +1,5 @@
 // Modified for Ordex on 19 October 2026.
+import { Brand } from '@components/common/Brand.js';
 import React from 'react';
 import './LoginForm.scss';
 import Area from '@components/common/Area.js';
@@ -52,25 +53,19 @@ export default function LoginForm({ authUrl, dashboardUrl }: LoginFormProps) {
       `}</style>
       <div className="admin-login-intro">
         <a href="/" className="ordex-admin-brand">
-          <span>✳</span> ordex
+          <Brand />
         </a>
         <h1>Your store. Your studio.</h1>
         <p>
-          Sample seller details are filled in.
+          Sign in with your seller account.
           <br />
-          Sign in to explore orders, products and returns.
+          Manage your orders, products and returns.
         </p>
       </div>
       {error && <div className="text-destructive py-2">{error}</div>}
       <Form
         action={authUrl}
         method="POST"
-        formOptions={{
-          defaultValues: {
-            email: 'seller@ordex.example',
-            password: 'DemoStore123!'
-          }
-        }}
         id="adminLoginForm"
         onSuccess={onSuccess}
         submitBtn={false}

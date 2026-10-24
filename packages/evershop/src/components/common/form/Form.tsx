@@ -2,6 +2,8 @@ import { Button } from '@components/common/ui/Button.js';
 import { toast } from '@components/common/ui/Sonner.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React, { useEffect, useState } from 'react';
+import { DemoFormDefaults } from './DemoFormDefaults.js';
+import type { DemoProfile } from './demoDefaults.js';
 import {
   useForm,
   FormProvider,
@@ -20,6 +22,7 @@ interface FormProps<T extends FieldValues = FieldValues>
   action?: string;
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   formOptions?: UseFormProps<T>;
+  demoProfile?: DemoProfile;
   onSubmit?: SubmitHandler<T>;
   onSuccess?: (response: any, data: T) => void;
   onError?: (error: string, data: T) => void;
@@ -42,6 +45,7 @@ export function Form<T extends FieldValues = FieldValues>({
   action,
   method = 'POST',
   formOptions,
+  demoProfile,
   onSubmit,
   onSuccess,
   onError,
@@ -155,7 +159,10 @@ export function Form<T extends FieldValues = FieldValues>({
         noValidate={noValidate}
         {...props}
       >
-        <fieldset disabled={loading}>{children}</fieldset>
+        <fieldset disabled={loading}>
+          {demoProfile && <DemoFormDefaults profile={demoProfile} />}
+          {children}
+        </fieldset>
 
         {submitBtn && (
           <div className="mt-4">

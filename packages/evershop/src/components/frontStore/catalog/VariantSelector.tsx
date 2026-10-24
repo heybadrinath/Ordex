@@ -24,10 +24,11 @@ interface ProcessedAttribute extends VariantAttribute {
   options: (AttributeOption & { available: boolean })[];
 }
 
-const processAttributes = (
+export const processAttributes = (
   vs: VariantGroup | undefined,
   attributes: VariantAttribute[],
-  currentUrl: string
+  currentUrl: string,
+  currentOptions: SelectedOption[] = []
 ): ProcessedAttribute[] => {
   if (!vs) return [];
 
@@ -41,9 +42,14 @@ const processAttributes = (
   const search =
     queryStart >= 0 ? currentUrl.slice(queryStart).split('#')[0] : '';
 
+  const params = new URLSearchParams(search);
+  // A direct variant URL already identifies its options. Explicit query choices win.
+  for (const { attributeCode, optionId } of currentOptions) {
+    if (!params.has(attributeCode) && optionId != null)
+      params.set(attributeCode, String(optionId));
+  }
   newAttributes = attributes.map((attribute) => {
-    const params = new URLSearchParams(search).entries();
-    const check = Array.from(params).find(
+    const check = Array.from(params.entries()).find(
       ([key, value]) =>
         key === attribute.attributeCode &&
         attribute.options.find(
@@ -149,7 +155,11 @@ export function VariantSelector({
   AttributeRenderer = DefaultVariantAttribute,
   OptionRenderer = DefaultVariantOptionItem
 }: VariantsProps) {
-  const { variantGroup: vs, productId } = useProduct();
+  const {
+    variantGroup: vs,
+    productId,
+    attributes: currentOptions
+  } = useProduct();
   const {
     config: {
       pageMeta: {
@@ -164,8 +174,14 @@ export function VariantSelector({
   const AppContextDispatch = useAppDispatch();
 
   const initialAttributes = useMemo(
-    () => processAttributes(vs, vs?.variantAttributes || [], currentProductUrl),
-    [vs, currentProductUrl]
+    () =>
+      processAttributes(
+        vs,
+        vs?.variantAttributes || [],
+        currentProductUrl,
+        currentOptions
+      ),
+    [vs, currentProductUrl, currentOptions]
   );
 
   const [attributes, setAttributes] =
@@ -181,14 +197,15 @@ export function VariantSelector({
       const newAttributes = processAttributes(
         vs,
         vs?.variantAttributes || [],
-        currentProductUrl
+        currentProductUrl,
+        currentOptions
       );
       setAttributes(newAttributes);
       attributeRef.current = newAttributes;
     };
 
     handleProductChange();
-  }, [vs, productId]);
+  }, [vs, productId, currentProductUrl, currentOptions]);
 
   const handleOptionClick = async (
     attributeCode: string,

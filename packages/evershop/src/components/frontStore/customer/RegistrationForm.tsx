@@ -57,6 +57,7 @@ export const CustomerRegistrationForm: React.FC<{
         <Area id="customerRegisterFormBefore" noOuter />
         <Form
           id="registerForm"
+          demoProfile="registration"
           method="POST"
           onSubmit={async (data) => {
             try {

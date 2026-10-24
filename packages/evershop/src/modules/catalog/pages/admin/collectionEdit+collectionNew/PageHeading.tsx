@@ -1,6 +1,7 @@
 import { PageHeading } from '@components/admin/PageHeading.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { Layers3 } from 'lucide-react';
 
 export interface CollectionEditPageHeadingProps {
   backUrl: string;
@@ -14,9 +15,12 @@ export default function CollectionEditPageHeading({
   collection = {}
 }: CollectionEditPageHeadingProps) {
   return (
-    <div className="w-2/3" style={{ margin: '0 auto' }}>
+    <div className="w-full" style={{ margin: '0 auto' }}>
       <PageHeading
         backUrl={backUrl}
+        eyebrow="Catalog editor"
+        description="Curate the products that belong together."
+        icon={<Layers3 size={24} />}
         heading={
           collection
             ? _('Editing ${name}', { name: collection.name || '' })

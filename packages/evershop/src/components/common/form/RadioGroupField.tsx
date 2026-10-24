@@ -115,6 +115,7 @@ export function RadioGroupField<T extends FieldValues = FieldValues>({
               <div key={option.value} className="flex items-center gap-2">
                 <RadioGroupItem
                   value={String(option.value)}
+                  aria-label={option.label}
                   id={`${fieldId}-${option.value}`}
                   disabled={disabled || option.disabled}
                 />

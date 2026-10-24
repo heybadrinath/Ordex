@@ -1,4 +1,5 @@
 import { ProductListSkeleton } from '@components/admin/ProductListSkeleton.js';
+import { useCatalogPreview } from '@components/admin/CatalogEditor.js';
 import { ProductSelector } from '@components/admin/ProductSelector.js';
 import { Button } from '@components/common/ui/Button.js';
 import {
@@ -136,18 +137,26 @@ export default function Products({
   }, [page]);
 
   const { data, fetching, error } = result;
+  const updatePreview = useCatalogPreview();
+  React.useEffect(() => {
+    if (data?.collection?.products && !keyword && page === 1) {
+      updatePreview?.(data.collection.products);
+    }
+  }, [data, keyword, page, updatePreview]);
 
   return (
     <Dialog>
-      <Card>
+      <Card id="collection-products" className="editor-section-card">
         <CardHeader>
           <CardTitle>{_('Products')}</CardTitle>
           <CardDescription>
-            {_('Manage the products assigned to this collection.')}
+            {_(
+              'Products shown together in this collection. Product assignments update immediately.'
+            )}
           </CardDescription>
           <CardAction>
-            <DialogTrigger>
-              <Button variant="link">{_('Add Products')}</Button>
+            <DialogTrigger render={<Button variant="link" />}>
+              {_('Add Products')}
             </DialogTrigger>
           </CardAction>
         </CardHeader>
@@ -214,14 +223,11 @@ export default function Products({
                     )}
                   </div>
                 </div>
-                <div className="divide-y">
+                <div className="catalog-product-tiles">
                   {data.collection.products.items.map((p) => (
-                    <div
-                      key={p.uuid}
-                      className="flex justify-between py-2 border-divider items-center"
-                    >
-                      <div className="flex justify-items-start gap-5">
-                        <div className="grid-thumbnail text-border border border-divider p-2 rounded flex justify-center w-10 h-10">
+                    <div key={p.uuid} className="catalog-product-tile">
+                      <div className="catalog-product-tile-main">
+                        <div className="catalog-product-tile-photo">
                           {p.image?.url && (
                             <img
                               className="self-center"
@@ -250,15 +256,20 @@ export default function Products({
                         <div>
                           <a
                             href={p.editUrl || ''}
-                            className="font-semibold hover:underline"
+                            className="catalog-product-tile-name"
                           >
                             {p.name}
                           </a>
+                          <small className="catalog-product-sku">{p.sku}</small>
+                          <strong className="catalog-product-price">
+                            {p.price.regular.text}
+                          </strong>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="catalog-product-tile-action">
                         <Button
-                          variant="destructive"
+                          variant="outline"
+                          aria-label={`Remove ${p.name} from this collection`}
                           onClick={async () => {
                             await removeProduct(
                               p.removeFromCollectionUrl,

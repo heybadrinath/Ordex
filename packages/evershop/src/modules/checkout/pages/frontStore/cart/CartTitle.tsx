@@ -1,6 +1,7 @@
 import { useCartState } from '@components/frontStore/cart/CartContext.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { ArrowLeft, ShoppingBag } from 'lucide-react';
 
 /**
  * Cart page block: the title and the item count. A page component rather than
@@ -13,12 +14,22 @@ export default function CartTitle(): React.ReactElement {
   const count = cart.items.length;
   return (
     <div className="shopping-cart-header mb-8">
-      <h1 className="shopping-cart-title text-3xl font-semibold tracking-tight">
-        {_('Your cart')}
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {_('${count} items in your cart', { count: count.toString() })}
-      </p>
+      <span className="cart-heading-icon" aria-hidden="true">
+        <ShoppingBag size={25} />
+      </span>
+      <div>
+        <h1 className="shopping-cart-title text-3xl font-semibold tracking-tight">
+          {_('Your cart')}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {count === 1
+            ? _('1 item in your cart')
+            : _('${count} items in your cart', { count: count.toString() })}
+        </p>
+      </div>
+      <a className="cart-continue-link" href="/products">
+        <ArrowLeft size={15} /> Keep exploring
+      </a>
     </div>
   );
 }

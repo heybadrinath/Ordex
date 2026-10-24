@@ -91,11 +91,7 @@ export const CustomerLoginForm: React.FC<{
           onSubmit={async (data) => {
             try {
               await login(
-                {
-                  email: data.email,
-                  password: data.password,
-                  ...data
-                },
+                data,
                 redirectUrl
               );
             } catch (error) {

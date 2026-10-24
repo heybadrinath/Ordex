@@ -1,3 +1,7 @@
+import {
+  CatalogEditor,
+  type EditorEntity
+} from '@components/admin/CatalogEditor.js';
 import { FormButtons } from '@components/admin/FormButtons.js';
 import Area from '@components/common/Area.js';
 import { Form } from '@components/common/form/Form.js';
@@ -6,10 +10,12 @@ import React from 'react';
 interface AttributeEditFormProps {
   action: string;
   gridUrl: string;
+  attribute?: EditorEntity | null;
 }
 export default function AttributeEditForm({
   action,
-  gridUrl
+  gridUrl,
+  attribute
 }: AttributeEditFormProps) {
   return (
     <Form
@@ -18,14 +24,13 @@ export default function AttributeEditForm({
       id="attributeEditForm"
       submitBtn={false}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="leftSide" noOuter />
-        </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="rightSide" noOuter />
-        </div>
-      </div>
+      <CatalogEditor
+        kind="attribute"
+        entity={attribute}
+        aside={<Area id="rightSide" noOuter />}
+      >
+        <Area id="leftSide" noOuter />
+      </CatalogEditor>
       <FormButtons formId="attributeEditForm" cancelUrl={gridUrl} />
     </Form>
   );
@@ -38,6 +43,9 @@ export const layout = {
 
 export const query = `
   query Query {
+    attribute(id: getContextValue("attributeId", null)) {
+      attributeName attributeCode type isFilterable options { optionText }
+    }
     action: url(routeId: "updateAttribute", params: [{key: "id", value: getContextValue("attributeUuid")}]),
     gridUrl: url(routeId: "attributeGrid")
   }

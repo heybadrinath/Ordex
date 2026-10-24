@@ -1,8 +1,14 @@
+// Modified for Ordex on 19 October 2026.
 import { resolve } from 'path';
 import { getEnabledExtensions } from '../../bin/extension/index.js';
 import { getCoreModules } from '../../bin/lib/loadModules.js';
 import { getRoutes } from '../router/Router.js';
 import { getEnabledTheme } from '../util/getEnabledTheme.js';
+import {
+  isComponentEnabled,
+  isModuleEnabled,
+  isRouteEnabled
+} from '../util/featureScope.js';
 import { getEnabledWidgets } from '../widget/widgetManager.js';
 import { ComponentsMap, scanRouteComponents } from './scanForComponents.js';
 
@@ -18,11 +24,15 @@ export function getComponentsByRoute(route) {
   } else {
     components = Object.values(scanRouteComponents(route, modules));
   }
+  components = components.filter(isComponentEnabled);
   const widgets = getEnabledWidgets();
   if (!route.isAdmin) {
     // Add widgets to components
     return components.concat((widgets || []).map((widget) => widget.component));
   } else {
+    if (!isRouteEnabled('widgetGrid') && !isModuleEnabled('pageBuilder')) {
+      return components;
+    }
     // Add widgets to components
     return components.concat(
       (widgets || []).map((widget) => widget.settingComponent)

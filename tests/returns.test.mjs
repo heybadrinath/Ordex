@@ -266,18 +266,24 @@ test('return lifecycle is persistent, duplicate-safe and separate from stock', a
     'refunded'
   );
   assert.equal(
-    persisted.data.data.orders.find((o) => o.uuid === fixture.uuid).items[0].remaining_qty,
+    persisted.data.data.orders.find((o) => o.uuid === fixture.uuid).items[0]
+      .remaining_qty,
     1
   );
 });
 
 test('the customer return page is reachable and requires customer login', async () => {
-  const anonymous = await fetch(`${base}/account/returns`, { redirect: 'manual' });
+  const anonymous = await fetch(`${base}/account/returns`, {
+    redirect: 'manual'
+  });
   assert.equal(anonymous.status, 302);
   assert.ok(anonymous.headers.get('location').includes('/account/login'));
   const customer = await fetch(`${base}/account/returns`, {
     headers: { Cookie: customerCookies }
   });
   assert.equal(customer.status, 200);
-  assert.match(await customer.text(), /A little care, after checkout/);
+  assert.ok(
+    (await customer.text()).includes('<h1>Returns &amp; refunds</h1>'),
+    'Customer return workspace heading is present'
+  );
 });

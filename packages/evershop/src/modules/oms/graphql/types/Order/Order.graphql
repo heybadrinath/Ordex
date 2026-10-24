@@ -74,6 +74,7 @@ type OrderItem implements ShoppingCartItem {
 Represents an Order.
 """
 type Order implements ShoppingCart {
+  canCancel: Boolean!
   orderId: ID!
   uuid: String!
   orderNumber: String!
@@ -120,9 +121,16 @@ type Order implements ShoppingCart {
   createdAt: Date!
   updatedAt: Date!
   activities: [Activity]
-  """Deprecated singular. Returns the earliest shipment for back-compat — use `shipments` instead. Dropped in Z1."""
-  shipment: Shipment @deprecated(reason: "Use shipments. Returns the earliest shipment for back-compat.")
-  """All shipments on this order, ordered by created_at ascending. Storefront-safe."""
+  """
+  Deprecated singular. Returns the earliest shipment for back-compat — use `shipments` instead. Dropped in Z1.
+  """
+  shipment: Shipment
+    @deprecated(
+      reason: "Use shipments. Returns the earliest shipment for back-compat."
+    )
+  """
+  All shipments on this order, ordered by created_at ascending. Storefront-safe.
+  """
   shipments: [Shipment!]!
 }
 
@@ -145,9 +153,13 @@ type Shipment {
   uuid: String!
   carrier: String
   trackingNumber: String
-  """Carrier display name resolved server-side from the registered carriers. Null if carrier code isn't registered."""
+  """
+  Carrier display name resolved server-side from the registered carriers. Null if carrier code isn't registered.
+  """
   carrierName: String
-  """Carrier tracking URL with the tracking number substituted, or null if no template/no tracking number."""
+  """
+  Carrier tracking URL with the tracking number substituted, or null if no template/no tracking number.
+  """
   trackingUrl: String
   """
   Resolved status (name + badge + phase) from the registry. Returns an object,
@@ -161,11 +173,17 @@ type Shipment {
   and storefront templates where the full status object is overkill.
   """
   phase: String!
-  """First-occurrence timestamp; null until the shipment first enters the shipped phase."""
+  """
+  First-occurrence timestamp; null until the shipment first enters the shipped phase.
+  """
   shippedAt: DateTime
-  """First-occurrence timestamp; null until the shipment first enters the delivered phase."""
+  """
+  First-occurrence timestamp; null until the shipment first enters the delivered phase.
+  """
   deliveredAt: DateTime
-  """First-occurrence timestamp; null until the shipment is canceled."""
+  """
+  First-occurrence timestamp; null until the shipment is canceled.
+  """
   canceledAt: DateTime
   """
   Carrier-hosted URL for the purchased shipping label, or null when admin
@@ -174,7 +192,9 @@ type Shipment {
   whatever the carrier provider hands back.
   """
   labelUrl: String
-  """Items in this shipment with their qty."""
+  """
+  Items in this shipment with their qty.
+  """
   items: [ShipmentItem!]!
   createdAt: DateTime!
   updatedAt: DateTime
@@ -192,7 +212,6 @@ type ShipmentItem {
   thumbnail: String
   productName: String
 }
-
 
 """
 Retrieve an list of order.

@@ -1,0 +1,559 @@
+{
+  "categories": [
+    {
+      "key": "living",
+      "name": "Living & decor",
+      "image": "sofa",
+      "description": "Characterful furniture, soft textures and little details for a space that feels like you."
+    },
+    {
+      "key": "workspace",
+      "name": "Workspace",
+      "image": "keyboard",
+      "description": "Thoughtful tools for a clear desk and a fresh start."
+    },
+    {
+      "key": "audio",
+      "name": "Audio & tech",
+      "image": "headphones",
+      "description": "Good sound, considered design and everyday technology."
+    },
+    {
+      "key": "kitchen",
+      "name": "Kitchen & coffee",
+      "image": "kettle",
+      "description": "Slow mornings, favourite cups and the joy of a daily ritual."
+    },
+    {
+      "key": "lighting",
+      "name": "Lighting",
+      "image": "lamp",
+      "description": "A little warmth for every corner of your home."
+    },
+    {
+      "key": "everyday-carry",
+      "name": "Everyday carry",
+      "image": "backpack",
+      "description": "Useful companions for wherever the day takes you."
+    },
+    {
+      "key": "stationery",
+      "name": "Paper & stationery",
+      "image": "stationery-set",
+      "description": "Good ideas start somewhere. Journals, pencils and paper for the things you want to make."
+    },
+    {
+      "key": "tableware",
+      "name": "At the table",
+      "image": "white-plates",
+      "description": "Everyday ceramics and warm wooden utensils, for breakfasts and dinners worth lingering over."
+    },
+    {
+      "key": "outdoors",
+      "name": "Slow weekends",
+      "image": "picnic-basket",
+      "description": "A little fresh air, a sunny spot and a few well-chosen things to take along."
+    }
+  ],
+  "products": [
+    {
+      "sku": "STUDIO-HP-001",
+      "name": "Studio headphones",
+      "key": "studio-headphones",
+      "price": 12990,
+      "image": "headphones",
+      "category": "audio",
+      "description": "A sculptural over-ear design in graphite, made for your listening corner.",
+      "details": "Over-ear form; padded ear cups; graphite finish. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "workspace-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "LINE-CHAIR-001",
+      "name": "Line side chair",
+      "key": "line-side-chair",
+      "price": 5990,
+      "image": "chair",
+      "category": "living",
+      "description": "An airy white silhouette for the desk, dining table or your favourite corner.",
+      "details": "White finish; open frame; indoor use. Demo product; photography is illustrative.",
+      "collections": [
+        "home-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "WOVEN-LAMP-001",
+      "name": "Woven table lamp",
+      "key": "woven-table-lamp",
+      "price": 3490,
+      "image": "lamp",
+      "category": "lighting",
+      "description": "A warm woven base and soft shade bring an easy glow to evening routines.",
+      "details": "Natural-tone base; fabric shade; dust with a soft dry cloth. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "home-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "FORMA-VASE-001",
+      "name": "Forma ceramic pitcher",
+      "key": "forma-ceramic-pitcher",
+      "price": 1290,
+      "image": "vase",
+      "category": "living",
+      "description": "A ribbed ceramic shape that makes even a few stems feel special.",
+      "details": "White glaze; decorative ceramic; hand wash gently. Demo product; photography is illustrative.",
+      "collections": [
+        "home-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "POCKET-AUDIO-001",
+      "name": "Pocket wireless earbuds",
+      "key": "pocket-wireless-earbuds",
+      "price": 6990,
+      "image": "earbuds",
+      "category": "audio",
+      "description": "A compact dark case and a clean in-ear silhouette, ready for the everyday.",
+      "details": "In-ear form; pocket-size charging case; keep dry. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "daily-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "STILL-SOFA-001",
+      "name": "Still two-seat sofa",
+      "key": "still-two-seat-sofa",
+      "price": 24990,
+      "image": "sofa",
+      "category": "living",
+      "description": "Deep forest upholstery, simple lines and room to slow down.",
+      "details": "Forest green; two-seat silhouette; wooden legs; indoor use. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "home-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "TYPE-KEYS-001",
+      "name": "Type mechanical keyboard",
+      "key": "type-mechanical-keyboard",
+      "price": 4990,
+      "image": "keyboard",
+      "category": "workspace",
+      "description": "Crisp white keys and a compact form for a desk with a little more clarity.",
+      "details": "White finish; compact keyboard; wipe gently with a dry cloth. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "workspace-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "ROAM-PACK-001",
+      "name": "Roam canvas backpack",
+      "key": "roam-canvas-backpack",
+      "price": 3990,
+      "image": "backpack",
+      "category": "everyday-carry",
+      "description": "An olive canvas carryall with warm leather details, for workdays and weekends.",
+      "details": "Olive canvas; brown trim; adjustable straps; spot clean. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "daily-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "WARM-SOUND-001",
+      "name": "Warm wood speaker",
+      "key": "warm-wood-speaker",
+      "price": 8990,
+      "image": "speaker",
+      "category": "audio",
+      "description": "Warm wood and a considered silhouette make this speaker at home on any shelf.",
+      "details": "Wood-tone cabinet; single desktop speaker; keep dry. Demo product; photography is illustrative.",
+      "collections": [
+        "workspace-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "PACE-CLOCK-001",
+      "name": "Pace bedside clock",
+      "key": "pace-bedside-clock",
+      "price": 1490,
+      "image": "clock",
+      "category": "living",
+      "description": "A small analogue clock for a slower start to the morning.",
+      "details": "Pale aqua finish; analogue dial; battery-powered form. Demo product; photography is illustrative.",
+      "collections": [
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "SPROUT-POT-001",
+      "name": "Sprout succulent planter",
+      "key": "sprout-succulent-planter",
+      "price": 690,
+      "image": "plant",
+      "category": "living",
+      "description": "A little green for your desk, shelf or windowsill.",
+      "details": "Succulent in a pale ceramic planter; place in bright indirect light. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "home-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "TRAIL-BOTTLE-001",
+      "name": "Trail insulated bottle",
+      "key": "trail-insulated-bottle",
+      "price": 1890,
+      "image": "bottle",
+      "category": "everyday-carry",
+      "description": "A blue reusable bottle for a desk-side sip or a day outside.",
+      "details": "Blue finish; reusable bottle; wash before use. Demo product; photography is illustrative.",
+      "collections": [
+        "daily-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "SLOW-KETTLE-001",
+      "name": "Slow pour kettle",
+      "key": "slow-pour-kettle",
+      "price": 3290,
+      "image": "kettle",
+      "category": "kitchen",
+      "description": "A curved spout and matte dark finish for your morning pour-over ritual.",
+      "details": "Matte black; gooseneck spout; wood-look handle; hand wash. Demo product; photography is illustrative.",
+      "collections": [
+        "studio-edit",
+        "daily-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "NOTES-BOOK-001",
+      "name": "Field notes journal",
+      "key": "field-notes-journal",
+      "price": 590,
+      "image": "notebook",
+      "category": "workspace",
+      "description": "Make a little space for ideas, plans and the things worth remembering.",
+      "details": "Bound paper journal; ruled and planning pages; pen not included. Demo product; photography is illustrative.",
+      "collections": [
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "ARCHIVE-CAM-001",
+      "name": "Archive cine camera",
+      "key": "archive-cine-camera",
+      "price": 7990,
+      "image": "camera",
+      "category": "audio",
+      "description": "A vintage cine-camera silhouette for collectors and lovers of analogue design.",
+      "details": "Vintage display piece; camera pictured is illustrative; no film included. Demo product; photography is illustrative.",
+      "collections": [
+        "workspace-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "GLIDE-MOUSE-001",
+      "name": "Glide wireless mouse",
+      "key": "glide-wireless-mouse",
+      "price": 1590,
+      "image": "mouse",
+      "category": "workspace",
+      "description": "A low-profile white mouse that keeps the desk simple.",
+      "details": "White finish; wireless form; clean with a dry cloth. Demo product; photography is illustrative.",
+      "collections": [
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "DAYLIGHT-SUN-001",
+      "name": "Daylight sunglasses",
+      "key": "daylight-sunglasses",
+      "price": 2290,
+      "image": "sunglasses",
+      "category": "everyday-carry",
+      "description": "Dark lenses and a clean frame for the brighter hours of the day.",
+      "details": "Black frame; dark lenses; store in a protective case. Demo product; photography is illustrative.",
+      "collections": [
+        "daily-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "CLOUD-CUSH-001",
+      "name": "Cloud cushion",
+      "key": "cloud-cushion",
+      "price": 990,
+      "image": "cushion",
+      "category": "living",
+      "description": "A soft white cushion to settle into, layer up and make your own.",
+      "details": "White woven cover; square shape; spot clean. Demo product; photography is illustrative.",
+      "collections": [
+        "home-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "FRAME-SIDE-001",
+      "name": "Frame wooden sideboard",
+      "key": "frame-wooden-sideboard",
+      "price": 12990,
+      "image": "side-table",
+      "category": "living",
+      "description": "Warm wood storage with space above for the objects you love.",
+      "details": "Natural wood tone; low storage form; styling props not included. Demo product; photography is illustrative.",
+      "collections": [
+        "home-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "PRESS-COFFEE-001",
+      "name": "Morning French press",
+      "key": "morning-french-press",
+      "price": 1990,
+      "image": "french-press",
+      "category": "kitchen",
+      "description": "Take a few quiet minutes for a fresh cup and a slower start.",
+      "details": "Glass coffee press; dark frame; cup and coffee not included. Demo product; photography is illustrative.",
+      "collections": [
+        "daily-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "HOME-TOTE-001",
+      "name": "Homebody canvas tote",
+      "key": "homebody-canvas-tote",
+      "price": 890,
+      "image": "tote",
+      "category": "everyday-carry",
+      "description": "A roomy canvas tote with a little personality for your daily essentials.",
+      "details": "Natural canvas; printed design; shoulder handles; spot clean. Demo product; photography is illustrative.",
+      "collections": [
+        "daily-edit",
+        "small-joys"
+      ],
+      "stock": 36
+    },
+    {
+      "sku": "GLOW-FLOOR-001",
+      "name": "Glow floor lamp",
+      "key": "glow-floor-lamp",
+      "price": 4490,
+      "image": "floor-lamp",
+      "category": "lighting",
+      "description": "A softly lit shade and slender frame make a welcoming corner, morning to evening.",
+      "details": "Black stem; fabric shade; floor-standing form; wipe with a dry cloth. Demo product; photography is illustrative.",
+      "collections": [
+        "home-edit"
+      ],
+      "stock": 20
+    },
+    {
+      "sku": "PAPER-PENCIL-001",
+      "name": "Pastel pencil set",
+      "key": "pastel-pencil-set",
+      "price": 390,
+      "image": "stationery-set",
+      "category": "stationery",
+      "description": "Soft pink pencils and clean lines for everyday lists, sketches and little ideas.",
+      "details": "Pencil set; pastel finish. Demo product; photography is illustrative.",
+      "collections": [
+        "paper-edit",
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "PAPER-JOURNAL-001",
+      "name": "Open pages journal",
+      "key": "open-pages-journal",
+      "price": 690,
+      "image": "open-journal",
+      "category": "stationery",
+      "description": "Room for the next good idea. A simple notebook for thoughts, sketches and plans.",
+      "details": "Blank pages; soft cover. Demo product; photography is illustrative.",
+      "collections": [
+        "paper-edit",
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "PAPER-JOY-001",
+      "name": "Little joys notebook",
+      "key": "little-joys-notebook",
+      "price": 590,
+      "image": "pink-journal",
+      "category": "stationery",
+      "description": "A little encouragement for your desk, with pages ready for whatever comes next.",
+      "details": "Pink cover; compact format. Demo product; photography is illustrative.",
+      "collections": [
+        "paper-edit",
+        "studio-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "PAPER-SPIRAL-001",
+      "name": "Everyday spiral notebooks",
+      "key": "everyday-spiral-notebooks",
+      "price": 890,
+      "image": "notebook-stack",
+      "category": "stationery",
+      "description": "A colourful home for lists, plans and all the bits you want to remember.",
+      "details": "Spiral binding; printed covers. Demo product; photography is illustrative.",
+      "collections": [
+        "paper-edit",
+        "workspace-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "TABLE-PLATE-001",
+      "name": "Warm white dinner plates",
+      "key": "warm-white-dinner-plates",
+      "price": 1890,
+      "image": "white-plates",
+      "category": "tableware",
+      "description": "A warm white finish that makes room for whatever is on the menu.",
+      "details": "Set of four; ceramic; smooth glazed finish. Demo product; photography is illustrative.",
+      "collections": [
+        "table-edit",
+        "home-edit",
+        "studio-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "TABLE-MONO-001",
+      "name": "Contrast plate set",
+      "key": "contrast-plate-set",
+      "price": 2290,
+      "image": "contrast-plates",
+      "category": "tableware",
+      "description": "A little contrast for an everyday table. Mix the black and white pieces your way.",
+      "details": "Set of four; monochrome glazed ceramic. Demo product; photography is illustrative.",
+      "collections": [
+        "table-edit",
+        "home-edit"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "TABLE-WOOD-001",
+      "name": "Everyday wooden utensils",
+      "key": "everyday-wooden-utensils",
+      "price": 990,
+      "image": "wooden-spoons",
+      "category": "tableware",
+      "description": "Natural texture and gentle curves for cooking, serving and sharing.",
+      "details": "Wooden utensil set; hand wash and dry. Demo product; photography is illustrative.",
+      "collections": [
+        "table-edit",
+        "home-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "TABLE-SERVE-001",
+      "name": "Walnut serving spoon",
+      "key": "walnut-serving-spoon",
+      "price": 490,
+      "image": "serving-spoon",
+      "category": "tableware",
+      "description": "A beautifully simple serving spoon, with a warm grain and a generous scoop.",
+      "details": "Wooden serving spoon; natural finish. Demo product; photography is illustrative.",
+      "collections": [
+        "table-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "OUT-PICNIC-001",
+      "name": "Sunday picnic basket",
+      "key": "sunday-picnic-basket",
+      "price": 3490,
+      "image": "picnic-basket",
+      "category": "outdoors",
+      "description": "Pack something good and find your favourite patch of sunshine.",
+      "details": "Woven picnic basket; handled lid. Demo product; photography is illustrative.",
+      "collections": [
+        "weekend-edit",
+        "daily-edit",
+        "studio-edit"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "OUT-HAMPER-001",
+      "name": "Meadow picnic hamper",
+      "key": "meadow-picnic-hamper",
+      "price": 2990,
+      "image": "picnic-edit",
+      "category": "outdoors",
+      "description": "For long lunches in the fresh air and afternoons with nowhere to be.",
+      "details": "Woven hamper; two-part lid. Contents sold separately. Demo product; photography is illustrative.",
+      "collections": [
+        "weekend-edit",
+        "daily-edit"
+      ],
+      "stock": 30
+    },
+    {
+      "sku": "OUT-SHADES-001",
+      "name": "Weekend round sunglasses",
+      "key": "weekend-round-sunglasses",
+      "price": 1490,
+      "image": "weekend-shades",
+      "category": "outdoors",
+      "description": "An easy round frame for the brighter part of your day.",
+      "details": "Round dark frame; tinted lenses. Demo product; photography is illustrative.",
+      "collections": [
+        "weekend-edit",
+        "daily-edit",
+        "small-joys"
+      ],
+      "stock": 30
+    }
+  ]
+}

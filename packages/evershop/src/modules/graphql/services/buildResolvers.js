@@ -1,15 +1,17 @@
+// Modified for Ordex on 19 October 2026.
 import path from 'path';
 import url from 'url';
 import { loadFiles } from '@graphql-tools/load-files';
 import { mergeResolvers } from '@graphql-tools/merge';
 import { getEnabledExtensions } from '../../../bin/extension/index.js';
-import { CONSTANTS } from '../../../lib/helpers.js';
+import { getCoreModules } from '../../../bin/lib/loadModules.js';
+import { isGraphqlQueryEnabled } from '../../../lib/util/featureScope.js';
 import { isDevelopmentMode } from '../../../lib/util/isDevelopmentMode.js';
 
 export async function buildResolvers(isAdmin = false) {
-  const typeSources = [
-    path.join(CONSTANTS.MODULESPATH, '*/graphql/types/**/*.resolvers.{js,ts}')
-  ];
+  const typeSources = getCoreModules().map((module) =>
+    path.join(module.path, 'graphql/types/**/*.resolvers.{js,ts}')
+  );
 
   const extensions = getEnabledExtensions();
   extensions.forEach((extension) => {
@@ -38,5 +40,8 @@ export async function buildResolvers(isAdmin = false) {
     })
   );
 
+  for (const name of Object.keys(resolvers.Query || {})) {
+    if (!isGraphqlQueryEnabled(name)) delete resolvers.Query[name];
+  }
   return resolvers;
 }

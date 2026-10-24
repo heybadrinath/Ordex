@@ -46,7 +46,7 @@ const VariantGroup: React.FC<VariantGroupProps> = ({
     product?.variantGroup || null
   );
   return (
-    <Card>
+    <Card id="product-variants">
       <CardHeader>
         <CardTitle>{_('Variant Group')}</CardTitle>
         <CardDescription>

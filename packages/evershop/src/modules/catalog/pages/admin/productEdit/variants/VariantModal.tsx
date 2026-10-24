@@ -282,8 +282,8 @@ export const VariantModal: React.FC<
         </div>
       </div>
       <DialogFooter>
-        <DialogClose>
-          <Button variant="outline">{_('Cancel')}</Button>
+        <DialogClose render={<Button variant="outline" />}>
+          {_('Cancel')}
         </DialogClose>
         <Button
           isLoading={saving}

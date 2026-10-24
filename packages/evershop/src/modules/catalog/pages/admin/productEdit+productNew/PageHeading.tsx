@@ -1,11 +1,15 @@
 import { PageHeading } from '@components/admin/PageHeading.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { Package } from 'lucide-react';
 
 export interface ProductEditPageHeadingProps {
   backUrl: string;
   product?: {
     name?: string;
+    sku: string;
+    url: string;
+    image?: { url: string };
   };
   duplicateSource?: {
     productId: number;
@@ -26,7 +30,26 @@ export default function ProductEditPageHeading({
   } else if (product) {
     heading = _('Editing ${name}', { name: product.name ?? '' });
   }
-  return <PageHeading backUrl={backUrl} heading={heading} />;
+  return (
+    <>
+      <PageHeading
+        backUrl={backUrl}
+        heading={heading}
+        eyebrow="Product editor"
+        description={
+          product?.sku ||
+          'Start with the details your customers need. Add images, pricing and stock below.'
+        }
+        icon={
+          product?.image ? (
+            <img src={product.image.url} alt="" />
+          ) : (
+            <Package size={24} />
+          )
+        }
+      />
+    </>
+  );
 }
 
 export const layout = {
@@ -38,6 +61,9 @@ export const query = `
   query Query {
     product(id: getContextValue("productId", null)) {
       name
+      sku
+      url
+      image { url }
     }
     duplicateSource: product(id: getContextValue("duplicateSourceId", null)) {
       productId

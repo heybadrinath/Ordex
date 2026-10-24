@@ -1,3 +1,7 @@
+import {
+  CatalogEditor,
+  type EditorEntity
+} from '@components/admin/CatalogEditor.js';
 import { FormButtons } from '@components/admin/FormButtons.js';
 import Area from '@components/common/Area.js';
 import { Form } from '@components/common/form/Form.js';
@@ -8,16 +12,19 @@ import React from 'react';
 interface AttributeNewFormProps {
   action: string;
   gridUrl: string;
+  attribute?: EditorEntity | null;
 }
 export default function AttributeNewForm({
   action,
-  gridUrl
+  gridUrl,
+  attribute
 }: AttributeNewFormProps) {
   return (
     <Form
       action={action}
       method="POST"
       id="attributeNewForm"
+      demoProfile="attribute"
       onSuccess={(response) => {
         toast.success(_('Attribute created successfully!'));
         setTimeout(() => {
@@ -29,14 +36,13 @@ export default function AttributeNewForm({
       }}
       submitBtn={false}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="leftSide" noOuter />
-        </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="rightSide" noOuter />
-        </div>
-      </div>
+      <CatalogEditor
+        kind="attribute"
+        entity={attribute}
+        aside={<Area id="rightSide" noOuter />}
+      >
+        <Area id="leftSide" noOuter />
+      </CatalogEditor>
       <FormButtons formId="attributeNewForm" cancelUrl={gridUrl} />
     </Form>
   );
@@ -49,6 +55,9 @@ export const layout = {
 
 export const query = `
   query Query {
+    attribute(id: getContextValue("attributeId", null)) {
+      attributeName attributeCode type isFilterable options { optionText }
+    }
     action: url(routeId: "createAttribute")
     gridUrl: url(routeId: "attributeGrid")
   }

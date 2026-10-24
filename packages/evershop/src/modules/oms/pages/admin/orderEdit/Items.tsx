@@ -8,7 +8,10 @@ import {
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import { CheckCircle2, Package } from 'lucide-react';
 import React from 'react';
-import { NewShipmentDialog, type UnshippedItem } from './Shipments/NewShipmentDialog.js';
+import {
+  NewShipmentDialog,
+  type UnshippedItem
+} from './Shipments/NewShipmentDialog.js';
 import { PhaseBadge } from './Shipments/phaseBadge.js';
 
 interface VariantOption {
@@ -65,9 +68,7 @@ function ItemRow({
   const isDigital = item.noShippingRequired;
   const remaining = unshippedMap.get(Number(item.orderItemId)) ?? 0;
   const showRemainHint =
-    !isDigital &&
-    item.fulfillmentBadge === 'partial_shipped' &&
-    remaining > 0;
+    !isDigital && item.fulfillmentBadge === 'partial_shipped' && remaining > 0;
 
   return (
     <div
@@ -94,7 +95,9 @@ function ItemRow({
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
             {item.variantOptions.map((opt) => (
               <span
-                key={`${opt.attributeCode ?? opt.attributeName}-${opt.optionText}`}
+                key={`${opt.attributeCode ?? opt.attributeName}-${
+                  opt.optionText
+                }`}
                 className="text-xs text-muted-foreground whitespace-nowrap"
               >
                 <span className="font-semibold">{opt.attributeName}:</span>{' '}
@@ -150,10 +153,11 @@ export default function Items({ order, carriers }: ItemsProps) {
 
   // Quick lookup from orderItemId → qtyUnshipped for the "N left to ship" hint.
   const unshippedMap = new Map<number, number>();
-  for (const u of unshippedItems) unshippedMap.set(u.orderItemId, u.qtyUnshipped);
+  for (const u of unshippedItems)
+    unshippedMap.set(u.orderItemId, u.qtyUnshipped);
 
   return (
-    <Card>
+    <Card id="order-items">
       <CardHeader className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Package className="size-4 text-muted-foreground" />

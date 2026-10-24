@@ -20,7 +20,7 @@ interface StatusProps {
 }
 export default function Status({ product }: StatusProps) {
   return (
-    <Card className="bg-popover">
+    <Card id="product-status" className="bg-popover">
       <CardHeader>
         <CardTitle>{_('Product Status')}</CardTitle>
         <CardDescription>

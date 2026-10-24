@@ -11,8 +11,8 @@ export function Thumbnail({ src, name }: ThumbnailProps) {
   return (
     <TableCell>
       <div
-        className="grid-thumbnail text-border border border-divider p-2 rounded flex justify-center"
-        style={{ width: '4rem', height: '4rem' }}
+        className="grid-thumbnail text-border border border-divider rounded flex justify-center"
+        style={{ width: '3rem', height: '3rem' }}
       >
         {src && (
           <Image

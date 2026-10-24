@@ -1,3 +1,13 @@
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription
+} from '@components/common/ui/Empty.js';
+import { ShoppingBag, ArrowUpRight, Search } from 'lucide-react';
+import { RecordAvatar } from '@components/admin/RecordAvatar.js';
+import { GridViews } from '@components/admin/GridViews.js';
 import { GridPagination } from '@components/admin/grid/GridPagination';
 import { SortableHeader } from '@components/admin/grid/header/Sortable';
 import Area from '@components/common/Area';
@@ -41,6 +51,11 @@ import { ShipmentStatus } from './rows/ShipmentStatus.js';
 function Actions({ orders = [], selectedIds = [] }) {
   const { openAlert, closeAlert } = useAlertContext();
   const [isLoading, setIsLoading] = useState(false);
+  const canFulfil =
+    selectedIds.length > 0 &&
+    orders
+      .filter((order) => selectedIds.includes(order.uuid))
+      .every((order) => order.shipmentStatus.code === 'pending');
 
   const fullFillOrders = async () => {
     setIsLoading(true);
@@ -86,7 +101,7 @@ function Actions({ orders = [], selectedIds = [] }) {
   ];
 
   return (
-    <TableRow>
+    <TableRow className="grid-bulk-actions">
       {selectedIds.length === 0 && null}
       {selectedIds.length > 0 && (
         <TableCell style={{ borderTop: 0 }} colSpan="100">
@@ -95,6 +110,7 @@ function Actions({ orders = [], selectedIds = [] }) {
               <Button
                 key={i}
                 variant={'outline'}
+                disabled={!canFulfil || isLoading}
                 onClick={(e) => {
                   e.preventDefault();
                   action.onAction();
@@ -104,6 +120,11 @@ function Actions({ orders = [], selectedIds = [] }) {
               </Button>
             ))}
           </ButtonGroup>
+          {!canFulfil && (
+            <span className="bulk-action-hint">
+              Select only orders awaiting dispatch to mark them as shipped.
+            </span>
+          )}
         </TableCell>
       )}
     </TableRow>
@@ -139,7 +160,22 @@ export default function OrderGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <Card>
+    <Card className="workspace-grid">
+      <GridViews
+        baseUrl="/admin/orders"
+        filterKey="shipment_status"
+        views={[
+          { label: 'All orders' },
+          { label: 'To fulfil', value: 'pending' },
+          { label: 'Shipped', value: 'shipped' },
+          { label: 'Delivered', value: 'delivered' }
+        ]}
+        currentFilters={currentFilters}
+        total={total}
+        unit="Orders"
+        selected={selectedRows.length}
+        onClearSelection={() => setSelectedRows([])}
+      />
       <CardHeader className="flex justify-between">
         <Form submitBtn={false} id="orderGridFilter">
           <div className="flex gap-5 justify-center items-center">
@@ -151,8 +187,10 @@ export default function OrderGrid({
                   component: {
                     default: () => (
                       <InputField
+                        prefixIcon={<Search size={16} />}
                         name="keyword"
-                        placeholder={_('Search')}
+                        aria-label={_('Search orders')}
+                        placeholder={_('Search orders')}
                         defaultValue={
                           currentFilters.find((f) => f.key === 'keyword')?.value
                         }
@@ -160,6 +198,7 @@ export default function OrderGrid({
                           // If the user press enter, we should submit the form
                           if (e.key === 'Enter') {
                             const url = new URL(document.location);
+                            url.searchParams.delete('page');
                             const keyword = e.target?.value;
                             if (keyword) {
                               url.searchParams.set('keyword', keyword);
@@ -190,6 +229,7 @@ export default function OrderGrid({
                           }
                           onValueChange={(value) => {
                             const url = new URL(document.location);
+                            url.searchParams.delete('page');
                             url.searchParams.set('payment_status', value);
                             window.location.href = url;
                           }}
@@ -228,6 +268,7 @@ export default function OrderGrid({
                         }
                         onValueChange={(value) => {
                           const url = new URL(document.location);
+                          url.searchParams.delete('page');
                           url.searchParams.set('shipment_status', value);
                           window.location.href = url;
                         }}
@@ -261,6 +302,7 @@ export default function OrderGrid({
             className={'hover:cursor-pointer'}
             onClick={() => {
               const url = new URL(document.location);
+              url.searchParams.delete('page');
               url.search = '';
               window.location.href = url.href;
             }}
@@ -276,6 +318,14 @@ export default function OrderGrid({
               <TableHead>
                 <div className="form-field mb-0">
                   <Checkbox
+                    aria-label={_('Select all orders on this page')}
+                    checked={
+                      orders.length > 0 && selectedRows.length === orders.length
+                    }
+                    indeterminate={
+                      selectedRows.length > 0 &&
+                      selectedRows.length < orders.length
+                    }
                     onCheckedChange={(checked) => {
                       if (checked) {
                         setSelectedRows(orders.map((o) => o.uuid));
@@ -295,7 +345,7 @@ export default function OrderGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Order Number')}
+                          title={_('Order')}
                           name="number"
                           currentFilters={currentFilters}
                         />
@@ -307,19 +357,7 @@ export default function OrderGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Date')}
-                          name="created_at"
-                          currentFilters={currentFilters}
-                        />
-                      )
-                    },
-                    sortOrder: 10
-                  },
-                  {
-                    component: {
-                      default: () => (
-                        <SortableHeader
-                          title={_('Customer Email')}
+                          title={_('Customer')}
                           name="email"
                           currentFilters={currentFilters}
                         />
@@ -331,7 +369,7 @@ export default function OrderGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Shipment Status')}
+                          title={_('Delivery')}
                           name="shipment_status"
                           currentFilters={currentFilters}
                         />
@@ -343,7 +381,7 @@ export default function OrderGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Payment Status')}
+                          title={_('Payment')}
                           name="payment_status"
                           currentFilters={currentFilters}
                         />
@@ -365,6 +403,9 @@ export default function OrderGrid({
                   }
                 ]}
               />
+              <TableHead>
+                <span className="sr-only">Open order</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -378,6 +419,9 @@ export default function OrderGrid({
                 <TableCell>
                   <div className="form-field mb-0">
                     <Checkbox
+                      aria-label={_('Select order ${number}', {
+                        number: o.orderNumber
+                      })}
                       checked={selectedRows.includes(o.uuid)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -402,6 +446,7 @@ export default function OrderGrid({
                         default: () => (
                           <OrderNumber
                             number={o.orderNumber}
+                            date={o.createdAt.text}
                             editUrl={o.editUrl}
                           />
                         )
@@ -410,14 +455,22 @@ export default function OrderGrid({
                     },
                     {
                       component: {
-                        default: () => <TableCell>{o.createdAt.text}</TableCell>
-                      },
-                      sortOrder: 10
-                    },
-                    {
-                      component: {
                         default: ({ areaProps }) => (
-                          <TableCell>{o.customerEmail}</TableCell>
+                          <TableCell>
+                            <div className="order-customer-identity">
+                              <RecordAvatar
+                                name={o.customerFullName || o.customerEmail}
+                              />
+                              <div>
+                                <strong className="table-primary">
+                                  {o.customerFullName || o.customerEmail}
+                                </strong>
+                                <small className="table-secondary">
+                                  {o.customerEmail}
+                                </small>
+                              </div>
+                            </div>
+                          </TableCell>
                         )
                       },
                       sortOrder: 15
@@ -441,21 +494,43 @@ export default function OrderGrid({
                     {
                       component: {
                         default: () => (
-                          <TableCell>{o.grandTotal.text}</TableCell>
+                          <TableCell className="record-amount">
+                            {o.grandTotal.text}
+                          </TableCell>
                         )
                       },
                       sortOrder: 30
                     }
                   ]}
                 />
+                <TableCell>
+                  <a
+                    className="record-open"
+                    href={o.editUrl}
+                    aria-label={`Open order ${o.orderNumber}`}
+                  >
+                    <ArrowUpRight size={15} />
+                  </a>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {orders.length === 0 && (
-          <div className="flex w-full justify-center">
-            {_('There is no order to display')}
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ShoppingBag size={24} />
+              </EmptyMedia>
+              <EmptyTitle>No orders in this view</EmptyTitle>
+              <EmptyDescription>
+                Try another search or clear your filters to see all orders.
+              </EmptyDescription>
+            </EmptyHeader>
+            <a className="grid-empty-link" href="/admin/orders">
+              Clear filters
+            </a>
+          </Empty>
         )}
         <GridPagination total={total} limit={limit} page={page} />
       </CardContent>
@@ -533,6 +608,7 @@ export const query = `
           text
         }
         customerEmail
+        customerFullName
         shipmentStatus {
           name
           code

@@ -24,7 +24,6 @@ import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
 import React from 'react';
 import { useClient } from 'urql';
-import { v4 as uuidv4 } from 'uuid';
 import './Editor.scss';
 
 async function loadEditorJS(): Promise<any> {
@@ -375,16 +374,17 @@ export const Editor: React.FC<EditorProps> = ({
     onError: (error: string) => void;
   } | null>(null);
   const { register, setValue } = useScopedFormContext();
+  const editorId = React.useId();
   const [rows, setRows] = React.useState(() => {
     const initial = value
-      ? value.map((row) => {
-          const rowId = `r__${uuidv4()}`;
+      ? value.map((row, rowIndex) => {
+          const rowId = `${editorId}-r-${rowIndex}`;
           return {
             ...row,
             className: getRowClasses(row.size),
             id: row.id || rowId,
-            columns: row.columns.map((column) => {
-              const colId = `c__${uuidv4()}`;
+            columns: row.columns.map((column, columnIndex) => {
+              const colId = `${editorId}-c-${rowIndex}-${columnIndex}`;
               return {
                 ...column,
                 className: getColumnClasses(column.size),
@@ -402,12 +402,12 @@ export const Editor: React.FC<EditorProps> = ({
     if (initial.length === 0) {
       return [
         {
-          id: `r__${uuidv4()}`,
+          id: `${editorId}-r-0`,
           size: 1,
           className: getRowClasses(1),
           columns: [
             {
-              id: `c__${uuidv4()}`,
+              id: `${editorId}-c-0-0`,
               size: 1,
               className: getColumnClasses(1),
               data: {}
@@ -419,6 +419,19 @@ export const Editor: React.FC<EditorProps> = ({
     return initial;
   });
   const editors = React.useRef({});
+  const mounted = React.useRef(false);
+
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      Object.values(editors.current).forEach((editor: any) => {
+        const instance = editor.instance;
+        instance?.isReady.then(() => instance.destroy?.()).catch(() => {});
+      });
+      editors.current = {};
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -448,6 +461,7 @@ export const Editor: React.FC<EditorProps> = ({
   };
 
   React.useEffect(() => {
+    let cancelled = false;
     const initEditors = async () => {
       const EditorJS = await loadEditorJS();
       const ImageTool = await loadEditorJSImage();
@@ -457,14 +471,16 @@ export const Editor: React.FC<EditorProps> = ({
       const ProductListTool = enableProductList
         ? await loadEditorJSProductList()
         : null;
+      if (cancelled) return;
       // Using RawToolWrapper instead of loading from @editorjs/raw
       setValue(name, rows);
       rows.forEach((row) => {
         row.columns.forEach((column) => {
-          if (!editors.current[column.id]) {
+          const holder = document.getElementById(column.id);
+          if (holder && !editors.current[column.id]) {
             editors.current[column.id] = {};
             editors.current[column.id].instance = new EditorJS({
-              holder: column.id,
+              holder,
               placeholder: _('Type / to see the available blocks'),
               minHeight: 0,
               tools: {
@@ -511,13 +527,16 @@ export const Editor: React.FC<EditorProps> = ({
               data: column.data,
               onChange: (api) => {
                 api.saver.save().then((outputData) => {
+                  if (!mounted.current) return;
                   // Save outputData to the column and trigger re-render
                   setRows((prevRows) => {
                     const newRows = [...prevRows];
                     const rowIdx = newRows.findIndex((r) => r.id === row.id);
+                    if (rowIdx === -1) return prevRows;
                     const columnIdx = newRows[rowIdx].columns.findIndex(
                       (c) => c.id === column.id
                     );
+                    if (columnIdx === -1) return prevRows;
                     newRows[rowIdx].columns[columnIdx].data = outputData;
                     // shouldDirty + shouldTouch: a content edit is a USER
                     // edit — dirty alone can't distinguish it from the
@@ -537,6 +556,9 @@ export const Editor: React.FC<EditorProps> = ({
       });
     };
     initEditors();
+    return () => {
+      cancelled = true;
+    };
   }, [rows.length]);
 
   const removeRow = (rowId) => {

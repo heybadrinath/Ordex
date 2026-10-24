@@ -49,16 +49,8 @@ export function Rates({ getTaxClasses, rates, addRateApi }: RatesProps) {
       </Table>
       <div className="mt-2">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>
-            <Button
-              variant="link"
-              onClick={(e) => {
-                e.preventDefault();
-                setDialogOpen(true);
-              }}
-            >
-              + {_('Add Rate')}
-            </Button>
+          <DialogTrigger render={<Button variant="link" />}>
+            + {_('Add Rate')}
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

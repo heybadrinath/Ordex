@@ -1,8 +1,15 @@
+import { demoAddress } from '@components/common/form/demoDefaults.js';
 import { AddressFields } from '@components/frontStore/customer/address/AddressFields.js';
 import { AddressFormLoadingSkeleton } from '@components/frontStore/customer/address/addressForm/AddressFormLoadingSkeleton.js';
-import { fieldName, initialValuesFor } from '@components/frontStore/customer/address/addressFormLogic.js';
+import {
+  fieldName,
+  initialValuesFor
+} from '@components/frontStore/customer/address/addressFormLogic.js';
 import { useAddressSchema } from '@components/frontStore/customer/address/useAddressSchema.js';
-import type { AddressSurface, ResolvedAddressSchema } from '@evershop/evershop/lib/address/types';
+import type {
+  AddressSurface,
+  ResolvedAddressSchema
+} from '@evershop/evershop/lib/address/types';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import type { AddressGraphql } from '@evershop/evershop/types/address';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -30,6 +37,7 @@ export type AddressCountryScope = 'SHIPPING' | 'SELL_TO' | 'ALL';
 
 export interface AddressFormProps {
   address?: AddressGraphql | null;
+  demoDefaults?: boolean;
   /** 'account' | 'shipping' | 'billing'. Default 'account'. */
   surface?: AddressSurface;
   /** '' (account), 'shippingAddress', 'billingAddress'. Default ''. */
@@ -40,6 +48,7 @@ export interface AddressFormProps {
 
 export default function Index({
   address = null,
+  demoDefaults = false,
   surface = 'account',
   namePrefix = '',
   countryScope
@@ -48,19 +57,28 @@ export default function Index({
     countryScope ?? (surface === 'shipping' ? 'SHIPPING' : 'SELL_TO');
   const { control, getValues, setValue } = useFormContext();
   const countryFieldName = fieldName(namePrefix, 'country');
-  const watchedCountry = useWatch({ control, name: countryFieldName }) as unknown;
+  const watchedCountry = useWatch({
+    control,
+    name: countryFieldName
+  }) as unknown;
   const [chosenCountry, setChosenCountry] = useState<string | null>(
     address?.country?.code ?? null
   );
   const country =
-    (watchedCountry !== undefined && watchedCountry !== null && String(watchedCountry)) ||
+    (watchedCountry !== undefined &&
+      watchedCountry !== null &&
+      String(watchedCountry)) ||
     chosenCountry;
 
   const [countriesResult] = useQuery({
     query: AddressFormCountriesQuery,
     variables: { scope }
   });
-  const { schema: fetchedSchema, fetching, error } = useAddressSchema(country, surface);
+  const {
+    schema: fetchedSchema,
+    fetching,
+    error
+  } = useAddressSchema(country, surface);
 
   // Keep the last schema while the next country's is in flight, so the form
   // stays mounted through a swap (an unmount would drop every value under
@@ -83,8 +101,11 @@ export default function Index({
   }, [schema?.country]);
 
   // One country offered → the form is for it (the renderer shows it read-only).
-  const offered = countriesResult.data?.countries as { value: string }[] | undefined;
-  const fixedCountry = offered && offered.length === 1 ? offered[0].value : null;
+  const offered = countriesResult.data?.countries as
+    | { value: string }[]
+    | undefined;
+  const fixedCountry =
+    offered && offered.length === 1 ? offered[0].value : null;
   useEffect(() => {
     if (!fixedCountry) return;
     if (String(getValues(countryFieldName) ?? '') !== fixedCountry) {
@@ -93,10 +114,19 @@ export default function Index({
     setChosenCountry(fixedCountry);
   }, [fixedCountry]);
 
-  const initialValues = useMemo(
-    () => (schema ? initialValuesFor(address, schema) : {}),
-    [address, schema]
-  );
+  const initialValues = useMemo(() => {
+    if (!schema) return {};
+    if (address) return initialValuesFor(address, schema);
+    if (!demoDefaults || schema.country !== 'IN') return {};
+    return Object.fromEntries(
+      schema.fields
+        .filter((field) => field.id in demoAddress)
+        .map((field) => [
+          field.id,
+          demoAddress[field.id as keyof typeof demoAddress]
+        ])
+    );
+  }, [address, schema, demoDefaults]);
 
   if (error || countriesResult.error) {
     return (
@@ -114,8 +144,13 @@ export default function Index({
   // at fault — say so instead of showing a country select with no options.
   if (surface === 'shipping' && countries.length === 0) {
     return (
-      <p className="address-form__notice text-sm text-destructive" role="status">
-        {_('Shipping is not available at the moment. Please contact us to complete your order.')}
+      <p
+        className="address-form__notice text-sm text-destructive"
+        role="status"
+      >
+        {_(
+          'Shipping is not available at the moment. Please contact us to complete your order.'
+        )}
       </p>
     );
   }

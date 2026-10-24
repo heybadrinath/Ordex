@@ -6,7 +6,8 @@ import { useFormContext } from 'react-hook-form';
 const FormButtons: React.FC<{
   formId: string;
   cancelUrl: string;
-}> = ({ cancelUrl, formId }) => {
+  submitLabel?: string;
+}> = ({ cancelUrl, formId, submitLabel = 'Save changes' }) => {
   const {
     formState: { isSubmitting }
   } = useFormContext();
@@ -14,7 +15,7 @@ const FormButtons: React.FC<{
   return (
     <div className="form-submit-button flex border-t border-border mt-4 pt-4 justify-between">
       <Button
-        variant="destructive"
+        variant="outline"
         onClick={() => {
           window.location.href = cancelUrl;
         }}
@@ -29,7 +30,7 @@ const FormButtons: React.FC<{
         }}
         isLoading={isSubmitting}
       >
-        {_('Save')}
+        {_(submitLabel)}
       </Button>
     </div>
   );

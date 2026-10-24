@@ -4,11 +4,11 @@ import './Layout.scss';
 
 export default function OrderEdit() {
   return (
-    <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
+    <div className="order-detail-layout grid grid-cols-3 gap-x-5 grid-flow-row">
       <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
         <Area id="leftSide" noOuter />
       </div>
-      <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
+      <div className="order-detail-sidebar col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
         <Area id="rightSide" noOuter />
       </div>
     </div>

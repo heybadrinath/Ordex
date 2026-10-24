@@ -1,86 +1,7 @@
-import { TableCell } from '@components/common/ui/Table.js';
+import { TableHead } from '@components/common/ui/Table.js';
+import { _ } from '@evershop/evershop/lib/locale/translate/_';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import React from 'react';
-
-function Up() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 17 23"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M1 8.5L8.5 1L16 8.5"
-        stroke="black"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 14L8.5 21.5L1 14"
-        stroke="#e1e3e5"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function Down() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 17 23"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M1 8.5L8.5 1L16 8.5"
-        stroke="#e1e3e5"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 14L8.5 21.5L1 14"
-        stroke="black"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function None() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 17 23"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M1 8.5L8.5 1L16 8.5"
-        stroke="#e1e3e5"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 14L8.5 21.5L1 14"
-        stroke="#e1e3e5"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export interface SortableHeaderProps {
   title: string;
@@ -93,49 +14,44 @@ export function SortableHeader({
   name,
   currentFilters = []
 }: SortableHeaderProps) {
-  const [currentDirection] = React.useState(() => {
-    const currentOrderBy = currentFilters.find((filter) => filter.key === 'ob');
-    if (!currentOrderBy || currentOrderBy.value !== name) {
-      return null;
-    } else {
-      return (
-        currentFilters.find((filter) => filter.key === 'od')?.value || 'asc'
-      );
-    }
-  });
+  const currentOrderBy = currentFilters.find((filter) => filter.key === 'ob');
+  const currentDirection =
+    currentOrderBy?.value === name
+      ? currentFilters.find((filter) => filter.key === 'od')?.value || 'asc'
+      : null;
   const onChange = () => {
     const url = new URL(window.location.href);
     url.searchParams.set('ob', name);
-    // Get the current direction by checking the currentFilters
-    const currentDirection = currentFilters.find(
-      (filter) => filter.key === 'od'
-    );
-    if (!currentDirection || currentDirection.value === 'asc') {
-      url.searchParams.set('od', 'desc');
-    } else {
-      url.searchParams.set('od', 'asc');
-    }
+    const direction = currentFilters.find((filter) => filter.key === 'od');
+    url.searchParams.set('od', direction?.value === 'desc' ? 'asc' : 'desc');
     window.location.href = url.toString();
   };
+  const Icon =
+    currentDirection === 'asc'
+      ? ArrowUp
+      : currentDirection === 'desc'
+      ? ArrowDown
+      : ArrowUpDown;
 
   return (
-    <TableCell>
-      <div className="table-header flex justify-start gap-2 content-center">
-        <div className="font-medium uppercase text-xs">
-          <span>{title}</span>
-        </div>
-        <div className="sort flex items-center">
-          <button type="button" onClick={onChange}>
-            {currentDirection === 'asc' ? (
-              <Down />
-            ) : currentDirection === 'desc' ? (
-              <Up />
-            ) : (
-              <None />
-            )}
-          </button>
-        </div>
-      </div>
-    </TableCell>
+    <TableHead
+      aria-sort={
+        currentDirection === 'asc'
+          ? 'ascending'
+          : currentDirection === 'desc'
+          ? 'descending'
+          : 'none'
+      }
+    >
+      <button
+        type="button"
+        className="table-sort-button"
+        aria-label={_('Sort by ${column}', { column: title })}
+        onClick={onChange}
+      >
+        <span>{title}</span>
+        <Icon size={14} aria-hidden="true" />
+      </button>
+    </TableHead>
   );
 }

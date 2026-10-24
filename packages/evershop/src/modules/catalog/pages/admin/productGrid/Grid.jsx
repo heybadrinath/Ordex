@@ -1,7 +1,15 @@
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription
+} from '@components/common/ui/Empty.js';
+import { Package, ArrowUpRight, Search } from 'lucide-react';
+import { GridViews } from '@components/admin/GridViews.js';
 import { GridPagination } from '@components/admin/grid/GridPagination.js';
 import { DummyColumnHeader } from '@components/admin/grid/header/Dummy';
 import { SortableHeader } from '@components/admin/grid/header/Sortable.js';
-import { Thumbnail } from '@components/admin/grid/Thumbnail.js';
 import { Status } from '@components/admin/Status.js';
 import Area from '@components/common/Area';
 import { Form } from '@components/common/form/Form.js';
@@ -158,7 +166,7 @@ function Actions({ products = [], selectedIds = [], newProductUrl }) {
   ];
 
   return (
-    <TableRow>
+    <TableRow className="grid-bulk-actions">
       {selectedIds.length === 0 && null}
       {selectedIds.length > 0 && (
         <TableCell style={{ borderTop: 0 }} colSpan="100">
@@ -211,7 +219,21 @@ export default function ProductGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <Card>
+    <Card className="workspace-grid">
+      <GridViews
+        baseUrl="/admin/products"
+        filterKey="status"
+        views={[
+          { label: 'All products' },
+          { label: 'Active', value: '1' },
+          { label: 'Disabled', value: '0' }
+        ]}
+        currentFilters={currentFilters}
+        total={total}
+        unit="Products"
+        selected={selectedRows.length}
+        onClearSelection={() => setSelectedRows([])}
+      />
       <CardHeader className="flex justify-between">
         <Form submitBtn={false} id="productGridFilter">
           <div className="flex gap-5 justify-center items-center">
@@ -223,8 +245,10 @@ export default function ProductGrid({
                   component: {
                     default: () => (
                       <InputField
+                        prefixIcon={<Search size={16} />}
                         name="keyword"
-                        placeholder={_('Search')}
+                        placeholder={_('Search products')}
+                        aria-label={_('Search products')}
                         defaultValue={
                           currentFilters.find((f) => f.key === 'keyword')?.value
                         }
@@ -232,6 +256,7 @@ export default function ProductGrid({
                           // If the user press enter, we should submit the form
                           if (e.key === 'Enter') {
                             const url = new URL(document.location);
+                            url.searchParams.delete('page');
                             const keyword = e.target?.value;
                             if (keyword) {
                               url.searchParams.set('keyword', keyword);
@@ -255,6 +280,7 @@ export default function ProductGrid({
                         }
                         onValueChange={(value) => {
                           const url = new URL(document.location);
+                          url.searchParams.delete('page');
                           url.searchParams.set('status', value);
                           window.location.href = url.href;
                         }}
@@ -283,6 +309,7 @@ export default function ProductGrid({
                         }
                         onValueChange={(value) => {
                           const url = new URL(document.location);
+                          url.searchParams.delete('page');
                           url.searchParams.set('type', value);
                           window.location.href = url.href;
                         }}
@@ -293,7 +320,9 @@ export default function ProductGrid({
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>{_('Product type')}</SelectLabel>
-                            <SelectItem value="simple">{_('Simple')}</SelectItem>
+                            <SelectItem value="simple">
+                              {_('Simple')}
+                            </SelectItem>
                             <SelectItem value="configurable">
                               {_('Configurable')}
                             </SelectItem>
@@ -315,6 +344,7 @@ export default function ProductGrid({
             className={'hover:cursor-pointer'}
             onClick={() => {
               const url = new URL(document.location);
+              url.searchParams.delete('page');
               url.search = '';
               window.location.href = url.href;
             }}
@@ -329,6 +359,15 @@ export default function ProductGrid({
             <TableRow>
               <TableHead>
                 <Checkbox
+                  aria-label="Select all products on this page"
+                  checked={
+                    products.length > 0 &&
+                    selectedRows.length === products.length
+                  }
+                  indeterminate={
+                    selectedRows.length > 0 &&
+                    selectedRows.length < products.length
+                  }
                   onCheckedChange={(checked) => {
                     if (checked) {
                       setSelectedRows(products.map((p) => p.uuid));
@@ -345,22 +384,8 @@ export default function ProductGrid({
                   {
                     component: {
                       default: () => (
-                        <TableHead>
-                          <div className="table-header id-header">
-                            <div className="font-medium uppercase text-xs">
-                              <span>{_('Thumbnail')}</span>
-                            </div>
-                          </div>
-                        </TableHead>
-                      )
-                    },
-                    sortOrder: 5
-                  },
-                  {
-                    component: {
-                      default: () => (
                         <SortableHeader
-                          title={_('Name')}
+                          title={_('Product')}
                           name="name"
                           currentFilters={currentFilters}
                         />
@@ -379,12 +404,6 @@ export default function ProductGrid({
                       )
                     },
                     sortOrder: 15
-                  },
-                  {
-                    component: {
-                      default: () => <DummyColumnHeader title={_('SKU')} />
-                    },
-                    sortOrder: 20
                   },
                   {
                     component: {
@@ -412,6 +431,9 @@ export default function ProductGrid({
                   }
                 ]}
               />
+              <TableHead>
+                <span className="sr-only">Open product</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -426,6 +448,7 @@ export default function ProductGrid({
                 <TableCell>
                   <div className="form-field mb-0">
                     <Checkbox
+                      aria-label={`Select product ${p.name}`}
                       checked={selectedRows.includes(p.uuid)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -449,17 +472,11 @@ export default function ProductGrid({
                     {
                       component: {
                         default: () => (
-                          <Thumbnail src={p.image?.url} name={p.name} />
-                        )
-                      },
-                      sortOrder: 5
-                    },
-                    {
-                      component: {
-                        default: () => (
                           <ProductNameRow
                             id="name"
                             name={p.name}
+                            sku={p.sku}
+                            image={p.image?.url}
                             url={p.editUrl}
                           />
                         )
@@ -469,20 +486,35 @@ export default function ProductGrid({
                     {
                       component: {
                         default: () => (
-                          <TableCell>{p.price?.regular.text}</TableCell>
+                          <TableCell className="record-amount">
+                            {p.price?.regular.text}
+                          </TableCell>
                         )
                       },
                       sortOrder: 15
                     },
                     {
                       component: {
-                        default: () => <TableCell>{p.sku}</TableCell>
-                      },
-                      sortOrder: 20
-                    },
-                    {
-                      component: {
-                        default: () => <TableCell>{p.inventory?.qty}</TableCell>
+                        default: () => (
+                          <TableCell>
+                            <a
+                              href={`${p.editUrl}#product-inventory`}
+                              aria-label={`Edit inventory for ${p.name}`}
+                            >
+                              <span
+                                className={`table-stock ${
+                                  p.inventory?.qty === 0 ? 'is-empty' : ''
+                                }`}
+                              >
+                                <Package size={14} aria-hidden="true" />{' '}
+                                <span>
+                                  <b>{p.inventory?.qty ?? '—'}</b>
+                                  <small>on hand</small>
+                                </span>
+                              </span>
+                            </a>
+                          </TableCell>
+                        )
                       },
                       sortOrder: 25
                     },
@@ -496,14 +528,34 @@ export default function ProductGrid({
                     }
                   ]}
                 />
+                <TableCell>
+                  <a
+                    className="record-open"
+                    href={p.editUrl}
+                    aria-label={`Open ${p.name}`}
+                  >
+                    <ArrowUpRight size={15} />
+                  </a>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {products.length === 0 && (
-          <div className="flex w-full justify-center mt-2">
-            {_('There is no product to display')}
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Package size={24} />
+              </EmptyMedia>
+              <EmptyTitle>No products in this view</EmptyTitle>
+              <EmptyDescription>
+                Try another search or clear your filters to see all products.
+              </EmptyDescription>
+            </EmptyHeader>
+            <a className="grid-empty-link" href="/admin/products">
+              Clear filters
+            </a>
+          </Empty>
         )}
         <GridPagination total={total} limit={limit} page={page} />
       </CardContent>

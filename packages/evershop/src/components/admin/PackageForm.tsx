@@ -82,6 +82,7 @@ export function PackageForm({
   return (
     <Form
       id="packageForm"
+      demoProfile={formMethod === 'POST' ? 'package' : undefined}
       method={formMethod}
       action={saveApi}
       submitBtn={false}

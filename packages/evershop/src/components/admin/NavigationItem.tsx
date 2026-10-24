@@ -14,12 +14,16 @@ export function NavigationItem({ Icon, url, title }: NavigationItemProps) {
     const checkActive = () => {
       const currentUrl = window.location.href;
       const currentUrlObj = new URL(currentUrl);
-      const menuUrlObj = new URL(url);
+      const menuUrlObj = new URL(url, window.location.origin);
 
       const currentPath = currentUrlObj.pathname;
       const menuPath = menuUrlObj.pathname;
 
-      if (currentPath === menuPath) {
+      if (
+        currentPath === menuPath ||
+        (menuPath === '/admin/orders' &&
+          currentPath.startsWith('/admin/order/'))
+      ) {
         setIsActive(true);
         return;
       }
@@ -27,14 +31,8 @@ export function NavigationItem({ Icon, url, title }: NavigationItemProps) {
       const menuSegments = menuPath.split('/').filter(Boolean);
 
       if (menuSegments.length >= 2 && currentPath.startsWith(menuPath + '/')) {
-        const remainingPath = currentPath.substring(menuPath.length + 1);
-        const nextSegment = remainingPath.split('/')[0];
-
-        const actionWords = ['new', 'create', 'add'];
-        if (!actionWords.includes(nextSegment.toLowerCase())) {
-          setIsActive(true);
-          return;
-        }
+        setIsActive(true);
+        return;
       }
 
       setIsActive(false);
@@ -45,7 +43,11 @@ export function NavigationItem({ Icon, url, title }: NavigationItemProps) {
 
   return (
     <li className={isActive ? 'active nav-item' : 'nav-item'}>
-      <a href={url} className="flex justify-left">
+      <a
+        href={url}
+        className="flex justify-left"
+        aria-current={isActive ? 'page' : undefined}
+      >
         <i className="menu-icon">
           <Icon />
         </i>

@@ -20,7 +20,7 @@ function TaxClass({ taxClass, getTaxClasses }: TaxClassProps) {
       </div>
       <div className="divide-y border rounded border-divider">
         <div className="flex justify-start items-center border-divider mt-5">
-          <div className="grow px-2">
+          <div className="grow min-w-0 px-2">
             <Rates
               rates={taxClass.rates}
               addRateApi={taxClass.addRateApi}

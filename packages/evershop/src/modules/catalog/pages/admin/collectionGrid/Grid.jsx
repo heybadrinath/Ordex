@@ -1,3 +1,5 @@
+import { DirectoryHeading } from '@components/admin/GridViews.js';
+import { Search } from 'lucide-react';
 import { GridPagination } from '@components/admin/grid/GridPagination';
 import { DummyColumnHeader } from '@components/admin/grid/header/Dummy';
 import { SortableHeader } from '@components/admin/grid/header/Sortable';
@@ -27,6 +29,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { CollectionNameRow } from './rows/CollectionNameRow.js';
+import { CollectionPreview } from './rows/CollectionPreview.js';
 
 function Actions({ collections = [], selectedIds = [] }) {
   const { openAlert, closeAlert } = useAlertContext();
@@ -118,13 +121,16 @@ export default function CollectionGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <div className="w-2/3" style={{ margin: '0 auto' }}>
-      <Card>
+    <div className="w-full" style={{ margin: '0 auto' }}>
+      <Card className="workspace-grid collection-grid">
+        <DirectoryHeading title="Collections" total={total} />
         <CardHeader className="flex justify-between">
           <Form submitBtn={false} id="collectionGridFilter">
             <InputField
+              prefixIcon={<Search size={16} />}
               name="name"
-              placeholder={_('Search')}
+              placeholder={_('Search collections')}
+              aria-label={_('Search collections')}
               defaultValue={currentFilters.find((f) => f.key === 'name')?.value}
               onKeyPress={(e) => {
                 // If the user press enter, we should submit the form
@@ -183,7 +189,7 @@ export default function CollectionGrid({
                       component: {
                         default: () => (
                           <DummyColumnHeader
-                            title={_('ID')}
+                            title={_('Preview')}
                             id="collectionId"
                             currentFilters={currentFilters}
                           />
@@ -214,6 +220,12 @@ export default function CollectionGrid({
                         )
                       },
                       sortOrder: 15
+                    },
+                    {
+                      component: {
+                        default: () => <TableHead>Products</TableHead>
+                      },
+                      sortOrder: 20
                     }
                   ]}
                 />
@@ -251,7 +263,9 @@ export default function CollectionGrid({
                       {
                         component: {
                           default: () => (
-                            <TableCell>{c.collectionId.toString()}</TableCell>
+                            <TableCell>
+                              <CollectionPreview products={c.products?.items} />
+                            </TableCell>
                           )
                         },
                         sortOrder: 5
@@ -270,9 +284,26 @@ export default function CollectionGrid({
                       },
                       {
                         component: {
-                          default: () => <TableCell>{c.code}</TableCell>
+                          default: () => (
+                            <TableCell>
+                              <span className="catalog-code">{c.code}</span>
+                            </TableCell>
+                          )
                         },
                         sortOrder: 15
+                      },
+                      {
+                        component: {
+                          default: () => (
+                            <TableCell>
+                              <span className="catalog-count">
+                                {c.products?.total ?? '—'}
+                              </span>{' '}
+                              products
+                            </TableCell>
+                          )
+                        },
+                        sortOrder: 20
                       }
                     ]}
                   />
@@ -325,6 +356,7 @@ export const query = `
     collections (filters: $filters) {
       items {
         collectionId
+        products(filters: [{key: "limit", operation: eq, value: "3"}]) { total items { image { url } } }
         uuid
         name
         code

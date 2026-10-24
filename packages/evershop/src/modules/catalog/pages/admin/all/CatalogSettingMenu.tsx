@@ -1,3 +1,4 @@
+// Modified for Ordex on 20 October 2026.
 import { SettingMenuItem } from '@components/admin/SettingMenuItem.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
@@ -13,7 +14,7 @@ export default function CatalogSettingMenu({
     <SettingMenuItem
       url={catalogSettingUrl}
       title={_('Catalog')}
-      description={_('Product listing and image settings')}
+      description={_('Listings, images and recommendations')}
     />
   );
 }

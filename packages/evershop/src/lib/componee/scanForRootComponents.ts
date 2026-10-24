@@ -1,8 +1,11 @@
+// Modified for Ordex on 19 October 2026.
 import { join, normalize } from 'path';
 import fg from 'fast-glob';
 import { getEnabledExtensions } from '../../bin/extension/index.js';
 import { CONSTANTS } from '../helpers.js';
 import { getConfig } from '../util/getConfig.js';
+import { getCoreModules } from '../../bin/lib/loadModules.js';
+import { isComponentEnabled } from '../util/featureScope.js';
 
 /**
  * Scans for files matching a glob pattern within a list of specified locations.
@@ -14,7 +17,9 @@ import { getConfig } from '../util/getConfig.js';
 export async function scanForRootComponents(callback): Promise<string[]> {
   const pattern = '/[A-Z]*.js';
   const extensions = getEnabledExtensions();
-  const locations = [join(CONSTANTS.MODULESPATH, '/*/pages/*/*/')];
+  const locations = getCoreModules().map((module) =>
+    join(module.path, '/pages/*/*/')
+  );
   for (const ext of extensions) {
     locations.push(join(ext.path, 'pages/*/*/'));
   }
@@ -26,11 +31,13 @@ export async function scanForRootComponents(callback): Promise<string[]> {
 
   const globPatterns = normalizedLocations.map((loc) => `${loc}/${pattern}`);
 
-  const files = await fg(globPatterns, {
-    absolute: true,
-    onlyFiles: true,
-    unique: true
-  });
+  const files = (
+    await fg(globPatterns, {
+      absolute: true,
+      onlyFiles: true,
+      unique: true
+    })
+  ).filter(isComponentEnabled);
   if (callback) {
     await callback(files);
   }

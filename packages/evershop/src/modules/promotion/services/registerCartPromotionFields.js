@@ -1,4 +1,6 @@
+// Modified for Ordex on 19 October 2026.
 import { select } from '@evershop/postgres-query-builder';
+import { isRouteEnabled } from '../../../lib/util/featureScope.js';
 import { pool } from '../../../lib/postgres/connection.js';
 import { toPrice } from '../../checkout/services/toPrice.js';
 import { getPriceIncludingTax } from '../../tax/services/taxSettings.js';
@@ -13,6 +15,7 @@ export function registerCartPromotionFields(fields) {
         key: 'coupon',
         resolvers: [
           async function resolver(coupon) {
+            if (!isRouteEnabled('couponApply')) return null;
             if (coupon) {
               const check = await validateCoupon(this, coupon);
               if (check === true) {

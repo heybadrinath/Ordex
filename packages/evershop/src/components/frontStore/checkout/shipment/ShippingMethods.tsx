@@ -216,12 +216,11 @@ export function ShippingMethods({
                             <div className="flex items-center gap-2">
                               <RadioGroupItem
                                 id={`shipping-method-${method.code}`}
+                                aria-label={method.name}
                                 value={method.code}
                                 disabled={isProcessing}
                               />
-                              <span className="select-none">
-                                {method.name}
-                              </span>
+                              <span className="select-none">{method.name}</span>
                             </div>
                           </ItemTitle>
                           {method.description && (

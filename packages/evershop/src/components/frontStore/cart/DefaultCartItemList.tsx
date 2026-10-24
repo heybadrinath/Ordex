@@ -66,9 +66,6 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                     >
                       {row.productName}
                     </a>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      {_('SKU ${sku}', { sku: row.productSku })}
-                    </div>
                     {row.variantOptions?.map((option) => (
                       <div
                         key={option.optionId}
@@ -78,7 +75,10 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                       </div>
                     ))}
                     {row.errors?.map((error, index) => (
-                      <div key={index} className="mt-0.5 text-xs text-destructive">
+                      <div
+                        key={index}
+                        className="mt-0.5 text-xs text-destructive"
+                      >
                         {error}
                       </div>
                     ))}
@@ -97,9 +97,13 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                     {({ quantity, increase, decrease }) => (
                       <div className="inline-flex items-center rounded-md border border-border">
                         <button
+                          type="button"
+                          aria-label={_('Decrease quantity for ${product}', {
+                            product: row.productName
+                          })}
                           onClick={decrease}
                           disabled={loading || quantity <= 1}
-                          className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                          className="flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-40"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
@@ -107,9 +111,13 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                           {quantity}
                         </span>
                         <button
+                          type="button"
+                          aria-label={_('Increase quantity for ${product}', {
+                            product: row.productName
+                          })}
                           onClick={increase}
                           disabled={loading}
-                          className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                          className="flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-40"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
@@ -118,6 +126,9 @@ export const DefaultCartItemList: React.FC<CartItemsTableProps> = ({
                   </ItemQuantity>
                   <button
                     type="button"
+                    aria-label={_('Remove ${product} from cart', {
+                      product: row.productName
+                    })}
                     onClick={(e) => {
                       e.preventDefault();
                       onRemoveItem?.(row.cartItemId);

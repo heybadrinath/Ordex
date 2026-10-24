@@ -22,8 +22,8 @@ export const CreateVariant: React.FC<{
   return (
     <div className="mt-3">
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger>
-          <Button variant={'outline'}>{_('Add Variant')}</Button>
+        <DialogTrigger render={<Button variant="outline" />}>
+          {_('Add Variant')}
         </DialogTrigger>
         <DialogContent className={'sm:max-w-212.5'}>
           <DialogHeader>

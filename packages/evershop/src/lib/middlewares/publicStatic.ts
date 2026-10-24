@@ -1,9 +1,11 @@
+// Modified for Ordex on 19 October 2026.
 import fs from 'fs/promises';
 import { join } from 'path';
 import staticMiddleware from 'serve-static';
 import { EvershopRequest } from '../../types/request.js';
 import { EvershopResponse } from '../../types/response.js';
 import { CONSTANTS } from '../helpers.js';
+import { getConfig } from '../util/getConfig.js';
 
 export default async function publicStatic(
   request: EvershopRequest,
@@ -13,6 +15,13 @@ export default async function publicStatic(
   // Get the request path
   const { path } = request;
   try {
+    // Disabled sitemaps must not leak through previously generated static files.
+    if (
+      !getConfig('sitemap.enabled', true) &&
+      /^\/sitemap(?:-[a-z0-9-]+)?\.xml$/i.test(decodeURIComponent(path))
+    ) {
+      return next();
+    }
     if (!path.includes('.')) {
       throw new Error('No file extension');
     }

@@ -8,6 +8,10 @@ Project changes add an Ordex visual theme, synthetic demonstration fixtures and 
 
 ## Modified upstream files
 
+- `packages/evershop/src/modules/catalog/pages/admin/productEdit+productNew/General.tsx`
+
+- `packages/evershop/src/lib/middlewares/publicStatic.ts`
+
 - `packages/evershop/src/modules/checkout/pages/frontStore/checkoutSuccess/CustomerInfo.tsx`
 - `packages/evershop/src/components/frontStore/checkout/CheckoutContext.tsx`
 - `packages/evershop/src/components/frontStore/checkout/payment/BillingAddress.tsx`
@@ -29,3 +33,40 @@ Project changes add an Ordex visual theme, synthetic demonstration fixtures and 
 - `packages/evershop/src/components/frontStore/customer/LoginForm.tsx`
 - `packages/evershop/src/components/frontStore/customer/AccountNav.tsx`
 - `packages/evershop/src/bin/lib/bootstrap/migrate.js`
+- `packages/evershop/src/bin/lib/loadModules.js`
+- `packages/evershop/src/bin/lib/startUp.js`
+- `packages/evershop/src/components/frontStore/cart/CartTotalSummary.tsx`
+- `packages/evershop/src/lib/componee/getComponentsByRoute.ts`
+- `packages/evershop/src/lib/componee/scanForRootComponents.ts`
+- `packages/evershop/src/lib/router/registerAdminRoute.js`
+- `packages/evershop/src/lib/router/registerFrontStoreRoute.js`
+- `packages/evershop/src/modules/graphql/services/buildResolvers.js`
+- `packages/evershop/src/modules/graphql/services/buildTypes.js`
+- `packages/evershop/src/modules/pageBuilder/services/loadActiveOps.ts`
+- `packages/evershop/src/modules/promotion/graphql/types/Coupon/Coupon.resolvers.js`
+- `packages/evershop/src/modules/promotion/services/registerCartPromotionFields.js`
+- `packages/evershop/src/components/frontStore/catalog/ProductListItemRender.tsx`
+- `packages/evershop/src/components/frontStore/customer/AccountHeader.tsx`
+- `packages/evershop/src/modules/cms/pages/admin/all/Navigation.jsx`
+- `packages/evershop/src/components/frontStore/customer/OrderHistory.tsx`
+- `packages/evershop/src/modules/customer/pages/frontStore/orderList/CustomerOrders.tsx`
+- `packages/evershop/src/components/frontStore/catalog/Media.tsx`
+- `packages/evershop/src/modules/catalog/pages/admin/productGrid/PageHeading.tsx`
+- `packages/evershop/src/modules/customer/pages/frontStore/account/AccountRecentOrders.tsx`
+
+- `packages/evershop/src/components/admin/SettingMenu.tsx`
+- `packages/evershop/src/components/admin/SettingMenuItem.tsx`
+- `packages/evershop/src/modules/setting/pages/admin/storeSetting/StoreSetting.tsx`
+- `packages/evershop/src/modules/setting/pages/admin/customerSetting/CustomerSetting.tsx`
+- `packages/evershop/src/modules/catalog/pages/admin/catalogSetting/CatalogSetting.tsx`
+- `packages/evershop/src/modules/checkout/pages/admin/shippingSetting/ShippingSetting.tsx`
+- `packages/evershop/src/modules/checkout/pages/admin/shippingProviders/ShippingProviders.tsx`
+- `packages/evershop/src/modules/tax/pages/admin/taxSetting/TaxSetting.tsx`
+- `packages/evershop/src/modules/setting/pages/admin/all/StoreSettingMenu.tsx`
+- `packages/evershop/src/modules/setting/pages/admin/all/CustomerSettingMenu.tsx`
+- `packages/evershop/src/modules/catalog/pages/admin/all/CatalogSettingMenu.tsx`
+- `packages/evershop/src/modules/checkout/pages/admin/all/ShippingSettingMenu.tsx`
+- `packages/evershop/src/modules/checkout/pages/admin/all/ShippingProvidersMenu.tsx`
+- `packages/evershop/src/modules/tax/pages/admin/all/TaxSettingMenu.tsx`
+
+- `packages/evershop/src/modules/setting/tests/unit/customerSettingPage.test.tsx`

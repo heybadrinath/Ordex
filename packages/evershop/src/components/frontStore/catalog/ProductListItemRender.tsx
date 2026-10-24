@@ -1,4 +1,6 @@
+// Modified for Ordex on 19 October 2026.
 import { Image } from '@components/common/Image.js';
+import { ArrowUpRight } from 'lucide-react';
 import { ProductNoThumbnail } from '@components/common/ProductNoThumbnail.js';
 import { ProductData } from '@components/frontStore/catalog/ProductContext.js';
 import { ProductListAddToCart } from '@components/frontStore/catalog/ProductListAddToCart.js';
@@ -59,7 +61,7 @@ export const ProductListItemRender = ({
 
             <div className="product__list__price mb-2">
               {product.price.special &&
-              product.price.regular < product.price.special ? (
+              product.price.special.value < product.price.regular.value ? (
                 <div className="flex items-center gap-2">
                   <span
                     className="regular-price text-sm"
@@ -95,7 +97,7 @@ export const ProductListItemRender = ({
           </div>
 
           {showAddToCart && (
-            <div className="product__list__actions invisible transform translate-y-2 transition-all duration-300 ease-in-out group-hover:visible group-hover:translate-y-0 group-focus-within:visible group-focus-within:translate-y-0 [@media(hover:none)]:visible [@media(hover:none)]:translate-y-0">
+            <div className="product__list__actions">
               {customAddToCartRenderer ? (
                 customAddToCartRenderer(product)
               ) : (
@@ -112,14 +114,30 @@ export const ProductListItemRender = ({
     <div className="product__list__item__inner group overflow-hidden">
       <a href={product.url} className="product__list__link block">
         <div className="product__list__image overflow-hidden flex w-full justify-center">
+          {!product.inventory.isInStock && (
+            <span className="product-card-tag">Sold out</span>
+          )}
+          {product.inventory.isInStock &&
+            product.price.special &&
+            product.price.special.value < product.price.regular.value && (
+              <span className="product-card-tag sale-tag">
+                Save{' '}
+                {Math.round(
+                  (1 -
+                    product.price.special.value / product.price.regular.value) *
+                    100
+                )}
+                %
+              </span>
+            )}
           {product.image && (
             <Image
               src={product.image.url}
-              alt={product.image.alt || product.name}
+              alt=""
               width={imageWidth || 120}
               height={imageHeight || 120}
               sizes="(max-width: 768px) 100vw, 33vw" // Assume 3 columns on larger screens
-              className="transition-transform duration-500 ease-in-out group-hover:scale-110"
+              className="product-card-photograph"
             />
           )}
           {!product.image && (
@@ -128,27 +146,32 @@ export const ProductListItemRender = ({
         </div>
         <div className="product__list__info mt-3">
           <h3 className="product__list__name h5 font-medium">{product.name}</h3>
-          <div className="product__list__price">
-            {product.price.special &&
-            product.price.regular < product.price.special ? (
-              <>
+          <div className="product-card-bottom">
+            <div className="product__list__price">
+              {product.price.special &&
+              product.price.special.value < product.price.regular.value ? (
+                <>
+                  <span className="regular-price">
+                    {product.price.regular.text}
+                  </span>
+                  <span className="special-price">
+                    {product.price.special.text}
+                  </span>
+                </>
+              ) : (
                 <span className="regular-price">
                   {product.price.regular.text}
                 </span>
-                <span className="special-price">
-                  {product.price.special.text}
-                </span>
-              </>
-            ) : (
-              <span className="regular-price">
-                {product.price.regular.text}
-              </span>
-            )}
+              )}
+            </div>
+            <span className="product-card-arrow" aria-hidden="true">
+              <ArrowUpRight size={16} />
+            </span>
           </div>
         </div>
       </a>
       {showAddToCart && (
-        <div className="product__list__actions p-4 invisible transform translate-y-4 transition-all duration-300 ease-in-out group-hover:visible group-hover:translate-y-0 group-focus-within:visible group-focus-within:translate-y-0 [@media(hover:none)]:visible [@media(hover:none)]:translate-y-0">
+        <div className="product__list__actions p-4">
           {customAddToCartRenderer ? (
             customAddToCartRenderer(product)
           ) : (

@@ -1,3 +1,5 @@
+// Modified for Ordex on 19 October 2026.
+import { isRouteEnabled } from '../util/featureScope.js';
 import { addRoute } from './Router.js';
 
 /**
@@ -19,6 +21,7 @@ export function registerFrontStoreRoute(
   access = 'private',
   editable = false
 ) {
+  if (!isRouteEnabled(id)) return;
   // const route = validateRoute(id, method, path);
   const route = {
     id: String(id),

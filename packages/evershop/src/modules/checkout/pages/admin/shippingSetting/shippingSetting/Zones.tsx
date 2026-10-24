@@ -1,4 +1,5 @@
 import Spinner from '@components/admin/Spinner.jsx';
+import { DeliveryNetwork } from '@components/admin/SettingsPreviews.js';
 import { Button } from '@components/common/ui/Button.js';
 import {
   Dialog,
@@ -87,8 +88,7 @@ export function Zones({
   if (fetching) return <Spinner width={'2rem'} height={'2rem'} />;
   if (error)
     return <div className="text-destructive">{_('Error loading zones')}</div>;
-  if (!data || !data.shippingZones)
-    return <div>{_('No zones found')}</div>;
+  if (!data || !data.shippingZones) return <div>{_('No zones found')}</div>;
 
   const reload = () => reexecuteQuery({ requestPolicy: 'network-only' });
   const createShippingZoneApi =
@@ -105,6 +105,10 @@ export function Zones({
 
   return (
     <>
+      <DeliveryNetwork
+        zones={data.shippingZones}
+        destinations={(data.shippingCountries ?? []).length}
+      />
       {/* Spec § 3.13: the sell-to list sits above the zones it interacts with. */}
       <SellToCountriesCard
         zones={data.shippingZones}
@@ -121,17 +125,19 @@ export function Zones({
         </div>
       )}
       {data.shippingZones.map((zone: ShippingZone) => (
-        <Zone
-          zone={zone}
-          reload={reload}
-          key={zone.uuid}
-          warnings={warnings.filter((w) => w.sourceId === zone.uuid)}
-        />
+        <section id={`zone-${zone.uuid}`} key={zone.uuid}>
+          <Zone
+            zone={zone}
+            reload={reload}
+            key={zone.uuid}
+            warnings={warnings.filter((w) => w.sourceId === zone.uuid)}
+          />
+        </section>
       ))}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <div className="flex justify-end pr-5">
-          <DialogTrigger>
-            <Button>{_('Create New Zone')}</Button>
+          <DialogTrigger render={<Button />}>
+            {_('Create New Zone')}
           </DialogTrigger>
         </div>
         <DialogContent>

@@ -1,4 +1,5 @@
 import Spinner from '@components/admin/Spinner.jsx';
+import { attributeSwatches } from '@components/admin/attributeSwatches.js';
 import { InputField } from '@components/common/form/InputField.js';
 import { RadioGroupField } from '@components/common/form/RadioGroupField.js';
 import { Button } from '@components/common/ui/Button.js';
@@ -18,7 +19,12 @@ import { InputGroup } from '@components/common/ui/InputGroup.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import { PlusCircle } from 'lucide-react';
 import React from 'react';
-import { useFormContext, Controller, useFieldArray } from 'react-hook-form';
+import {
+  useFormContext,
+  Controller,
+  useFieldArray,
+  useWatch
+} from 'react-hook-form';
 import Select from 'react-select';
 import { useQuery } from 'urql';
 import { v4 as uuidv4 } from 'uuid';
@@ -171,6 +177,10 @@ const Options: React.FC<{
     name: 'options',
     control
   });
+  const [optionValues, attributeCode] = useWatch({
+    name: ['options', 'attribute_code'],
+    control
+  });
 
   React.useEffect(() => {
     replace(
@@ -198,9 +208,31 @@ const Options: React.FC<{
       {fields.map((field, index) => {
         return (
           <div key={field.id} className="flex items-center mb-2 space-x-5">
+            <span
+              className="attribute-option-marker"
+              aria-hidden="true"
+              style={
+                attributeCode === 'color' &&
+                attributeSwatches[
+                  optionValues?.[index]?.option_text?.toLowerCase()
+                ]
+                  ? {
+                      background:
+                        attributeSwatches[
+                          optionValues[index].option_text.toLowerCase()
+                        ]
+                    }
+                  : undefined
+              }
+            >
+              {attributeCode !== 'color'
+                ? String(index + 1).padStart(2, '0')
+                : null}
+            </span>
             <div className="flex-1">
               <InputField
                 name={`options.${index}.option_text`}
+                aria-label={`Option ${index + 1}`}
                 placeholder={_('Option text')}
                 validation={{ required: _('Option text is required') }}
               />
@@ -214,6 +246,7 @@ const Options: React.FC<{
                   remove(index);
                 }}
                 variant={'destructive'}
+                aria-label={`Remove option ${index + 1}`}
               >
                 {_('Remove')}
               </Button>
@@ -252,18 +285,23 @@ interface GeneralProps {
 }
 
 export default function General({ attribute, createGroupApi }: GeneralProps) {
-  const [type] = React.useState(attribute?.type || 'text');
+  const type = useWatch({
+    name: 'type',
+    defaultValue: attribute?.type || 'text'
+  });
 
   return (
-    <Card>
+    <Card id="attribute-details" className="editor-section-card">
       <CardHeader>
         <CardTitle>{_('General')}</CardTitle>
         <CardDescription>
-          {_('Manage the general information of the attribute.')}
+          {_(
+            'Define the detail your products share, then choose its available values.'
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="editor-primary-fields">
           <InputField
             name="attribute_name"
             label={_('Name')}
@@ -304,11 +342,16 @@ export default function General({ attribute, createGroupApi }: GeneralProps) {
         </div>
       </CardContent>
       {['select', 'multiselect'].includes(type) && (
-        <CardContent title={_('Attribute options')}>
+        <CardContent
+          id="attribute-options"
+          className="attribute-options-section"
+        >
+          <h3 className="editor-subheading">Available options</h3>
           <Options originOptions={get(attribute, 'options', [])} />
         </CardContent>
       )}
-      <CardContent title={_('Attribute Group')}>
+      <CardContent className="attribute-groups-section">
+        <h3 className="editor-subheading">Attribute groups</h3>
         <Groups
           groups={get(attribute, 'groups.items', [])}
           createGroupApi={createGroupApi}

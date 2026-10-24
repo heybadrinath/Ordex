@@ -1,4 +1,6 @@
-import { SettingMenu } from '@components/admin/SettingMenu.js';
+// Modified for Ordex on 20 October 2026.
+import { SettingsLayout } from '@components/admin/SettingsLayout.js';
+import { TaxRulesPreview } from '@components/admin/SettingsPreviews.js';
 import Spinner from '@components/admin/Spinner.js';
 import { Form } from '@components/common/form/Form.js';
 import { InputField } from '@components/common/form/InputField.js';
@@ -89,235 +91,236 @@ export default function TaxSetting({
 
   if (taxClassesQueryData.fetching) {
     return (
-      <div className="main-content-inner">
-        <div className="grid grid-cols-6 gap-x-5 grid-flow-row ">
-          <div className="col-span-2">
-            <SettingMenu />
-          </div>
-          <div className="col-span-4">
-            <Card>
-              <CardContent>
-                <Spinner width={30} height={30} />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+      <SettingsLayout
+        title={_('Pricing & tax')}
+        description={_('Manage price rounding, tax rules and regional rates.')}
+      >
+        <Card>
+          <CardContent>
+            <Spinner width={30} height={30} />
+          </CardContent>
+        </Card>
+      </SettingsLayout>
     );
   }
 
   return (
-    <div className="main-content-inner">
-      <div className="grid grid-cols-6 gap-x-5 grid-flow-row ">
-        <div className="col-span-2">
-          <SettingMenu />
-        </div>
-        <div className="col-span-4 grid grid-cols-1 gap-5">
-          <Card>
-            <CardHeader>
-              <CardTitle>{_('Price rounding')}</CardTitle>
-              <CardDescription>
-                {_('How every monetary amount is rounded across the store.')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form
-                id="pricingRoundingConfig"
-                method="POST"
-                action={saveSettingApi}
-                successMessage={_(
-                  'Pricing settings have been saved successfully!'
-                )}
-              >
-                <div className="grid grid-cols-2 gap-5">
-                  <div>
-                    <SelectField
-                      name="pricingRounding"
-                      label={_('Rounding mode')}
-                      defaultValue={setting.pricingRounding || 'round'}
-                      options={roundingOptions}
-                      helperText={_(
-                        'The direction used when rounding prices to the decimal precision.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <InputField
-                      type="number"
-                      name="pricingPrecision"
-                      label={_('Decimal precision')}
-                      defaultValue={setting.pricingPrecision ?? 2}
-                      min={0}
-                      helperText={_(
-                        'Number of decimal places prices are rounded to.'
-                      )}
-                    />
-                  </div>
+    <SettingsLayout
+      title={_('Pricing & tax')}
+      description={_('Manage price rounding, tax rules and regional rates.')}
+      preview={
+        <TaxRulesPreview
+          classes={taxClassesQueryData.data?.taxClasses?.items ?? []}
+          inclusive={setting.priceIncludingTax ?? false}
+        />
+      }
+    >
+      <div className="settings-card-stack">
+        <Card>
+          <CardHeader>
+            <CardTitle>{_('Price rounding')}</CardTitle>
+            <CardDescription>
+              {_('How every monetary amount is rounded across the store.')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form
+              id="pricingRoundingConfig"
+              submitBtnText={_('Save price settings')}
+              method="POST"
+              action={saveSettingApi}
+              successMessage={_(
+                'Pricing settings have been saved successfully!'
+              )}
+            >
+              <div className="grid grid-cols-2 gap-5">
+                <div>
+                  <SelectField
+                    name="pricingRounding"
+                    label={_('Rounding mode')}
+                    defaultValue={setting.pricingRounding || 'round'}
+                    options={roundingOptions}
+                    helperText={_(
+                      'The direction used when rounding prices to the decimal precision.'
+                    )}
+                  />
                 </div>
-              </Form>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{_('Tax calculation configuration')}</CardTitle>
-              <CardDescription>
-                {_(
-                  'Configure the tax classes that will be available to your customers at checkout.'
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent title={_('Basic configuration')}>
-              <Form
-                id="taxBasicConfig"
-                method="POST"
-                action={saveSettingApi}
-                successMessage={_('Tax setting has been saved successfully!')}
-              >
-                <div className="grid grid-cols-2 gap-5">
-                  <div>
-                    <SelectField
-                      name="defaultShippingTaxClassId"
-                      label={_('Shipping tax class')}
-                      defaultValue={setting.defaultShippingTaxClassId}
-                      placeholder={_('None')}
-                      options={[
-                        {
-                          value: -1,
-                          label: _(
-                            'Proportional allocation based on cart items'
-                          )
-                        },
-                        {
-                          value: 0,
-                          label: _('Higest tax rate based on cart items')
-                        }
-                      ].concat(
-                        taxClassesQueryData.data.taxClasses.items.map(
-                          (taxClass) => ({
-                            value: taxClass.taxClassId,
-                            label: taxClass.name
-                          })
-                        ) || []
-                      )}
-                      helperText={_(
-                        'This is the tax class applied to shipping costs.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <SelectField
-                      name="baseCalculationAddress"
-                      label={_('Base calculation address')}
-                      defaultValue={
-                        setting.baseCalculationAddress || 'shippingAddress'
+                <div>
+                  <InputField
+                    type="number"
+                    name="pricingPrecision"
+                    label={_('Decimal precision')}
+                    defaultValue={setting.pricingPrecision ?? 2}
+                    min={0}
+                    helperText={_(
+                      'Number of decimal places prices are rounded to.'
+                    )}
+                  />
+                </div>
+              </div>
+            </Form>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{_('Tax calculation configuration')}</CardTitle>
+            <CardDescription>
+              {_(
+                'Configure the tax classes that will be available to your customers at checkout.'
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent title={_('Basic configuration')}>
+            <Form
+              id="taxBasicConfig"
+              submitBtnText={_('Save tax settings')}
+              method="POST"
+              action={saveSettingApi}
+              successMessage={_('Tax setting has been saved successfully!')}
+            >
+              <div className="grid grid-cols-2 gap-5">
+                <div>
+                  <SelectField
+                    name="defaultShippingTaxClassId"
+                    label={_('Shipping tax class')}
+                    defaultValue={setting.defaultShippingTaxClassId}
+                    placeholder={_('None')}
+                    options={[
+                      {
+                        value: -1,
+                        label: _('Proportional allocation based on cart items')
+                      },
+                      {
+                        value: 0,
+                        label: _('Highest tax rate based on cart items')
                       }
-                      options={[
-                        {
-                          value: 'shippingAddress',
-                          label: _('Shipping address')
-                        },
-                        {
-                          value: 'billingAddress',
-                          label: _('Billing address')
-                        },
-                        {
-                          value: 'storeAddress',
-                          label: _('Store address')
-                        }
-                      ]}
-                      helperText={_(
-                        'This is the address used to calculate tax rates.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <SelectField
-                      name="taxRounding"
-                      label={_('Tax rounding mode')}
-                      defaultValue={setting.taxRounding || 'round'}
-                      options={roundingOptions}
-                      helperText={_(
-                        'The direction used when rounding the calculated tax amount.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <InputField
-                      type="number"
-                      name="taxPrecision"
-                      label={_('Tax decimal precision')}
-                      defaultValue={setting.taxPrecision ?? 2}
-                      min={0}
-                      helperText={_(
-                        'Number of decimal places the tax amount is rounded to.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <SelectField
-                      name="taxRoundLevel"
-                      label={_('Tax rounding level')}
-                      defaultValue={setting.taxRoundLevel || 'total'}
-                      options={roundLevelOptions}
-                      helperText={_(
-                        'Where tax rounding is applied: per unit, per line, or on the order total.'
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <ToggleField
-                      name="priceIncludingTax"
-                      label={_('Catalog prices include tax')}
-                      defaultValue={setting.priceIncludingTax ?? false}
-                      helperText={_(
-                        'Enable when the product prices you enter already include tax.'
-                      )}
-                    />
-                  </div>
+                    ].concat(
+                      taxClassesQueryData.data.taxClasses.items.map(
+                        (taxClass) => ({
+                          value: taxClass.taxClassId,
+                          label: taxClass.name
+                        })
+                      ) || []
+                    )}
+                    helperText={_(
+                      'This is the tax class applied to shipping costs.'
+                    )}
+                  />
                 </div>
-              </Form>
-            </CardContent>
-          </Card>
-          <Card title={_('Tax classes')}>
-            <CardHeader>
-              <CardTitle>{_('Tax classes')}</CardTitle>
-              <CardDescription>
-                {_('Manage tax classes and tax rates for different regions.')}
-              </CardDescription>
-            </CardHeader>
-            <TaxClasses
-              classes={taxClassesQueryData.data.taxClasses.items}
-              getTaxClasses={reexecuteQuery}
-            />
-            <CardContent>
-              <div>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger>
+                <div>
+                  <SelectField
+                    name="baseCalculationAddress"
+                    label={_('Base calculation address')}
+                    defaultValue={
+                      setting.baseCalculationAddress || 'shippingAddress'
+                    }
+                    options={[
+                      {
+                        value: 'shippingAddress',
+                        label: _('Shipping address')
+                      },
+                      {
+                        value: 'billingAddress',
+                        label: _('Billing address')
+                      },
+                      {
+                        value: 'storeAddress',
+                        label: _('Store address')
+                      }
+                    ]}
+                    helperText={_(
+                      'This is the address used to calculate tax rates.'
+                    )}
+                  />
+                </div>
+                <div>
+                  <SelectField
+                    name="taxRounding"
+                    label={_('Tax rounding mode')}
+                    defaultValue={setting.taxRounding || 'round'}
+                    options={roundingOptions}
+                    helperText={_(
+                      'The direction used when rounding the calculated tax amount.'
+                    )}
+                  />
+                </div>
+                <div>
+                  <InputField
+                    type="number"
+                    name="taxPrecision"
+                    label={_('Tax decimal precision')}
+                    defaultValue={setting.taxPrecision ?? 2}
+                    min={0}
+                    helperText={_(
+                      'Number of decimal places the tax amount is rounded to.'
+                    )}
+                  />
+                </div>
+                <div>
+                  <SelectField
+                    name="taxRoundLevel"
+                    label={_('Tax rounding level')}
+                    defaultValue={setting.taxRoundLevel || 'total'}
+                    options={roundLevelOptions}
+                    helperText={_(
+                      'Where tax rounding is applied: per unit, per line, or on the order total.'
+                    )}
+                  />
+                </div>
+                <div>
+                  <ToggleField
+                    name="priceIncludingTax"
+                    label={_('Catalog prices include tax')}
+                    defaultValue={setting.priceIncludingTax ?? false}
+                    helperText={_(
+                      'Enable when the product prices you enter already include tax.'
+                    )}
+                  />
+                </div>
+              </div>
+            </Form>
+          </CardContent>
+        </Card>
+        <Card title={_('Tax classes')}>
+          <CardHeader>
+            <CardTitle>{_('Tax classes')}</CardTitle>
+            <CardDescription>
+              {_('Manage tax classes and tax rates for different regions.')}
+            </CardDescription>
+          </CardHeader>
+          <TaxClasses
+            classes={taxClassesQueryData.data.taxClasses.items}
+            getTaxClasses={reexecuteQuery}
+          />
+          <CardContent>
+            <div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger
+                  render={
                     <Button
                       title={_('Create new tax class')}
                       variant="outline"
-                      onClick={() => setDialogOpen(true)}
-                    >
-                      {_('Create new tax class')}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{_('Create New Tax Class')}</DialogTitle>
-                    </DialogHeader>
-                    <TaxClassForm
-                      saveTaxClassApi={createTaxClassApi}
-                      closeModal={() => setDialogOpen(false)}
-                      getTaxClasses={reexecuteQuery}
                     />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  }
+                >
+                  {_('Create new tax class')}
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{_('Create New Tax Class')}</DialogTitle>
+                  </DialogHeader>
+                  <TaxClassForm
+                    saveTaxClassApi={createTaxClassApi}
+                    closeModal={() => setDialogOpen(false)}
+                    getTaxClasses={reexecuteQuery}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </SettingsLayout>
   );
 }
 

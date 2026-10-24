@@ -66,6 +66,7 @@ export default function General({ collection }: GeneralProps) {
       component: {
         default: (
           <Editor
+            columnToolbar={false}
             name="description"
             label={_('Description')}
             value={collection?.description || []}
@@ -77,7 +78,7 @@ export default function General({ collection }: GeneralProps) {
   ];
 
   return (
-    <Card title={_('General')}>
+    <Card id="collection-details" className="editor-section-card">
       <CardHeader>
         <CardTitle>{_('General Information')}</CardTitle>
         <CardDescription>
@@ -88,7 +89,7 @@ export default function General({ collection }: GeneralProps) {
         <Area
           id="collectionEditGeneral"
           coreComponents={fields}
-          className="space-y-2"
+          className="editor-primary-fields"
         />
       </CardContent>
     </Card>

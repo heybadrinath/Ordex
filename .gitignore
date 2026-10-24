@@ -12,3 +12,5 @@ test-results/
 playwright-report/
 .project-local/
 AGENTS.md
+
+/public/sitemap*.xml

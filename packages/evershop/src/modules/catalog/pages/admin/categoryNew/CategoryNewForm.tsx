@@ -1,3 +1,7 @@
+import {
+  CatalogEditor,
+  type EditorEntity
+} from '@components/admin/CatalogEditor.js';
 import { FormButtons } from '@components/admin/FormButtons.js';
 import Area from '@components/common/Area.js';
 import { Form } from '@components/common/form/Form.js';
@@ -8,17 +12,20 @@ import React from 'react';
 interface CategoryNewFormProps {
   action: string;
   gridUrl: string;
+  category?: EditorEntity | null;
 }
 
 export default function CategoryNewForm({
   action,
-  gridUrl
+  gridUrl,
+  category
 }: CategoryNewFormProps) {
   return (
     <Form
       action={action}
       method="POST"
       id="categoryNewForm"
+      demoProfile="category"
       onSuccess={(response) => {
         toast.success(_('Category created successfully!'));
         setTimeout(() => {
@@ -30,14 +37,13 @@ export default function CategoryNewForm({
       }}
       submitBtn={false}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="leftSide" noOuter />
-        </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="rightSide" noOuter />
-        </div>
-      </div>
+      <CatalogEditor
+        kind="category"
+        entity={category}
+        aside={<Area id="rightSide" noOuter />}
+      >
+        <Area id="leftSide" noOuter />
+      </CatalogEditor>
       <FormButtons formId="categoryNewForm" cancelUrl={gridUrl} />
     </Form>
   );
@@ -50,6 +56,9 @@ export const layout = {
 
 export const query = `
   query Query {
+    category(id: getContextValue("categoryId", null)) {
+      name status url image { url }
+    }
     action: url(routeId: "createCategory")
     gridUrl: url(routeId: "categoryGrid")
   }

@@ -9,4 +9,4 @@ export default function ReturnsLink() {
     </a>
   );
 }
-export const layout = { areaId: 'content', sortOrder: 5 };
+export const layout = { areaId: 'orderViewActions', sortOrder: 5 };

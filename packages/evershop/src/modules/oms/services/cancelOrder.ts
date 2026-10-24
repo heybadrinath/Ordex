@@ -77,6 +77,8 @@ function validateStatus(paymentStatus: string, shipmentStatus: string) {
   return true;
 }
 
+export { validateStatus as canCancelOrder };
+
 async function updatePaymentStatusToCancel(
   orderID: number,
   connection: PoolClient
@@ -237,10 +239,7 @@ export default async (uuid: string, reason: string | undefined) => {
 export function hookBeforeValidateStatus(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    paymentStatus: string,
-    shipmentStatus: string
-    ]
+    ...args: [paymentStatus: string, shipmentStatus: string]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -250,10 +249,7 @@ export function hookBeforeValidateStatus(
 export function hookAfterValidateStatus(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    paymentStatus: string,
-    shipmentStatus: string
-    ]
+    ...args: [paymentStatus: string, shipmentStatus: string]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -263,10 +259,7 @@ export function hookAfterValidateStatus(
 export function hookBeforeUpdatePaymentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -276,10 +269,7 @@ export function hookBeforeUpdatePaymentStatusToCancel(
 export function hookAfterUpdatePaymentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -289,10 +279,7 @@ export function hookAfterUpdatePaymentStatusToCancel(
 export function hookBeforeUpdateShipmentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -302,10 +289,7 @@ export function hookBeforeUpdateShipmentStatusToCancel(
 export function hookAfterUpdateShipmentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -315,10 +299,7 @@ export function hookAfterUpdateShipmentStatusToCancel(
 export function hookBeforeReStockAfterCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -328,10 +309,7 @@ export function hookBeforeReStockAfterCancel(
 export function hookAfterReStockAfterCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -341,10 +319,7 @@ export function hookAfterReStockAfterCancel(
 export function hookBeforeCancelOrder(
   callback: (
     this: { uuid: string },
-    ...args: [
-    uuid: string,
-    reason: string | undefined
-    ]
+    ...args: [uuid: string, reason: string | undefined]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -354,10 +329,7 @@ export function hookBeforeCancelOrder(
 export function hookAfterCancelOrder(
   callback: (
     this: { uuid: string },
-    ...args: [
-    uuid: string,
-    reason: string | undefined
-    ]
+    ...args: [uuid: string, reason: string | undefined]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {

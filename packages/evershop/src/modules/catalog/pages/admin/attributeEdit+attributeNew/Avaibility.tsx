@@ -20,17 +20,17 @@ interface GeneralProps {
 }
 export default function General({ attribute }: GeneralProps) {
   return (
-    <Card className="bg-popover">
+    <Card id="attribute-visibility" className="editor-section-card">
       <CardHeader>
-        <CardTitle>{_('Setting')}</CardTitle>
+        <CardTitle>{_('Storefront settings')}</CardTitle>
         <CardDescription>
-          {_('Manage the setting of the attribute.')}
+          {_('Choose where customers see and use this detail.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <RadioGroupField
           name="is_required"
-          label={_('Is Required?')}
+          label={_('Required on products')}
           options={[
             { value: 0, label: _('No') },
             { value: 1, label: _('Yes') }
@@ -45,7 +45,7 @@ export default function General({ attribute }: GeneralProps) {
       <CardContent className="pt-6 border-t border-border">
         <RadioGroupField
           name="is_filterable"
-          label={_('Is Filterable?')}
+          label={_('Use as a shopping filter')}
           options={[
             { value: 0, label: _('No') },
             { value: 1, label: _('Yes') }
@@ -60,7 +60,7 @@ export default function General({ attribute }: GeneralProps) {
       <CardContent className="pt-6 border-t border-border">
         <RadioGroupField
           name="display_on_frontend"
-          label={_('Display on Frontend?')}
+          label={_('Show on the product page')}
           options={[
             { value: 0, label: _('No') },
             { value: 1, label: _('Yes') }
@@ -85,7 +85,7 @@ export default function General({ attribute }: GeneralProps) {
               message: _('Sort order must be a positive number')
             }
           }}
-          defaultValue={attribute?.sortOrder}
+          defaultValue={attribute?.sortOrder ?? 0}
         />
       </CardContent>
     </Card>

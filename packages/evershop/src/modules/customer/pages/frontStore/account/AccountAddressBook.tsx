@@ -2,6 +2,7 @@ import Area from '@components/common/Area.js';
 import { MyAddresses } from '@components/frontStore/customer/MyAddresses.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { MapPin } from 'lucide-react';
 
 /**
  * Account dashboard block: the address book section with the
@@ -10,8 +11,11 @@ import React from 'react';
  */
 export default function AccountAddressBook(): React.ReactElement {
   return (
-    <section className="account-address-section py-6">
-      <h2 className="mb-4 h5">{_('Address book')}</h2>
+    <section id="account-addresses" className="account-address-section py-6">
+      <h2 className="mb-4 h5">
+        <MapPin size={18} strokeWidth={1.5} />
+        {_('Address book')}
+      </h2>
       <MyAddresses />
       <Area id="accountPageAddressBook" noOuter />
     </section>

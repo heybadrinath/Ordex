@@ -1,5 +1,9 @@
 {
-  "shop": { "language": "en", "timezone": "Asia/Kolkata", "currency": "INR" },
+  "shop": {
+    "language": "en",
+    "timezone": "Asia/Kolkata",
+    "currency": "INR"
+  },
   "system": {
     "extensions": [
       {
@@ -9,8 +13,85 @@
         "priority": 50
       }
     ],
-    "cod": { "status": 0 },
-    "stripe": { "status": 0 },
-    "paypal": { "status": 0 }
+    "cod": {
+      "status": 0
+    },
+    "stripe": {
+      "status": 0
+    },
+    "paypal": {
+      "status": 0
+    },
+    "disabledModules": [
+      "blog",
+      "pageBuilder",
+      "webhook",
+      "cod",
+      "paypal",
+      "stripe"
+    ],
+    "disabledRoutes": [
+      "cmsPageGrid",
+      "cmsPageNew",
+      "cmsPageEdit",
+      "cmsPageView",
+      "createCmsPage",
+      "updateCmsPage",
+      "deleteCmsPage",
+      "widgetGrid",
+      "widgetNew",
+      "widgetEdit",
+      "createWidget",
+      "updateWidget",
+      "deleteWidget",
+      "contactSubmissionGrid",
+      "submitContactForm",
+      "updateContactSubmission",
+      "deleteContactSubmission",
+      "landingPageGrid",
+      "landingPageNew",
+      "landingPageEdit",
+      "landingPageView",
+      "createLandingPage",
+      "updateLandingPage",
+      "deleteLandingPage",
+      "duplicateLandingPage",
+      "replaceHomepage",
+      "replaceHomepagePreflight",
+      "couponGrid",
+      "couponNew",
+      "couponEdit",
+      "createCoupon",
+      "updateCoupon",
+      "deleteCoupon",
+      "couponApply",
+      "couponRemove",
+      "paymentSetting",
+      "systemSetting"
+    ],
+    "disabledComponents": [
+      "cms/pages/admin/all/CmsMenuGroup.js",
+      "cms/pages/admin/all/MediaLibraryMenu.js",
+      "promotion/pages/admin/all/CouponMenuGroup.js",
+      "promotion/pages/admin/all/LandingPageMenuItem.js",
+      "promotion/pages/admin/all/NewCouponQuickLink.js",
+      "setting/pages/admin/all/PaymentSettingMenu.js",
+      "setting/pages/admin/all/SystemSettingMenu.js",
+      "cms/pages/admin/dashboard/PageHeading.js",
+      "cms/pages/admin/dashboard/Layout.js"
+    ],
+    "disabledGraphqlQueries": [
+      "cmsPage",
+      "cmsPages",
+      "currentCmsPage",
+      "contactSubmissions",
+      "coupon",
+      "coupons",
+      "landingPage",
+      "landingPages"
+    ]
+  },
+  "sitemap": {
+    "enabled": false
   }
 }

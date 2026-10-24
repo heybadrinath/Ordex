@@ -138,7 +138,7 @@ export default function Attributes({
   }, [currentGroup, items, append, remove, unregister]);
 
   return (
-    <Card>
+    <Card id="product-options">
       <CardHeader>
         <CardTitle>{_('Attribute group')}</CardTitle>
         <CardDescription>{_('Manage the attributes.')}</CardDescription>

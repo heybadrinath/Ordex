@@ -26,6 +26,7 @@ import type { RulesEditorConfig } from '../../../components/RelatedRulesEditor.j
 export interface ProductRecommendationsProps {
   recomputeApi: string;
   setting: {
+    storeTimeZone?: string;
     relatedProductsRules?: RulesEditorConfig;
     crossSellMinPairCount?: number;
     crossSellMinAnchorOrders?: number;
@@ -84,11 +85,16 @@ export function ProductRecommendations({
           <CardTitle>{_('Related products')}</CardTitle>
           <CardDescription>
             {_(
-              'Rules for the Related-products shelf on product pages. Categories and products can override them; manual picks on a product always come first.'
-            )}{' '}
-            {_(
-              'The Upsell shelf reuses these same rules, restricted to products PRICIER than the one being viewed (with the price band percent as the upper cap when enabled) — no bestseller fill, and no upsell for products set to “Manual picks only”.'
+              'Fill the related-products shelf using these rules. Manual product picks always appear first.'
             )}
+            <details className="settings-explanation">
+              <summary>{_('How upsells use these rules')}</summary>
+              <p>
+                {_(
+                  'Upsells use the same rules for higher-priced products, within the price limit when enabled. They exclude bestseller fill and products set to manual picks only. Categories and individual products can override these rules.'
+                )}
+              </p>
+            </details>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,7 +110,7 @@ export function ProductRecommendations({
           <CardTitle>{_('Frequently bought together')}</CardTitle>
           <CardDescription>
             {_(
-              'Co-purchase recommendations are trusted only above these thresholds. Defaults suit small stores — raising them means fewer, stronger suggestions.'
+              'Set how much order history a product pair needs before it is recommended.'
             )}
           </CardDescription>
         </CardHeader>
@@ -116,7 +122,9 @@ export function ProductRecommendations({
               label={_('Min times bought together')}
               defaultValue={setting.crossSellMinPairCount ?? 3}
               min={1}
-              helperText={_('A pair must co-occur in at least this many orders.')}
+              helperText={_(
+                'A pair must co-occur in at least this many orders.'
+              )}
             />
             <InputField
               type="number"
@@ -156,7 +164,9 @@ export function ProductRecommendations({
                 ? _(
                     'Co-purchase data last computed ${date} from ${total} orders (${pairs} product pairs).',
                     {
-                      date: new Date(stats.computedAt).toLocaleString(),
+                      date: new Date(stats.computedAt).toLocaleString('en-IN', {
+                        timeZone: setting.storeTimeZone || 'UTC'
+                      }),
                       total: String(stats.totalOrderCount),
                       pairs: String(stats.pairCount)
                     }

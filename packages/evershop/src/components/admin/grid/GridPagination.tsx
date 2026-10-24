@@ -1,5 +1,3 @@
-import { Button } from '@components/common/ui/Button.js';
-import { ButtonGroup } from '@components/common/ui/ButtonGroup.js';
 import {
   Pagination,
   PaginationContent,
@@ -28,6 +26,7 @@ export interface GridPaginationProps {
 }
 
 export function GridPagination({ total, limit, page }: GridPaginationProps) {
+  const pageSizeId = React.useId();
   const limitInput = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -83,22 +82,29 @@ export function GridPagination({ total, limit, page }: GridPaginationProps) {
   return (
     <div className="pagination flex w-full mt-3">
       <div className="flex justify-between w-full space-x-2">
-        <ButtonGroup>
-          <Button variant={'outline'}>{_('Show')}</Button>
+        <div className="grid-page-size">
+          <span className="grid-page-range">
+            {total ? (page - 1) * limit + 1 : 0}–{Math.min(page * limit, total)}{' '}
+            <span>of {total}</span>
+          </span>
+          <label htmlFor={pageSizeId}>{_('Per page')}</label>
           <Select
             value={limit.toString()}
             onValueChange={(value) => {
               const url = new URL(window.location.href);
               url.searchParams.set('limit', value?.toString() || '10');
+              url.searchParams.delete('page');
               window.location.href = url.href;
             }}
           >
-            <SelectTrigger className="w-20">
+            <SelectTrigger id={pageSizeId} className="w-20">
               <SelectValue>{limit}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>{_('Limit')}</SelectLabel>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
                 <SelectItem value="50">50</SelectItem>
                 <SelectItem value="100">100</SelectItem>
                 <SelectItem value="150">150</SelectItem>
@@ -106,12 +112,14 @@ export function GridPagination({ total, limit, page }: GridPaginationProps) {
               </SelectGroup>
             </SelectContent>
           </Select>
-        </ButtonGroup>
+        </div>
         <div className="flex justify-end">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
+                  aria-disabled={page <= 1}
+                  tabIndex={page <= 1 ? -1 : 0}
                   onClick={(e) => {
                     onPrev(e);
                   }}
@@ -154,7 +162,13 @@ export function GridPagination({ total, limit, page }: GridPaginationProps) {
                   </PaginationLink>
                 </PaginationItem>
               )}
-              <PaginationNext onClick={onNext} />
+              <PaginationItem>
+                <PaginationNext
+                  onClick={onNext}
+                  aria-disabled={page * limit >= total}
+                  tabIndex={page * limit >= total ? -1 : 0}
+                />
+              </PaginationItem>
             </PaginationContent>
           </Pagination>
         </div>

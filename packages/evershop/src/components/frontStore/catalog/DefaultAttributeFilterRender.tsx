@@ -156,6 +156,7 @@ export const DefaultAttributeFilterRender: React.FC<{
                       >
                         <Checkbox
                           checked={isSelected}
+                          aria-label={`${attribute.attributeName}: ${option.optionText}`}
                           id={`${attribute.attributeCode}-${option.optionId}`}
                           onCheckedChange={(checked) =>
                             handleAttributeChange(

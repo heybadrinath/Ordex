@@ -1,3 +1,12 @@
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription
+} from '@components/common/ui/Empty.js';
+import { Users, ArrowUpRight, Search } from 'lucide-react';
+import { GridViews } from '@components/admin/GridViews.js';
 import { GridPagination } from '@components/admin/grid/GridPagination';
 import { SortableHeader } from '@components/admin/grid/header/Sortable';
 import { Status } from '@components/admin/Status.js';
@@ -103,7 +112,7 @@ function Actions({ customers = [], selectedIds = [] }) {
   ];
 
   return (
-    <TableRow>
+    <TableRow className="grid-bulk-actions">
       {selectedIds.length === 0 && null}
       {selectedIds.length > 0 && (
         <TableCell colSpan="100">
@@ -152,7 +161,21 @@ export default function CustomerGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <Card>
+    <Card className="workspace-grid">
+      <GridViews
+        baseUrl="/admin/customers"
+        filterKey="status"
+        views={[
+          { label: 'All customers' },
+          { label: 'Active', value: '1' },
+          { label: 'Disabled', value: '0' }
+        ]}
+        currentFilters={currentFilters}
+        total={total}
+        unit="Customers"
+        selected={selectedRows.length}
+        onClearSelection={() => setSelectedRows([])}
+      />
       <CardHeader className="flex justify-between">
         <Form submitBtn={false} id="customerGridFilter">
           <div className="flex gap-5 justify-center items-center">
@@ -164,8 +187,10 @@ export default function CustomerGrid({
                   component: {
                     default: () => (
                       <InputField
+                        prefixIcon={<Search size={16} />}
                         name="keyword"
-                        placeholder={_('Search')}
+                        placeholder={_('Search customers')}
+                        aria-label={_('Search customers')}
                         defaultValue={
                           currentFilters.find((f) => f.key === 'keyword')?.value
                         }
@@ -173,6 +198,7 @@ export default function CustomerGrid({
                           // If the user press enter, we should submit the form
                           if (e.key === 'Enter') {
                             const url = new URL(document.location);
+                            url.searchParams.delete('page');
                             const keyword = e.target?.value;
                             if (keyword) {
                               url.searchParams.set('keyword', keyword);
@@ -196,6 +222,7 @@ export default function CustomerGrid({
                         }
                         onValueChange={(value) => {
                           const url = new URL(document.location);
+                          url.searchParams.delete('page');
                           url.searchParams.set('status', value);
                           window.location.href = url.href;
                         }}
@@ -226,6 +253,7 @@ export default function CustomerGrid({
             className={'hover:cursor-pointer'}
             onClick={() => {
               const url = new URL(document.location);
+              url.searchParams.delete('page');
               url.search = '';
               window.location.href = url.href;
             }}
@@ -241,6 +269,15 @@ export default function CustomerGrid({
               <TableCell className="align-bottom">
                 <div className="form-field mb-0">
                   <Checkbox
+                    aria-label="Select all customers on this page"
+                    checked={
+                      customers.length > 0 &&
+                      selectedRows.length === customers.length
+                    }
+                    indeterminate={
+                      selectedRows.length > 0 &&
+                      selectedRows.length < customers.length
+                    }
                     onCheckedChange={(checked) => {
                       if (checked)
                         setSelectedRows(customers.map((c) => c.uuid));
@@ -257,25 +294,13 @@ export default function CustomerGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Full Name')}
+                          title={_('Customer')}
                           name="full_name"
                           currentFilters={currentFilters}
                         />
                       )
                     },
                     sortOrder: 10
-                  },
-                  {
-                    component: {
-                      default: () => (
-                        <SortableHeader
-                          title={_('Email')}
-                          name="email"
-                          currentFilters={currentFilters}
-                        />
-                      )
-                    },
-                    sortOrder: 15
                   },
                   {
                     component: {
@@ -293,7 +318,7 @@ export default function CustomerGrid({
                     component: {
                       default: () => (
                         <SortableHeader
-                          title={_('Created At')}
+                          title={_('Joined')}
                           name="created_at"
                           currentFilters={currentFilters}
                         />
@@ -303,6 +328,9 @@ export default function CustomerGrid({
                   }
                 ]}
               />
+              <TableCell>
+                <span className="sr-only">Open customer</span>
+              </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -316,6 +344,7 @@ export default function CustomerGrid({
                 <TableCell>
                   <div className="form-field mb-0">
                     <Checkbox
+                      aria-label={`Select customer ${c.fullName}`}
                       checked={selectedRows.includes(c.uuid)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -339,18 +368,14 @@ export default function CustomerGrid({
                     {
                       component: {
                         default: () => (
-                          <CustomerName name={c.fullName} url={c.editUrl} />
+                          <CustomerName
+                            name={c.fullName}
+                            email={c.email}
+                            url={c.editUrl}
+                          />
                         )
                       },
                       sortOrder: 10
-                    },
-                    {
-                      component: {
-                        default: ({ areaProps }) => (
-                          <TableCell>{c.email}</TableCell>
-                        )
-                      },
-                      sortOrder: 15
                     },
                     {
                       component: {
@@ -368,14 +393,34 @@ export default function CustomerGrid({
                     }
                   ]}
                 />
+                <TableCell>
+                  <a
+                    className="record-open"
+                    href={c.editUrl}
+                    aria-label={`Open ${c.fullName}`}
+                  >
+                    <ArrowUpRight size={15} />
+                  </a>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {customers.length === 0 && (
-          <div className="flex w-full justify-center mt-3">
-            {_('There is no customer to display')}
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Users size={24} />
+              </EmptyMedia>
+              <EmptyTitle>No customers in this view</EmptyTitle>
+              <EmptyDescription>
+                Try another search or clear your filters to see all customers.
+              </EmptyDescription>
+            </EmptyHeader>
+            <a className="grid-empty-link" href="/admin/customers">
+              Clear filters
+            </a>
+          </Empty>
         )}
         <GridPagination total={total} limit={limit} page={page} />
       </CardContent>

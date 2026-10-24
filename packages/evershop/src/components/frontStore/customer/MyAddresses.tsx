@@ -21,6 +21,7 @@ import {
 } from '@components/frontStore/customer/CustomerContext.jsx';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { MapPin, Pencil, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 const Address: React.FC<{
@@ -30,10 +31,16 @@ const Address: React.FC<{
   const [dialogOpen, setDialogOpen] = React.useState(false);
   // Own form instance so field-targeted server errors can be set on the inputs.
   const form = useForm({ shouldUnregister: true, shouldFocusError: false });
-  const classes = address.isDefault ? 'border-2 border-primary' : '';
+  const classes = address.isDefault
+    ? 'saved-address is-default'
+    : 'saved-address';
   return (
     <Item variant={'outline'} className={`${classes}`}>
       <ItemContent>
+        <div className="address-card-label">
+          <MapPin size={18} strokeWidth={1.5} />
+          <span>{address.isDefault ? 'Default address' : 'Saved address'}</span>
+        </div>
         <AddressSummary address={address} />
       </ItemContent>
       <ItemActions>
@@ -43,7 +50,12 @@ const Address: React.FC<{
                 nest <button> in <button>, which browsers un-nest while parsing the
                 server HTML, so every /account load failed hydration (React #418). */}
             <DialogTrigger
-              render={<Button variant="outline">{_('Edit')}</Button>}
+              render={
+                <Button variant="ghost" aria-label={_('Edit address')}>
+                  <Pencil size={14} />
+                  {_('Edit')}
+                </Button>
+              }
             />
             <DialogContent>
               <DialogHeader>
@@ -75,6 +87,7 @@ const Address: React.FC<{
                 }}
               >
                 <CustomerAddressForm
+                  demoDefaults
                   address={address}
                   surface="account"
                   namePrefix=""
@@ -136,7 +149,7 @@ export function MyAddresses({ title }: { title?: string }) {
           {_('You have no addresses saved')}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="saved-address-grid">
         {customer.addresses.map((address) => (
           <Address key={address.uuid} address={address} />
         ))}
@@ -145,6 +158,7 @@ export function MyAddresses({ title }: { title?: string }) {
         <DialogTrigger
           render={
             <Button variant="outline" className="mt-4">
+              <Plus size={15} />
               {_('Add new address')}
             </Button>
           }
@@ -179,6 +193,7 @@ export function MyAddresses({ title }: { title?: string }) {
             }}
           >
             <CustomerAddressForm
+              demoDefaults
               address={undefined}
               surface="account"
               namePrefix=""

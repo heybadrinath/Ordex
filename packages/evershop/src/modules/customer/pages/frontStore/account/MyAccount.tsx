@@ -14,9 +14,9 @@ import React from 'react';
  */
 export default function MyAccount() {
   return (
-    <div className="account mx-auto max-w-2xl py-10">
+    <div className="account customer-account-shell">
       <Area id="accountPageHeader" noOuter />
-      <div className="mt-2 divide-y divide-border">
+      <div className="account-content">
         <Area id="accountPageContent" noOuter />
       </div>
     </div>

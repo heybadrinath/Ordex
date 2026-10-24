@@ -80,22 +80,36 @@ for (const [email, name] of [
   }
   customers.push({ customer, address });
 }
+const catalogCategory = (
+  await pool.query(
+    "SELECT category_description_category_id AS id FROM category_description WHERE url_key='accessories' LIMIT 1"
+  )
+).rows[0];
+const catalogTaxClass = (
+  await pool.query(
+    'SELECT tax_class_id AS id FROM tax_class ORDER BY tax_class_id LIMIT 1'
+  )
+).rows[0];
 const prices = { CUP: 590, PEN: 450, BOWL: 690, VASE: 990, THERMO: 1490 };
 const { rows: products } = await pool.query(
   'SELECT * FROM product ORDER BY product_id'
 );
 for (const product of products) {
   const price = prices[product.sku.split('-')[0]];
-  if (price) await updateProduct(product.uuid, { price });
+  if (price)
+    await updateProduct(product.uuid, {
+      price,
+      category_id: catalogCategory?.id || product.category_id,
+      tax_class: product.tax_class || catalogTaxClass?.id
+    });
 }
+const { seedCatalog } = await import('./seed-catalog.mjs');
+await seedCatalog(pool);
 await pool.query(
   "UPDATE collection SET name='Everyday favourites' WHERE code='homepage'"
 );
 await pool.query(
   "UPDATE widget_instance SET status=false WHERE name='Demo Main Menu'"
-);
-await pool.query(
-  'UPDATE widget_instance SET settings=settings || \'{"heading":"A little better, every day.","subText":"Useful objects. Honest materials. Colours that feel like home.","count":8,"viewAllLink":"/products","viewAllLabel":"Explore the collection"}\'::jsonb WHERE name=\'Demo Homepage Products\''
 );
 
 let zone = (await pool.query("SELECT * FROM shipping_zone WHERE name='India'"))
@@ -208,7 +222,72 @@ for (let index = 0; index < 12; index++) {
     }
   }
 }
+// Add a small spread of native orders for the expanded catalog, once per fixture.
+const { products: curatedProducts } = JSON.parse(
+  await (
+    await import('node:fs/promises')
+  ).readFile(new URL('../seed/catalog.json', import.meta.url), 'utf8')
+);
+for (let index = 0; index < 18; index++) {
+  const fixtureKey = `ordex-catalog-order-${index + 1}`;
+  if (
+    (
+      await pool.query('SELECT 1 FROM "order" WHERE integration_order_id=$1', [
+        fixtureKey
+      ])
+    ).rowCount
+  )
+    continue;
+  const item = curatedProducts[index % curatedProducts.length];
+  const product = (
+    await pool.query('SELECT product_id FROM product WHERE sku=$1', [item.sku])
+  ).rows[0];
+  const { customer, address } = customers[index % 2];
+  const cart = await createNewCart(fixtureKey, customer);
+  await cart.addItem(product.product_id, index % 7 === 0 ? 2 : 1, {});
+  await saveCart(cart);
+  const order = await checkout(cart.getData('uuid'), {
+    shippingAddress: address,
+    billingAddress: address,
+    shippingMethod: method.uuid,
+    shippingProvider: 'core',
+    paymentMethod: 'demo',
+    customer: {
+      id: customer.customer_id,
+      email: customer.email,
+      fullName: customer.full_name
+    }
+  });
+  const age = 1 + (index % 15);
+  await pool.query(
+    `UPDATE "order" SET integration_order_id=$2, order_number=$3, created_at=now()-($4::int*interval '1 day') WHERE order_id=$1`,
+    [order.order_id, fixtureKey, `DX-${2001 + index}`, age]
+  );
+  if (index % 5 !== 0) {
+    const items = (
+      await pool.query(
+        'SELECT order_item_id,qty FROM order_item WHERE order_item_order_id=$1',
+        [order.order_id]
+      )
+    ).rows;
+    const { shipment } = await createShipment(order.uuid, {
+      carrier: 'demo',
+      tracking_number: `DEMO-${2001 + index}`,
+      items
+    });
+    if (index % 4 !== 0) {
+      await markDelivered(shipment.uuid);
+      await pool.query(
+        `UPDATE shipment SET delivered_at=now()-($2::int*interval '1 day') WHERE shipment_id=$1`,
+        [shipment.shipment_id, Math.max(0, age - 2)]
+      );
+    }
+  }
+}
+const catalogCount = (
+  await pool.query('SELECT COUNT(*)::int AS count FROM product')
+).rows[0].count;
 console.log(
-  'Demo ready: 15 product variants, two customers, 12 orders and sample returns.'
+  `Demo ready: ${catalogCount} catalog items, two demo customers, 30 order fixtures and sample returns.`
 );
 await pool.end();

@@ -76,6 +76,7 @@ query Query {
         isInStock
       }
       attributes: attributeIndex {
+        optionId
         attributeName
         attributeCode
         optionText

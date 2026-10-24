@@ -3,8 +3,19 @@ import { userInfo } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { Pool } from 'pg';
+import { config as loadEnvironment } from 'dotenv';
 
-if (!existsSync('.env')) {
+loadEnvironment();
+const production = process.env.NODE_ENV === 'production';
+const adminPassword = process.env.ORDEX_ADMIN_PASSWORD || 'DemoStore123!';
+if (production && (adminPassword === 'DemoStore123!' || adminPassword.length < 16)) {
+  throw new Error('Production setup requires a private ORDEX_ADMIN_PASSWORD of at least 16 characters.');
+}
+if (production && !process.env.DB_HOST) {
+  throw new Error('Production setup requires DB_HOST; a local database will not be created.');
+}
+
+if (!existsSync('.env') && !process.env.DB_HOST) {
   const user = process.env.PGUSER || userInfo().username;
   const admin = new Pool({ host: 'localhost', database: 'postgres', user });
   const found = await admin.query(
@@ -19,7 +30,7 @@ if (!existsSync('.env')) {
     ).toString('hex')}\n`
   );
 }
-await import('dotenv/config');
+loadEnvironment();
 process.env.NODE_ENV = 'development';
 const { pool } = await import(
   '../packages/evershop/dist/lib/postgres/connection.js'
@@ -34,13 +45,13 @@ const { hashPassword } = await import(
   '../packages/evershop/dist/lib/util/passwordHelper.js'
 );
 await migrate([
-  ...getCoreModules(),
+  ...getCoreModules({ includeDisabled: true }),
   { name: 'ordex', path: `${process.cwd()}/extensions/ordex/dist` }
 ]);
 await pool.query(
   `INSERT INTO admin_user(email,password,full_name,status) VALUES($1,$2,$3,true)
-   ON CONFLICT(email) DO UPDATE SET password=EXCLUDED.password,full_name=EXCLUDED.full_name`,
-  ['seller@ordex.example', hashPassword('DemoStore123!'), 'Ordex Studio']
+   ON CONFLICT(email) DO NOTHING`,
+  ['seller@ordex.example', hashPassword(adminPassword), 'Ordex Studio']
 );
 const settings = {
   storeName: 'Ordex',
@@ -73,7 +84,14 @@ await pool.end();
 console.log('Database and demo seller are ready.');
 execFileSync(
   process.execPath,
-  ['packages/evershop/dist/bin/seed/index.js', '--all'],
+  [
+    'packages/evershop/dist/bin/seed/index.js',
+    '--attributes',
+    '--categories',
+    '--collections',
+    '--products',
+    '--widgets'
+  ],
   { stdio: 'inherit' }
 );
 execFileSync(process.execPath, ['scripts/seed-demo.mjs'], { stdio: 'inherit' });

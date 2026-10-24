@@ -1,3 +1,5 @@
+import { DirectoryHeading } from '@components/admin/GridViews.js';
+import { Search } from 'lucide-react';
 import { GridPagination } from '@components/admin/grid/GridPagination.js';
 import { DummyColumnHeader } from '@components/admin/grid/header/Dummy';
 import { SortableHeader } from '@components/admin/grid/header/Sortable';
@@ -138,12 +140,15 @@ export default function AttributeGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <Card>
+    <Card className="workspace-grid">
+      <DirectoryHeading title="Attributes" total={total} />
       <CardHeader className="flex justify-between">
         <Form submitBtn={false} id="attributeGridFilter">
           <InputField
+            prefixIcon={<Search size={16} />}
             name="name"
-            placeholder={_('Search')}
+            placeholder={_('Search attributes')}
+            aria-label={_('Search attributes')}
             defaultValue={currentFilters.find((f) => f.key === 'name')?.value}
             onKeyPress={(e) => {
               // If the user press enter, we should submit the form
@@ -231,7 +236,7 @@ export default function AttributeGrid({
                       default: () => (
                         <SortableHeader
                           name="is_required"
-                          title={_('Is Required?')}
+                          title={_('Required')}
                           currentFilters={currentFilters}
                         />
                       )
@@ -243,7 +248,7 @@ export default function AttributeGrid({
                       default: () => (
                         <SortableHeader
                           name="is_filterable"
-                          title={_('Is Filterable?')}
+                          title={_('Storefront filter')}
                           currentFilters={currentFilters}
                         />
                       )
@@ -307,7 +312,12 @@ export default function AttributeGrid({
                         default: ({ areaProps }) => (
                           <TableCell>
                             <Badge variant="outline">
-                              {areaProps.row.type}
+                              {{
+                                select: 'Single choice',
+                                multiselect: 'Multiple choice',
+                                text: 'Text',
+                                textarea: 'Long text'
+                              }[areaProps.row.type] || areaProps.row.type}
                             </Badge>
                           </TableCell>
                         )
@@ -318,7 +328,15 @@ export default function AttributeGrid({
                       component: {
                         default: () => (
                           <TableCell>
-                            {a.isRequired ? _('Yes') : _('No')}
+                            <span
+                              className={
+                                a.isRequired
+                                  ? 'attribute-flag active'
+                                  : 'attribute-flag'
+                              }
+                            >
+                              {a.isRequired ? 'Required' : 'Optional'}
+                            </span>
                           </TableCell>
                         )
                       },
@@ -328,7 +346,15 @@ export default function AttributeGrid({
                       component: {
                         default: () => (
                           <TableCell>
-                            {a.isFilterable ? _('Yes') : _('No')}
+                            <span
+                              className={
+                                a.isFilterable
+                                  ? 'attribute-flag active'
+                                  : 'attribute-flag'
+                              }
+                            >
+                              {a.isFilterable ? 'Visible filter' : 'Not shown'}
+                            </span>
                           </TableCell>
                         )
                       },

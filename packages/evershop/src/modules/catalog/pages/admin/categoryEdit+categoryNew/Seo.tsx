@@ -112,9 +112,9 @@ export default function Seo({ category }: CategorySeoProps) {
   ];
 
   return (
-    <Card>
+    <Card id="category-discovery" className="editor-section-card">
       <CardHeader>
-        <CardTitle>{_('Search engine optimize')}</CardTitle>
+        <CardTitle>{_('Search listing')}</CardTitle>
         <CardDescription>
           {_('Manage the SEO settings of the category.')}
         </CardDescription>
