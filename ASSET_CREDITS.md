@@ -43,6 +43,8 @@ The demonstration catalog uses downloaded photographs from Unsplash under the [U
 
 `seed/photography.json` records the source and download URL for each asset. The images in `public/ordex/base-catalog` are bundled copies of the existing EverShop demo images and retain their upstream provenance; the white cup uses the NordWood Themes photograph credited above. Bundling these files keeps the sample variants available when the initialization job exits. Font licenses are included in `LICENSES/`.
 
+The copies under `public/catalog` preserve the original image URLs recorded in existing synthetic order receipts. They use the same upstream demo photographs.
+
 Poppins is distributed under the SIL Open Font License; see `LICENSES/Poppins-OFL.txt`. Source: [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/poppins).
 
 The current interface uses locally served DM Sans and Manrope variable fonts, copied from the existing Fontsource packages. Both use the SIL Open Font License; see `LICENSES/dm-sans-OFL.txt` and `LICENSES/manrope-OFL.txt`. Sources: [DM Sans](https://fontsource.org/fonts/dm-sans) and [Manrope](https://fontsource.org/fonts/manrope).
