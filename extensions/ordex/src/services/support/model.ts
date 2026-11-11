@@ -1,14 +1,47 @@
 import { audit, fail, pool, transaction } from './db.js';
+import { interactionOutput } from './modelResponse.js';
 
-export const modelName = process.env.SUPPORT_MODEL || 'gemini-3.5-flash-lite';
+export const modelName = process.env.SUPPORT_MODEL || 'gemini-3.8-flash';
 export const limits = {
-  daily: 360,
-  minute: 12,
+  daily: 16,
+  minute: 4,
   perCase: 40,
   inputChars: 40000,
   inputTokensMinute: 20000,
   outputTokens: 2200
 };
+
+function providerFailure(response, payload) {
+  const status = response.status;
+  const providerStatus = payload?.error?.status;
+  const rawCode = payload?.error?.status || payload?.error?.code;
+  const providerCode =
+    typeof rawCode === 'string' && /^[a-z0-9_-]{1,60}$/i.test(rawCode)
+      ? rawCode
+      : null;
+  const retry = Number(response.headers.get('retry-after'));
+  return Object.assign(
+    new Error(
+      status === 429
+        ? 'Model rate limit reached. Your work is saved.'
+        : status >= 500
+        ? 'The model is temporarily unavailable. Your work is saved.'
+        : 'The model rejected this request. Your work is saved.'
+    ),
+    {
+      status: status === 429 ? 429 : status >= 500 ? 503 : 502,
+      providerStatus: status,
+      providerCode,
+      retryable: status === 429 || status >= 500,
+      retryAfter:
+        Number.isFinite(retry) && retry > 0
+          ? Math.min(3600, retry)
+          : status >= 500
+          ? 300
+          : 60
+    }
+  );
+}
 
 export async function modelJson(
   purpose,
@@ -100,7 +133,7 @@ export async function modelJson(
           input: prompt,
           generation_config: {
             max_output_tokens: limits.outputTokens,
-            thinking_level: 'minimal',
+            thinking_level: 'low',
             thinking_summaries: 'none'
           },
           response_format: {
@@ -111,29 +144,9 @@ export async function modelJson(
         })
       }
     );
-    if (!response.ok) {
-      const retry = Number(response.headers.get('retry-after'));
-      throw Object.assign(
-        new Error(
-          response.status === 429
-            ? 'Model rate limit reached. Your work is saved.'
-            : 'The model could not respond. Your work is saved.'
-        ),
-        {
-          status: response.status === 429 ? 429 : 503,
-          retryAfter:
-            Number.isFinite(retry) && retry > 0 ? Math.min(3600, retry) : 60
-        }
-      );
-    }
-    const body = await response.json();
-    const output = (body.steps || [])
-      .filter((s) => s.type === 'model_output')
-      .flatMap((s) => s.content || [])
-      .filter((p) => p.type === 'text')
-      .map((p) => p.text)
-      .join('');
-    const parsed = JSON.parse(output);
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw providerFailure(response, body);
+    const parsed = interactionOutput(body);
     const usage = body.usage || {};
     await transaction(async (db) => {
       await db.query(
@@ -176,11 +189,16 @@ export async function modelJson(
           'agent',
           'model.failed',
           'Model request failed; no action was authorized by this response.',
-          { callId, status: Number(error.status) || 503 }
+            {
+              callId,
+              status: Number(error.status) || 503,
+              providerStatus: error.providerStatus || null,
+              providerCode: error.providerCode || null
+            }
         );
       });
     if (error.status) throw error;
-    fail('The model response could not be used. Your work is saved.', 503);
+    fail('The model is temporarily unavailable. Your work is saved.', 503);
   } finally {
     await lock.query('SELECT pg_advisory_unlock(8241025)');
     lock.release();

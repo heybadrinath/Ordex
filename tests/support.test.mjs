@@ -249,6 +249,22 @@ async function inspect(id) {
   return r.return_id;
 }
 
+test('return-window and steps questions get a grounded answer without model availability', async () => {
+  const order = await makeOrder();
+  const id = await open(order);
+  await cases.customerCommand(customer.customer_id, {
+    command: 'message',
+    caseId: id,
+    body: 'What is the return window for this order, and what steps should I follow if I decide to return it?',
+    clientKey: randomUUID()
+  });
+  await runner.tick({ caseId: id });
+  const d = await cases.detail(id, customer.customer_id);
+  const reply = d.messages.find((m) => m.actor === 'agent');
+  assert.match(reply.body, /within 7 days of delivery/);
+  assert.match(reply.body, /receipt and inspection/);
+});
+
 test('audit explains the saved evidence, decision, policy checks and verified refund', async () => {
   const order = await makeOrder();
   const { id, a } = await propose(order);
@@ -649,6 +665,10 @@ test('provider failure and emergency pause retain work without a mutation', asyn
   const d = await cases.detail(id);
   assert.equal(d.returns.length, 0);
   assert.ok(d.messages.some((m) => m.actor === 'customer'));
+  assert.ok(
+    d.messages.some((m) => m.metadata?.retryNotice),
+    'customer sees that work is saved while the model is unavailable'
+  );
   await db.query(
     "UPDATE support_case SET queued=false,status='AWAITING_CUSTOMER' WHERE case_id=$1",
     [id]
@@ -735,6 +755,45 @@ test('knowledge review, conflicts, publication and public/internal isolation', a
       }),
     /draft changed/
   );
+});
+test('temporary knowledge model failures are retried without losing the draft', async () => {
+  const actor = 'Fixture seller';
+  const doc = await knowledge.saveKnowledge(actor, {
+    title: 'Synthetic retry FAQ',
+    body: 'Sample products ship in recyclable packaging.',
+    audience: 'public'
+  });
+  providerStatus = 503;
+  await runner.tick({ documentId: doc.document_id });
+  providerStatus = 200;
+  let saved = (await knowledge.knowledgeList()).find(
+    (item) => item.document_id === doc.document_id
+  );
+  assert.equal(saved.state, 'queued');
+  assert.equal(saved.attempts, 1);
+  assert.ok(saved.retry_at);
+
+  await db.query(
+    'UPDATE support_knowledge SET retry_at=now() WHERE document_id=$1',
+    [doc.document_id]
+  );
+  decisions.push({
+    effectiveText: doc.body,
+    summary: 'Packaging information.',
+    facts: [],
+    questions: []
+  });
+  await runner.tick({ documentId: doc.document_id });
+  saved = (await knowledge.knowledgeList()).find(
+    (item) => item.document_id === doc.document_id
+  );
+  assert.equal(saved.state, 'ready');
+  assert.equal(saved.attempts, 0);
+  await knowledge.knowledgeCommand(actor, {
+    command: 'archive',
+    documentId: doc.document_id,
+    revision: saved.revision
+  });
 });
 test('document extraction accepts real text formats and rejects disguised or empty files', async () => {
   const text =

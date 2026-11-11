@@ -236,7 +236,7 @@ export async function knowledgeCommand(actor, input) {
         fail('This source is not ready for clarification.', 409);
       const answer = text(input.answer, 3000);
       await db.query(
-        "UPDATE support_knowledge SET answers=answers||jsonb_build_object($2::text,$3::text),state='queued',revision=revision+1 WHERE document_id=$1",
+        "UPDATE support_knowledge SET answers=answers||jsonb_build_object($2::text,$3::text),state='queued',retry_at=null,attempts=0,revision=revision+1 WHERE document_id=$1",
         [doc.document_id, String(doc.revision), answer]
       );
       await audit(
@@ -245,6 +245,23 @@ export async function knowledgeCommand(actor, input) {
         actor,
         'knowledge.clarified',
         'Clarification saved; the draft will be reviewed again.',
+        { documentId: doc.document_id }
+      );
+    } else if (input.command === 'retry') {
+      if (doc.state !== 'failed') fail('This source does not need a retry.', 409);
+      await db.query(
+        "UPDATE support_knowledge SET state='queued',analysis='{}',retry_at=null,attempts=0,revision=revision+1 WHERE document_id=$1",
+        [doc.document_id]
+      );
+      await db.query(
+        'UPDATE support_state SET generation=generation+1 WHERE id=1'
+      );
+      await audit(
+        db,
+        null,
+        actor,
+        'knowledge.retry_requested',
+        'Knowledge review was queued again.',
         { documentId: doc.document_id }
       );
     } else if (input.command === 'publish') {
@@ -358,7 +375,7 @@ export async function reviewKnowledge(doc) {
   };
   await transaction(async (db) => {
     const saved = await db.query(
-      "UPDATE support_knowledge SET analysis=$3,state=$4,lease_until=null WHERE document_id=$1 AND revision=$2 AND state='analyzing' RETURNING document_id",
+      "UPDATE support_knowledge SET analysis=$3,state=$4,attempts=0,retry_at=null,lease_until=null WHERE document_id=$1 AND revision=$2 AND state='analyzing' RETURNING document_id",
       [
         doc.document_id,
         doc.revision,

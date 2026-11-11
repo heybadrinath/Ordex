@@ -31,7 +31,7 @@ Open the storefront at [localhost:3000](http://localhost:3000). `demo:setup` com
 
 These shared credentials are for the seeded local demo only. They do not grant access to a hosted instance. The online demo needs separately provisioned accounts; do not reuse these passwords for deployment.
 
-To enable live model decisions and document review, set `GEMINI_API_KEY` in the server environment. The default model is `gemini-3.5-flash-lite` and can be changed with `SUPPORT_MODEL`. The application has no paid-model fallback or automatic plan upgrade. Without model access, cases remain saved for retry or seller review.
+To enable live model decisions and document review, set `GEMINI_API_KEY` in the server environment. The default model is `gemini-3.8-flash` and can be changed with `SUPPORT_MODEL`. The application has no paid-model fallback or automatic plan upgrade. Temporary provider failures are retried; unsupported answers remain saved for seller review.
 
 ## Product features
 

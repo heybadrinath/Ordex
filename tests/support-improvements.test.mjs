@@ -92,6 +92,7 @@ before(async () => {
     );
     const result = decisions.shift();
     return Response.json({
+      status: 'completed',
       steps: [
         {
           type: 'model_output',

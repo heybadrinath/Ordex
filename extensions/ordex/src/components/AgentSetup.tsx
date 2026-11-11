@@ -364,6 +364,25 @@ export default function AgentSetup({ overview, reload }) {
                     Paste store guidance in your own words. The agent will ask
                     about unclear rules before you publish.
                   </p>
+                  {doc.state === 'failed' && (
+                    <Button
+                      type="button"
+                      disabled={!!busy}
+                      isLoading={busy === 'retry'}
+                      onClick={() =>
+                        act('retry', async () => {
+                          await api('/api/support/admin', {
+                            area: 'knowledge',
+                            command: 'retry',
+                            documentId: doc.document_id,
+                            revision: doc.revision
+                          });
+                        })
+                      }
+                    >
+                      Retry review
+                    </Button>
+                  )}
                   <div className="support-field-pair knowledge-source-fields">
                     <label>
                       Source title

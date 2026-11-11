@@ -4,7 +4,7 @@ The agent uses the existing application, PostgreSQL database and worker. There i
 
 ## Run locally
 
-Use Node 22. Put `GEMINI_API_KEY` in the ignored `.env` file. The default model is `gemini-3.5-flash-lite`; do not enable billing or a paid fallback. Keep the key out of browser configuration.
+Use Node 22. Put `GEMINI_API_KEY` in the ignored `.env` file. The default model is `gemini-3.8-flash`; do not enable billing or a paid fallback. Keep the key out of browser configuration.
 
 ```sh
 npm run compile:all

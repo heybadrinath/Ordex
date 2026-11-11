@@ -14,6 +14,7 @@ import {
 import { orderContext } from './cases.js';
 import { modelJson } from './model.js';
 import { conflicts, retrieve, reviewKnowledge } from './knowledge.js';
+import { isReturnPolicyQuestion } from './intent.js';
 import { createReturn, reasons, updateReturn } from '../returns.js';
 
 const decisionSchema = {
@@ -950,16 +951,18 @@ async function processCase(claim, runId) {
       runId
     )
   );
-  const decision = await decide(
-    {
-      ...order,
-      delivery: await deliveryContext(pool, order),
-      returnState: progress
-    },
-    passages,
-    rows.map((m) => ({ actor: m.actor, body: m.body })),
-    claim.case_id
-  );
+  const decision = isReturnPolicyQuestion(last.body)
+    ? { kind: 'policy', reason: '', items: [], sources: [], quotes: [] }
+    : await decide(
+        {
+          ...order,
+          delivery: await deliveryContext(pool, order),
+          returnState: progress
+        },
+        passages,
+        rows.map((m) => ({ actor: m.actor, body: m.body })),
+        claim.case_id
+      );
   await transaction(async (db) => {
     const { c, p } = await current(db, claim);
     const order = await orderContext(db, c);
@@ -1274,7 +1277,11 @@ export async function tick({
             state === 'superseded'
               ? 'Run stopped after newer control or evidence.'
               : 'Run stopped safely; saved work is retained.',
-            { status: Number(error.status) || 500 },
+            {
+              status: Number(error.status) || 500,
+              providerStatus: error.providerStatus || null,
+              providerCode: error.providerCode || null
+            },
             claimed.runId
           );
           const c = (
@@ -1319,6 +1326,24 @@ export async function tick({
                 error.message,
                 3600
               );
+            } else {
+              const latest = (
+                await db.query(
+                  "SELECT message_id FROM support_message WHERE case_id=$1 AND actor='customer' ORDER BY message_seq DESC LIMIT 1",
+                  [c.case_id]
+                )
+              ).rows[0];
+              if (latest)
+                await message(
+                  db,
+                  c.case_id,
+                  'agent',
+                  needsSeller
+                    ? 'I could not verify an answer right now. Your message is saved for seller review.'
+                    : 'I am checking this with the support system. Your message is saved, and I will update you when I can verify an answer.',
+                  `support-status:${latest.message_id}:${needsSeller ? 'seller' : 'retry'}`,
+                  { retryNotice: true, sellerReview: needsSeller }
+                );
             }
           }
         });
@@ -1362,7 +1387,7 @@ export async function tick({
         (
           await db.query(
             `UPDATE support_knowledge SET state='analyzing',lease_until=now()+interval '90 seconds'
-      WHERE document_id=(SELECT document_id FROM support_knowledge WHERE ($1::uuid IS NULL OR document_id=$1) AND (state='queued' OR (state='analyzing' AND lease_until<now())) ORDER BY created_at LIMIT 1)
+      WHERE document_id=(SELECT document_id FROM support_knowledge WHERE ($1::uuid IS NULL OR document_id=$1) AND ((state='queued' AND (retry_at IS NULL OR retry_at<=now())) OR (state='analyzing' AND lease_until<now())) ORDER BY created_at LIMIT 1)
       RETURNING *`,
             [documentId]
           )
@@ -1372,14 +1397,21 @@ export async function tick({
       try {
         await reviewKnowledge(doc);
       } catch (error) {
+        const attempts = Number(doc.attempts || 0) + 1;
+        const retryable = error.retryable ?? [429, 503].includes(error.status);
+        const retry = retryable && attempts < 5;
         await pool.query(
-          "UPDATE support_knowledge SET state='failed',analysis=$3,lease_until=null WHERE document_id=$1 AND revision=$2",
+          "UPDATE support_knowledge SET state=$3,attempts=$4,retry_at=CASE WHEN $3='queued' THEN now()+$5*interval '1 second' ELSE null END,analysis=$6,lease_until=null WHERE document_id=$1 AND revision=$2",
           [
             doc.document_id,
             doc.revision,
+            retry ? 'queued' : 'failed',
+            attempts,
+            Math.max(300, Math.min(Number(error.retryAfter) || 300, 3600)),
             {
-              summary:
-                'Analysis could not finish. Your source is saved. Retry by adding a clarification.',
+              summary: retry
+                ? `The model is temporarily unavailable (${error.providerStatus || error.status || 'network error'}). Your source is saved and will retry automatically.`
+                : `The model could not review this source (${error.providerCode || error.providerStatus || error.status || 'unknown error'}). Your source is saved; retry the review or add a clarification.`,
               questions: []
             }
           ]
@@ -1389,9 +1421,17 @@ export async function tick({
             db,
             null,
             'agent',
-            'knowledge.failed',
-            'Knowledge analysis stopped safely.',
-            { documentId: doc.document_id, status: Number(error.status) || 500 }
+            retry ? 'knowledge.retry_scheduled' : 'knowledge.failed',
+            retry
+              ? 'Knowledge analysis will retry after a temporary model failure.'
+              : 'Knowledge analysis stopped after a non-retryable failure.',
+            {
+              documentId: doc.document_id,
+              status: Number(error.status) || 500,
+              providerStatus: error.providerStatus || null,
+              providerCode: error.providerCode || null,
+              attempts
+            }
           )
         );
       }
