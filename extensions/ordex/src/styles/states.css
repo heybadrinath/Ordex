@@ -1,0 +1,51 @@
+[data-slot='badge'] {
+  font-size: 12px;
+  min-height: 25px;
+  padding: 4px 9px;
+}
+[data-slot='badge'][data-variant='success'] {
+  color: var(--success);
+  background: var(--success-soft);
+}
+[data-slot='badge'][data-variant='warning'] {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.status-pill {
+  background: var(--muted);
+  color: var(--ink-subtle);
+  font-size: 12px;
+  font-weight: 500;
+}
+.status-pill.requested {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.status-pill.approved {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.status-pill.received,
+.status-pill.inspected {
+  background: var(--lavender);
+  color: #4e3f91;
+}
+.status-pill.refunded {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.status-pill.rejected {
+  background: var(--danger-soft);
+  color: var(--destructive);
+}
+.notice.error {
+  color: var(--destructive);
+  background: var(--danger-soft);
+  border: 1px solid #edc7d1;
+}
+.notice.success,
+.refund-receipt {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: #c8e3d1;
+}

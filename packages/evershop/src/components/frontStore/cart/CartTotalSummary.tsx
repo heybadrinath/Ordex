@@ -1,3 +1,4 @@
+// Modified for Ordex on 19 October 2026.
 import Area from '@components/common/Area.js';
 import { useAppState } from '@components/common/context/app.js';
 import { Skeleton } from '@components/common/ui/Skeleton.js';
@@ -100,6 +101,8 @@ const Discount: React.FC<{
   coupon: string | undefined;
   loading?: boolean;
 }> = ({ discountAmount, coupon, loading = false }) => {
+  const { data } = useCartState();
+  if (!data?.applyCouponApi) return null;
   if (!coupon) {
     return (
       <div className="gap-7 py-2">

@@ -138,6 +138,7 @@ export function PaymentMethods({
                                 <label className="flex items-center space-x-3 w-full cursor-pointer">
                                   <RadioGroupItem
                                     id={`payment-method-${method.code}`}
+                                    aria-label={method.name}
                                     value={method.code}
                                   />
                                   <span className="w-full select-none">

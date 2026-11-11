@@ -1,31 +1,51 @@
+import React from 'react';
+import { LogOut, Package, UserRound } from 'lucide-react';
+import { useAppState } from '@components/common/context/app.js';
 import { Button } from '@components/common/ui/Button.js';
 import { toast } from '@components/common/ui/Sonner.js';
-import { useCustomerDispatch } from '@components/frontStore/customer/CustomerContext.jsx';
-import { _ } from '@evershop/evershop/lib/locale/translate/_';
-import React from 'react';
+import { useCustomer, useCustomerDispatch } from './CustomerContext.js';
 
-/**
- * Account pages header: the "My account" title with a Log out button inline on
- * the right. Shared by the dashboard and the orders page.
- */
 export function AccountHeader() {
+  const { customer } = useCustomer();
   const { logout } = useCustomerDispatch();
-  const handleLogout = async () => {
-    try {
-      await logout();
-      window.location.href = '/';
-    } catch (error) {
-      toast.error((error as Error)?.message || _('Logout failed'));
-    }
-  };
+  const isOrders = useAppState()?.config?.pageMeta?.route?.id === 'orderList';
+  const firstName = customer?.fullName?.trim().split(' ')[0];
   return (
-    <div className="account-header mb-6 flex items-center justify-between gap-4">
-      <h1 className="text-3xl font-semibold tracking-tight">
-        {_('My account')}
-      </h1>
-      <Button variant="outline" size="sm" onClick={handleLogout}>
-        {_('Log out')}
+    <header className="account-header">
+      <div className="account-welcome">
+        <span className="account-heading-icon" aria-hidden="true">
+          {isOrders ? <Package size={24} /> : <UserRound size={24} />}
+        </span>
+        <div>
+          <h1>
+            {isOrders
+              ? 'Your orders'
+              : `Your account${firstName ? `, ${firstName}` : ''}`}
+          </h1>
+          <p>
+            {isOrders
+              ? 'Order history, delivery updates and support.'
+              : 'Manage your orders, contact details and saved addresses.'}
+          </p>
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={async () => {
+          try {
+            await logout();
+            window.location.href = '/';
+          } catch (error) {
+            toast.error(
+              (error as Error).message || 'Could not log out. Try again.'
+            );
+          }
+        }}
+      >
+        <LogOut size={15} />
+        Log out
       </Button>
-    </div>
+    </header>
   );
 }

@@ -24,7 +24,9 @@ export const DefaultMiniCartIcon = ({
       className={`mini-cart-icon relative rounded-md p-2 text-foreground/80 hover:bg-muted hover:text-foreground ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
       } ${isOpen ? 'active' : ''}`}
-      aria-label={`Shopping cart with ${totalQty} items`}
+      aria-label={`Shopping cart with ${totalQty} ${
+        totalQty === 1 ? 'item' : 'items'
+      }`}
     >
       {syncStatus.syncing ? (
         <div className="w-6 h-6 flex items-center justify-center">

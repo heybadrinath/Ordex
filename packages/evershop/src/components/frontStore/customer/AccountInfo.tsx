@@ -20,7 +20,7 @@ interface AccountInfoProps {
 /**
  * Save + Cancel on one row, inside the <Form> so the submit button drives the
  * form's own onSubmit. Reads `isSubmitting` from the form context to keep the
- * Save spinner. Cancel uses the destructive variant.
+ * Save spinner. Cancel leaves the saved profile unchanged.
  */
 function AccountInfoActions({ onCancel }: { onCancel: () => void }) {
   const {
@@ -31,7 +31,7 @@ function AccountInfoActions({ onCancel }: { onCancel: () => void }) {
       <Button type="submit" isLoading={isSubmitting}>
         {_('Save')}
       </Button>
-      <Button type="button" variant="destructive" onClick={onCancel}>
+      <Button type="button" variant="outline" onClick={onCancel}>
         {_('Cancel')}
       </Button>
     </div>
@@ -109,6 +109,7 @@ export default function AccountInfo({ title, showLogout }: AccountInfoProps) {
           <div className="grid grid-cols-1 gap-2 grow text-sm">
             <Area
               id="accountDetails"
+              noOuter
               coreComponents={[
                 {
                   component: {
@@ -119,7 +120,10 @@ export default function AccountInfo({ title, showLogout }: AccountInfoProps) {
                           height={16}
                           className="text-muted-foreground"
                         />
-                        <div>{account?.fullName}</div>
+                        <div>
+                          <span className="account-field-label">Full name</span>
+                          <strong>{account?.fullName}</strong>
+                        </div>
                       </div>
                     )
                   },
@@ -134,7 +138,12 @@ export default function AccountInfo({ title, showLogout }: AccountInfoProps) {
                           height={16}
                           className="text-muted-foreground"
                         />
-                        <div>{account?.email}</div>
+                        <div>
+                          <span className="account-field-label">
+                            Email address
+                          </span>
+                          <strong>{account?.email}</strong>
+                        </div>
                       </div>
                     )
                   },
@@ -143,14 +152,16 @@ export default function AccountInfo({ title, showLogout }: AccountInfoProps) {
               ]}
             />
           </div>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             type="button"
             className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
             onClick={() => setIsEditing(true)}
           >
             <Pencil width={14} height={14} />
-            {_('Edit')}
-          </button>
+            {_('Edit details')}
+          </Button>
         </div>
       )}
     </div>

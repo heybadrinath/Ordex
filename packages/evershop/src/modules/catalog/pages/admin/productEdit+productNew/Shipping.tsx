@@ -70,10 +70,8 @@ function NewPackageDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button variant="link" size="sm" type="button">
-          {_('+ New package')}
-        </Button>
+      <DialogTrigger render={<Button variant="link" size="sm" type="button" />}>
+        {_('+ New package')}
       </DialogTrigger>
       <DialogContent>
         <PackageForm
@@ -138,7 +136,7 @@ export default function Shipping({
     (product ? undefined : packages.find((p) => p.isDefault)?.packageId);
 
   return (
-    <Card>
+    <Card id="product-shipping">
       <CardHeader>
         <CardTitle>{_('Shipping')}</CardTitle>
         <CardDescription>

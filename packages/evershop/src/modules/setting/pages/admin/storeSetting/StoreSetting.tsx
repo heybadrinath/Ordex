@@ -1,6 +1,9 @@
+// Modified for Ordex on 20 October 2026.
 import { BrandAssetUploader } from '@components/admin/BrandAssetUploader.js';
 import { StandaloneMetafieldCard } from '@components/admin/metafield/StandaloneMetafieldCard.js';
-import { SettingMenu } from '@components/admin/SettingMenu.js';
+import { SettingsLayout } from '@components/admin/SettingsLayout.js';
+import { StoreIdentityPreview } from '@components/admin/SettingsPreviews.js';
+import { useForm } from 'react-hook-form';
 import Spinner from '@components/admin/Spinner.js';
 import Area from '@components/common/Area.js';
 import { EmailField } from '@components/common/form/EmailField.js';
@@ -11,13 +14,9 @@ import { SelectField } from '@components/common/form/SelectField.js';
 import { TelField } from '@components/common/form/TelField.js';
 import { TextareaField } from '@components/common/form/TextareaField.js';
 import { ToggleField } from '@components/common/form/ToggleField.js';
-import { Button } from '@components/common/ui/Button.js';
 import {
-  Card,
   CardContent,
   CardDescription,
-  CardFooter,
-  CardHeader,
   CardTitle
 } from '@components/common/ui/Card.js';
 import { Item } from '@components/common/ui/Item.js';
@@ -117,7 +116,11 @@ const StoreRegion: React.FC<{
   selectedCountry: string;
   selectedRegion: string;
   fieldName?: string;
-}> = ({ selectedCountry = 'US', selectedRegion, fieldName = 'storeProvince' }) => {
+}> = ({
+  selectedCountry = 'US',
+  selectedRegion,
+  fieldName = 'storeProvince'
+}) => {
   const { setValue } = useFormContext();
 
   const [result] = useQuery({
@@ -404,6 +407,11 @@ export default function StoreSetting({
     allowGuestCheckout
   }
 }: StoreSettingProps) {
+  const form = useForm({ shouldUnregister: true, shouldFocusError: false });
+  const timezoneOptions =
+    !storeTimeZone || timezones.some(({ code }) => code === storeTimeZone)
+      ? timezones
+      : [{ code: storeTimeZone, name: storeTimeZone }, ...timezones];
   const [selectedCountry, setSelectedCountry] = React.useState(() => {
     const country = storeCountry;
     if (!country) {
@@ -422,290 +430,293 @@ export default function StoreSetting({
   };
 
   return (
-    <div className="main-content-inner">
-      <div className="grid grid-cols-6 gap-x-5 grid-flow-row ">
-        <div className="col-span-2">
-          <SettingMenu />
-        </div>
-        <div className="col-span-4">
-          <Form
-            method="POST"
-            id="storeSetting"
-            action={saveSettingApi}
-            onSuccess={onSuccess}
-            submitBtn={false}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{_('Store Settings')}</CardTitle>
-                <CardDescription>
-                  {_('Configure your store information')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Area
-                  id="storeInfoSetting"
-                  className="space-y-3"
-                  coreComponents={[
-                    {
-                      component: {
-                        default: (
-                          <InputField
-                            name="storeName"
-                            label={_('Store Name')}
-                            required
-                            placeholder={_('Store Name')}
-                            defaultValue={storeName}
-                          />
-                        )
-                      },
-                      sortOrder: 10
-                    },
-                    {
-                      component: {
-                        default: (
-                          <TextareaField
-                            name="storeDescription"
-                            label={_('Store Description')}
-                            placeholder={_('Store Description')}
-                            defaultValue={storeDescription}
-                            required
-                          />
-                        )
-                      },
-                      sortOrder: 20
-                    }
-                  ]}
-                />
-              </CardContent>
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Contact Information')}</CardTitle>
-                <Area
-                  id="storeContactSetting"
-                  coreComponents={[
-                    {
-                      component: {
-                        default: StorePhoneNumber
-                      },
-                      props: {
-                        storePhoneNumber
-                      },
-                      sortOrder: 10
-                    },
-                    {
-                      component: {
-                        default: StoreEmail
-                      },
-                      props: {
-                        storeEmail
-                      },
-                      sortOrder: 20
-                    }
-                  ]}
-                  className="grid grid-cols-2 gap-5 mt-5"
-                />
-              </CardContent>
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Address')}</CardTitle>
-                <div className="space-y-3">
-                  <Country
-                    selectedCountry={storeCountry}
-                    setSelectedCountry={setSelectedCountry}
-                  />
-                  <InputField
-                    name="storeAddress"
-                    label={_('Address')}
-                    defaultValue={storeAddress}
-                    placeholder={_('Store Address')}
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-5 mt-5">
-                  <div>
-                    <InputField
-                      name="storeCity"
-                      label={_('City')}
-                      defaultValue={storeCity}
-                      placeholder={_('City')}
-                    />
-                  </div>
-                  <StoreRegion
-                    selectedRegion={storeProvince}
-                    selectedCountry={selectedCountry}
-                  />
-                  <div>
-                    <InputField
-                      name="storePostalCode"
-                      label={_('Postal Code')}
-                      defaultValue={storePostalCode}
-                      placeholder={_('Postal Code')}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <LanguageSettings
-                storeLanguage={storeLanguage}
-                storeLanguages={storeLanguages}
-                adminLanguage={adminLanguage}
-              />
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Regional & Units')}</CardTitle>
-                <div className="grid grid-cols-2 gap-5 mt-5">
-                  <SelectField
-                    name="storeCurrency"
-                    label={_('Currency')}
-                    defaultValue={storeCurrency}
-                    required
-                    options={currencies.map((c) => ({
-                      value: c.code,
-                      label: `${c.name} (${c.code})`
-                    }))}
-                    helperText={_(
-                      'Default currency for new carts and price display. Existing orders keep their own currency.'
-                    )}
-                  />
-                  <SelectField
-                    name="storeTimeZone"
-                    label={_('Timezone')}
-                    defaultValue={storeTimeZone}
-                    required
-                    options={timezones.map((t) => ({
-                      value: t.code,
-                      label: t.name
-                    }))}
-                    helperText={_(
-                      'Timezone used to display dates in the store.'
-                    )}
-                  />
-                  <SelectField
-                    name="weightUnit"
-                    label={_('Weight unit')}
-                    defaultValue={weightUnit}
-                    required
-                    options={WEIGHT_UNITS}
-                  />
-                  <SelectField
-                    name="dimensionUnit"
-                    label={_('Dimension unit')}
-                    defaultValue={dimensionUnit}
-                    required
-                    options={DIMENSION_UNITS}
-                  />
-                </div>
-              </CardContent>
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Branding')}</CardTitle>
-                <CardDescription>
-                  {_(
-                    'Your logo, favicon, and the image shown when your store is shared on social media.'
-                  )}
-                </CardDescription>
-                <div className="space-y-8 mt-5">
-                  <div>
-                    <div className="font-medium mb-1">{_('Logo')}</div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {_(
-                        'Shown in the storefront header. Use a high-resolution PNG with a transparent background — it is scaled to fit your theme automatically and served as optimized WebP.'
-                      )}
-                    </p>
-                    <BrandAssetUploader
-                      name="logo"
-                      defaultValue={logo}
-                      previewType="logo"
-                      widthName="logoWidth"
-                      heightName="logoHeight"
-                      defaultWidth={logoWidth}
-                      defaultHeight={logoHeight}
-                    />
-                  </div>
-                  <div>
-                    <div className="font-medium mb-1">{_('Favicon')}</div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {_(
-                        'The small icon in browser tabs. Upload a square PNG of at least 512×512px — the 16/32px icons and the 180px Apple touch icon are generated automatically.'
-                      )}
-                    </p>
-                    <BrandAssetUploader
-                      name="favicon"
-                      defaultValue={favicon}
-                      previewType="favicon"
-                    />
-                  </div>
-                  <div>
-                    <div className="font-medium mb-1">
-                      {_('Social sharing image')}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {_(
-                        'The preview shown when a page is shared on social media (Open Graph / Twitter). Recommended 1200×630px (1.91:1), PNG or JPG.'
-                      )}
-                    </p>
-                    <BrandAssetUploader
-                      name="socialSharingImage"
-                      defaultValue={socialSharingImage}
-                      previewType="social"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Analytics')}</CardTitle>
-                <div className="mt-5">
-                  <InputField
-                    name="gaMeasurementId"
-                    label={_('Google Analytics 4 Measurement ID')}
-                    placeholder="G-XXXXXXXXXX"
-                    defaultValue={gaMeasurementId}
-                    helperText={_(
-                      'Found in Google Analytics under Admin → Data Streams → your web stream. Leave empty to disable tracking.'
-                    )}
-                    validation={{
-                      pattern: {
-                        value: /^G-[A-Z0-9]+$/i,
-                        message: _(
-                          'Enter a valid GA4 Measurement ID, e.g. G-XXXXXXXXXX'
-                        )
-                      }
-                    }}
-                  />
-                </div>
-              </CardContent>
-              <CardContent className="pt-3 border-t border-border">
-                <CardTitle>{_('Checkout')}</CardTitle>
-                <div className="mt-4">
-                  <ToggleField
-                    name="allowGuestCheckout"
-                    label={_('Allow guest checkout')}
-                    defaultValue={allowGuestCheckout ?? true}
-                    helperText={_(
-                      'When enabled, shoppers can place an order without an account. When disabled, they must log in or register to check out.'
-                    )}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <div className="flex justify-end w-full">
-                  <Button
-                    type="submit"
-                    className="btn btn-primary"
-                    form="storeSetting"
-                  >
-                    {_('Save Settings')}
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </Form>
-          <div className="mt-6">
-            <ShopCustomFields
-              setting={{
-                metaData,
-                shopMetafieldsApi
-              }}
+    <SettingsLayout
+      title={_('Store settings')}
+      description={_(
+        'Manage your store details, location and shopping preferences.'
+      )}
+      formId="storeSetting"
+      preview={
+        <StoreIdentityPreview
+          control={form.control}
+          initial={{ storeName, storeCurrency, storeCountry, storeTimeZone }}
+        />
+      }
+      saving={form.formState.isSubmitting}
+    >
+      <Form
+        form={form}
+        method="POST"
+        id="storeSetting"
+        action={saveSettingApi}
+        onSuccess={onSuccess}
+        submitBtn={false}
+      >
+        <div className="settings-sections">
+          <CardContent id="store-profile">
+            <CardTitle>{_('Store identity')}</CardTitle>
+            <CardDescription>
+              {_(
+                'The name and description customers see when they visit your store.'
+              )}
+            </CardDescription>
+            <Area
+              id="storeInfoSetting"
+              className="space-y-4 mt-5"
+              coreComponents={[
+                {
+                  component: {
+                    default: (
+                      <InputField
+                        name="storeName"
+                        label={_('Store Name')}
+                        required
+                        placeholder={_('Store Name')}
+                        defaultValue={storeName}
+                      />
+                    )
+                  },
+                  sortOrder: 10
+                },
+                {
+                  component: {
+                    default: (
+                      <TextareaField
+                        name="storeDescription"
+                        label={_('Store Description')}
+                        placeholder={_('Store Description')}
+                        defaultValue={storeDescription}
+                        required
+                      />
+                    )
+                  },
+                  sortOrder: 20
+                }
+              ]}
             />
-          </div>
+          </CardContent>
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Contact details')}</CardTitle>
+            <CardDescription>
+              {_('How customers can reach your store.')}
+            </CardDescription>
+            <Area
+              id="storeContactSetting"
+              coreComponents={[
+                {
+                  component: {
+                    default: StorePhoneNumber
+                  },
+                  props: {
+                    storePhoneNumber
+                  },
+                  sortOrder: 10
+                },
+                {
+                  component: {
+                    default: StoreEmail
+                  },
+                  props: {
+                    storeEmail
+                  },
+                  sortOrder: 20
+                }
+              ]}
+              className="grid grid-cols-2 gap-5 mt-5"
+            />
+          </CardContent>
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Store address')}</CardTitle>
+            <CardDescription>
+              {_('Your business location and the region used by your store.')}
+            </CardDescription>
+            <div className="space-y-3">
+              <Country
+                selectedCountry={storeCountry}
+                setSelectedCountry={setSelectedCountry}
+              />
+              <InputField
+                name="storeAddress"
+                label={_('Address')}
+                defaultValue={storeAddress}
+                placeholder={_('Store Address')}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-5 mt-5">
+              <div>
+                <InputField
+                  name="storeCity"
+                  label={_('City')}
+                  defaultValue={storeCity}
+                  placeholder={_('City')}
+                />
+              </div>
+              <StoreRegion
+                selectedRegion={storeProvince}
+                selectedCountry={selectedCountry}
+              />
+              <div>
+                <InputField
+                  name="storePostalCode"
+                  label={_('Postal Code')}
+                  defaultValue={storePostalCode}
+                  placeholder={_('Postal Code')}
+                />
+              </div>
+            </div>
+          </CardContent>
+          <LanguageSettings
+            storeLanguage={storeLanguage}
+            storeLanguages={storeLanguages}
+            adminLanguage={adminLanguage}
+          />
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Region & units')}</CardTitle>
+            <CardDescription>
+              {_('Currency, time zone and measurement units for your store.')}
+            </CardDescription>
+            <div className="grid grid-cols-2 gap-5 mt-5">
+              <SelectField
+                name="storeCurrency"
+                label={_('Currency')}
+                defaultValue={storeCurrency}
+                required
+                options={currencies.map((c) => ({
+                  value: c.code,
+                  label: `${c.name} (${c.code})`
+                }))}
+                helperText={_(
+                  'Default currency for new carts and price display. Existing orders keep their own currency.'
+                )}
+              />
+              <SelectField
+                name="storeTimeZone"
+                label={_('Timezone')}
+                defaultValue={storeTimeZone}
+                required
+                options={timezoneOptions.map((t) => ({
+                  value: t.code,
+                  label: t.name
+                }))}
+                helperText={_('Timezone used to display dates in the store.')}
+              />
+              <SelectField
+                name="weightUnit"
+                label={_('Weight unit')}
+                defaultValue={weightUnit}
+                required
+                options={WEIGHT_UNITS}
+              />
+              <SelectField
+                name="dimensionUnit"
+                label={_('Dimension unit')}
+                defaultValue={dimensionUnit}
+                required
+                options={DIMENSION_UNITS}
+              />
+            </div>
+          </CardContent>
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Branding')}</CardTitle>
+            <CardDescription>
+              {_(
+                'Your logo, favicon, and the image shown when your store is shared on social media.'
+              )}
+            </CardDescription>
+            <div className="space-y-8 mt-5">
+              <div>
+                <div className="font-medium mb-1">{_('Logo')}</div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {_(
+                    'Shown in the storefront header. Use a high-resolution PNG with a transparent background — it is scaled to fit your theme automatically and served as optimized WebP.'
+                  )}
+                </p>
+                <BrandAssetUploader
+                  name="logo"
+                  defaultValue={logo}
+                  previewType="logo"
+                  widthName="logoWidth"
+                  heightName="logoHeight"
+                  defaultWidth={logoWidth}
+                  defaultHeight={logoHeight}
+                />
+              </div>
+              <div>
+                <div className="font-medium mb-1">{_('Favicon')}</div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {_(
+                    'The small icon in browser tabs. Upload a square PNG of at least 512×512px — the 16/32px icons and the 180px Apple touch icon are generated automatically.'
+                  )}
+                </p>
+                <BrandAssetUploader
+                  name="favicon"
+                  defaultValue={favicon}
+                  previewType="favicon"
+                />
+              </div>
+              <div>
+                <div className="font-medium mb-1">
+                  {_('Social sharing image')}
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {_(
+                    'The preview shown when a page is shared on social media (Open Graph / Twitter). Recommended 1200×630px (1.91:1), PNG or JPG.'
+                  )}
+                </p>
+                <BrandAssetUploader
+                  name="socialSharingImage"
+                  defaultValue={socialSharingImage}
+                  previewType="social"
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Analytics')}</CardTitle>
+            <div className="mt-5">
+              <InputField
+                name="gaMeasurementId"
+                label={_('Google Analytics 4 Measurement ID')}
+                placeholder="G-XXXXXXXXXX"
+                defaultValue={gaMeasurementId}
+                helperText={_(
+                  'Found in Google Analytics under Admin → Data Streams → your web stream. Leave empty to disable tracking.'
+                )}
+                validation={{
+                  pattern: {
+                    value: /^G-[A-Z0-9]+$/i,
+                    message: _(
+                      'Enter a valid GA4 Measurement ID, e.g. G-XXXXXXXXXX'
+                    )
+                  }
+                }}
+              />
+            </div>
+          </CardContent>
+          <CardContent className="pt-3 border-t border-border">
+            <CardTitle>{_('Checkout')}</CardTitle>
+            <div className="mt-4">
+              <ToggleField
+                name="allowGuestCheckout"
+                label={_('Allow guest checkout')}
+                defaultValue={allowGuestCheckout ?? true}
+                helperText={_(
+                  'When enabled, shoppers can place an order without an account. When disabled, they must log in or register to check out.'
+                )}
+              />
+            </div>
+          </CardContent>
         </div>
+      </Form>
+      <div className="mt-6">
+        <ShopCustomFields
+          setting={{
+            metaData,
+            shopMetafieldsApi
+          }}
+        />
       </div>
-    </div>
+    </SettingsLayout>
   );
 }
 

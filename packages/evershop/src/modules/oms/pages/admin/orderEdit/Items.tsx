@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import { Badge } from '@components/common/ui/Badge.js';
 import {
   Card,
@@ -8,7 +9,10 @@ import {
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import { CheckCircle2, Package } from 'lucide-react';
 import React from 'react';
-import { NewShipmentDialog, type UnshippedItem } from './Shipments/NewShipmentDialog.js';
+import {
+  NewShipmentDialog,
+  type UnshippedItem
+} from './Shipments/NewShipmentDialog.js';
 import { PhaseBadge } from './Shipments/phaseBadge.js';
 
 interface VariantOption {
@@ -44,6 +48,7 @@ interface Carrier {
 
 interface ItemsProps {
   order: {
+    status: { code: string };
     items: OrderItem[];
     unshippedItems: UnshippedItem[];
     noShippingRequired: boolean;
@@ -57,14 +62,17 @@ interface ItemsProps {
 
 function ItemRow({
   item,
-  unshippedMap
+  unshippedMap,
+  canceled
 }: {
   item: OrderItem;
+  canceled: boolean;
   unshippedMap: Map<number, number>;
 }) {
   const isDigital = item.noShippingRequired;
   const remaining = unshippedMap.get(Number(item.orderItemId)) ?? 0;
   const showRemainHint =
+    !canceled &&
     !isDigital &&
     item.fulfillmentBadge === 'partial_shipped' &&
     remaining > 0;
@@ -76,10 +84,13 @@ function ItemRow({
       }`}
     >
       {item.thumbnail ? (
-        <img
+        <Image
+          unoptimized
           src={item.thumbnail}
           alt={item.productName}
           className="size-13 rounded-md object-cover border border-divider shrink-0"
+          width={72}
+          height={72}
         />
       ) : (
         <div className="size-13 rounded-md border border-divider bg-muted/40 shrink-0" />
@@ -94,7 +105,9 @@ function ItemRow({
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
             {item.variantOptions.map((opt) => (
               <span
-                key={`${opt.attributeCode ?? opt.attributeName}-${opt.optionText}`}
+                key={`${opt.attributeCode ?? opt.attributeName}-${
+                  opt.optionText
+                }`}
                 className="text-xs text-muted-foreground whitespace-nowrap"
               >
                 <span className="font-semibold">{opt.attributeName}:</span>{' '}
@@ -104,7 +117,7 @@ function ItemRow({
           </div>
         )}
         <div className="mt-2">
-          <PhaseBadge code={item.fulfillmentBadge} />
+          <PhaseBadge code={canceled ? 'canceled' : item.fulfillmentBadge} />
         </div>
       </div>
 
@@ -146,14 +159,17 @@ export default function Items({ order, carriers }: ItemsProps) {
   } = order;
 
   const defaultCarrierCode = shippingMethodData?.snapshot?.carrier ?? null;
-  const canCreateShipment = unshippedItems.length > 0 && !noShippingRequired;
+  const terminal = ['canceled', 'closed'].includes(order.status.code);
+  const canCreateShipment =
+    unshippedItems.length > 0 && !noShippingRequired && !terminal;
 
   // Quick lookup from orderItemId → qtyUnshipped for the "N left to ship" hint.
   const unshippedMap = new Map<number, number>();
-  for (const u of unshippedItems) unshippedMap.set(u.orderItemId, u.qtyUnshipped);
+  for (const u of unshippedItems)
+    unshippedMap.set(u.orderItemId, u.qtyUnshipped);
 
   return (
-    <Card>
+    <Card id="order-items">
       <CardHeader className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Package className="size-4 text-muted-foreground" />
@@ -164,6 +180,8 @@ export default function Items({ order, carriers }: ItemsProps) {
         </div>
         {noShippingRequired ? (
           <Badge variant="outline">{_('No shipping required')}</Badge>
+        ) : terminal ? (
+          <Badge variant="outline">No further shipments</Badge>
         ) : canCreateShipment ? (
           <NewShipmentDialog
             unshippedItems={unshippedItems}
@@ -184,6 +202,7 @@ export default function Items({ order, carriers }: ItemsProps) {
           <ItemRow
             key={item.orderItemId}
             item={item}
+            canceled={order.status.code === 'canceled'}
             unshippedMap={unshippedMap}
           />
         ))}
@@ -200,6 +219,7 @@ export const layout = {
 export const query = `
   query Query {
     order(uuid: getContextValue("orderId")) {
+      status { code }
       noShippingRequired
       createShipmentApi
       shippingMethodData {

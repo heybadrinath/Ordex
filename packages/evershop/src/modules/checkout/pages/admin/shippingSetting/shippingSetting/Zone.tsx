@@ -155,10 +155,7 @@ export function Zone({ zone, reload, warnings = [] }: ZoneProps) {
           </Dialog>
           <ConfirmDialog
             trigger={
-              <button
-                type="button"
-                className="text-destructive cursor-pointer"
-              >
+              <button type="button" className="text-destructive cursor-pointer">
                 {_('Remove Zone')}
               </button>
             }
@@ -303,10 +300,12 @@ export function Zone({ zone, reload, warnings = [] }: ZoneProps) {
 
           <div className="mt-2">
             <Dialog open={attachOpen} onOpenChange={setAttachOpen}>
-              <DialogTrigger>
-                <Button variant="outline" size="sm" className="text-xs">
-                  {_('+ Attach Provider')}
-                </Button>
+              <DialogTrigger
+                render={
+                  <Button variant="outline" size="sm" className="text-xs" />
+                }
+              >
+                {_('+ Attach Provider')}
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>

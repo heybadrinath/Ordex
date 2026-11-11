@@ -1,5 +1,6 @@
 import { PackageForm, PackageData } from '@components/admin/PackageForm.js';
 import Spinner from '@components/admin/Spinner.jsx';
+import { PackageDrawing } from '@components/admin/SettingsPreviews.js';
 import { Badge } from '@components/common/ui/Badge.js';
 import { Button } from '@components/common/ui/Button.js';
 import { ConfirmDialog } from '@components/common/ui/ConfirmDialog.js';
@@ -78,86 +79,114 @@ export function Packages() {
 
   return (
     <div className="px-5 pb-5">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left border-b border-border">
-            <th className="py-2">{_('Name')}</th>
-            <th className="py-2">{_('Size (L × W × H)')}</th>
-            <th className="py-2">{_('Empty weight')}</th>
-            <th className="py-2" />
-          </tr>
-        </thead>
-        <tbody>
-          {packages.map((pkg) => (
-            <tr key={pkg.uuid} className="border-b border-border">
-              <td className="py-2">
-                {pkg.name}{' '}
-                {pkg.isDefault && (
-                  <Badge variant="secondary">{_('Default')}</Badge>
-                )}
-              </td>
-              <td className="py-2">
+      <div className="package-preview-grid">
+        {packages.map((pkg) => (
+          <button
+            type="button"
+            key={pkg.uuid}
+            onClick={() => setEditing(pkg)}
+            aria-label={`Edit package ${pkg.name}`}
+            className="package-preview-card"
+          >
+            <PackageDrawing
+              length={pkg.length}
+              width={pkg.width}
+              height={pkg.height}
+            />
+            <span>
+              <strong>{pkg.name}</strong>
+              <small>
                 {pkg.length} × {pkg.width} × {pkg.height} {dimensionUnit}
-                {pkg.height === 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {' '}
-                    {_('(envelope)')}
-                  </span>
-                )}
-              </td>
-              <td className="py-2">{pkg.weight?.value ?? 0} {pkg.weight?.unit ?? weightUnit}</td>
-              <td className="py-2 text-right space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={() => setEditing(pkg)}
-                >
-                  {_('Edit')}
-                </Button>
-                <ConfirmDialog
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      disabled={pkg.isDefault}
-                      title={
-                        pkg.isDefault
-                          ? _('The default package cannot be deleted')
-                          : undefined
-                      }
-                    >
-                      {_('Delete')}
-                    </Button>
-                  }
-                  title={_('Delete package "${name}"?', { name: pkg.name })}
-                  description={_(
-                    "This cannot be undone. Packages still assigned to products can't be removed."
+              </small>
+              {pkg.isDefault && <b>Default package</b>}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left border-b border-border">
+              <th className="py-2">{_('Name')}</th>
+              <th className="py-2">{_('Size (L × W × H)')}</th>
+              <th className="py-2">{_('Empty weight')}</th>
+              <th className="py-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {packages.map((pkg) => (
+              <tr key={pkg.uuid} className="border-b border-border">
+                <td className="py-2">
+                  {pkg.name}{' '}
+                  {pkg.isDefault && (
+                    <Badge variant="secondary">{_('Default')}</Badge>
                   )}
-                  confirmLabel={_('Delete')}
-                  confirmVariant="destructive"
-                  onConfirm={() => onDelete(pkg)}
-                />
-              </td>
-            </tr>
-          ))}
-          {packages.length === 0 && (
-            <tr>
-              <td colSpan={4} className="py-4 text-muted-foreground">
-                {_(
-                  'No packages yet. Create one — shippable products require a package.'
-                )}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                </td>
+                <td className="py-2">
+                  {pkg.length} × {pkg.width} × {pkg.height} {dimensionUnit}
+                  {pkg.height === 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {' '}
+                      {_('(envelope)')}
+                    </span>
+                  )}
+                </td>
+                <td className="py-2">
+                  {pkg.weight?.value ?? 0} {pkg.weight?.unit ?? weightUnit}
+                </td>
+                <td className="py-2 text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setEditing(pkg)}
+                  >
+                    {_('Edit')}
+                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        disabled={pkg.isDefault}
+                        title={
+                          pkg.isDefault
+                            ? _('The default package cannot be deleted')
+                            : undefined
+                        }
+                      >
+                        {_('Delete')}
+                      </Button>
+                    }
+                    title={_('Delete package "${name}"?', { name: pkg.name })}
+                    description={_(
+                      "This cannot be undone. Packages still assigned to products can't be removed."
+                    )}
+                    confirmLabel={_('Delete')}
+                    confirmVariant="destructive"
+                    onConfirm={() => onDelete(pkg)}
+                  />
+                </td>
+              </tr>
+            ))}
+            {packages.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-4 text-muted-foreground">
+                  {_(
+                    'No packages yet. Create one — shippable products require a package.'
+                  )}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <div className="flex justify-end mt-3">
-          <DialogTrigger>
-            <Button>{_('Create New Package')}</Button>
+          <DialogTrigger render={<Button />}>
+            {_('Create New Package')}
           </DialogTrigger>
         </div>
         <DialogContent>

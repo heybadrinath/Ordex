@@ -165,6 +165,7 @@ export default function General({ category }: GeneralProps) {
       component: {
         default: (
           <Editor
+            columnToolbar={false}
             name="description"
             label={_('Description')}
             value={category?.description || []}
@@ -176,7 +177,7 @@ export default function General({ category }: GeneralProps) {
   ];
 
   return (
-    <Card>
+    <Card id="category-details" className="editor-section-card">
       <CardHeader>
         <CardTitle>{_('General')}</CardTitle>
         <CardDescription>

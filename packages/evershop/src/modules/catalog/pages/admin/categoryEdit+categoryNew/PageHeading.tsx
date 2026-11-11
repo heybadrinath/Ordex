@@ -1,6 +1,7 @@
 import { PageHeading } from '@components/admin/PageHeading.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { FolderTree } from 'lucide-react';
 
 export interface CategoryEditPageHeadingProps {
   backUrl: string;
@@ -16,6 +17,9 @@ export default function CategoryEditPageHeading({
   return (
     <PageHeading
       backUrl={backUrl}
+      eyebrow="Catalog editor"
+      description="Build a clear place for customers to discover these products."
+      icon={<FolderTree size={24} />}
       heading={
         category
           ? _('Editing ${name}', { name: category.name || '' })

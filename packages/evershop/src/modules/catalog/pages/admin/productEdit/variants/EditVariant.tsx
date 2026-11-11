@@ -24,14 +24,17 @@ export const EditVariant: React.FC<{
   return (
     <div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger>
-          <Button
-            variant={'link'}
-            className={'h-7 w-7 p-0 hover:cursor-pointer'}
-            title={_('Edit variant')}
-          >
-            <Cog className="w-4 h-4 text-primary" />
-          </Button>
+        <DialogTrigger
+          render={
+            <Button
+              variant={'link'}
+              className={'h-7 w-7 p-0 hover:cursor-pointer'}
+              title={_('Edit variant')}
+              aria-label={_('Edit variant')}
+            />
+          }
+        >
+          <Cog className="w-4 h-4 text-primary" />
         </DialogTrigger>
         <DialogContent className={'sm:max-w-212.5'}>
           <DialogHeader>

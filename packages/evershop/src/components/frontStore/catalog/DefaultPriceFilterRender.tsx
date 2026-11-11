@@ -77,6 +77,7 @@ export const DefaultPriceFilterRender: React.FC<{
       <div className="price__filter border-b border-border pb-8 mb-8">
         <div className="price__slider mb-4">
           <Slider
+            thumbLabels={[_('Minimum price'), _('Maximum price')]}
             min={priceRange.min}
             max={priceRange.max}
             value={[localMin, localMax]}

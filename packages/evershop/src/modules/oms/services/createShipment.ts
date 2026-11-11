@@ -333,18 +333,14 @@ async function buildCreateLabelInput(
   };
   // Weight unit is store-wide (admin setting `weightUnit`); `order_item.product_weight`
   // is stored in that unit. Normalize to the `Weight.unit` vocabulary.
-  const rawUnit = String(getWeightUnit())
-    .toLowerCase()
-    .replace(/s$/, '');
-  const weightUnit = (['kg', 'g', 'lb', 'oz'] as const).find(
-    (u) => u === rawUnit
-  ) ?? 'kg';
+  const rawUnit = String(getWeightUnit()).toLowerCase().replace(/s$/, '');
+  const weightUnit =
+    (['kg', 'g', 'lb', 'oz'] as const).find((u) => u === rawUnit) ?? 'kg';
   // Dimension unit is store-wide (admin setting `dimensionUnit`); the order_item
   // package snapshot is stored in that unit.
   const rawDimUnit = String(getDimensionUnit()).toLowerCase();
-  const dimensionUnit = (['cm', 'mm', 'in'] as const).find(
-    (u) => u === rawDimUnit
-  ) ?? 'cm';
+  const dimensionUnit =
+    (['cm', 'mm', 'in'] as const).find((u) => u === rawDimUnit) ?? 'cm';
 
   let goodsWeight = 0;
   const parcelCandidates: PackingCandidate[] = [];
@@ -362,7 +358,10 @@ async function buildCreateLabelInput(
     const width = oi?.package_width ? Number(oi.package_width) : NaN;
     const height = oi?.package_height ? Number(oi.package_height) : NaN;
     const hasDims =
-      Number.isFinite(length) && Number.isFinite(width) && length > 0 && width > 0;
+      Number.isFinite(length) &&
+      Number.isFinite(width) &&
+      length > 0 &&
+      width > 0;
     if (Number.isFinite(weightValue)) {
       goodsWeight += weightValue * c.qty;
     }
@@ -574,6 +573,18 @@ const createShipmentImpl = async function createShipment(
     if (ownsTx) await startTransaction(connection);
     await acquireOrderLock(connection as PoolClient, order.order_id);
 
+    const lockedOrder = (
+      await connection.query(
+        'SELECT status FROM "order" WHERE order_id=$1 FOR UPDATE',
+        [order.order_id]
+      )
+    ).rows[0];
+    if (!lockedOrder || isTerminalOrderStatus(lockedOrder.status)) {
+      throw new Error(
+        'This order can no longer be shipped. Reload its current status.'
+      );
+    }
+
     // Re-validate qty under the lock — concurrent shipments may have committed
     // between phase 1 and phase 2.
     await hookable(validateShipmentItems, { order, payload })(
@@ -683,7 +694,7 @@ const createShipmentImpl = async function createShipment(
     }
     throw e;
   }
-}
+};
 
 const createShipmentDefault = hookable(createShipmentImpl, {});
 

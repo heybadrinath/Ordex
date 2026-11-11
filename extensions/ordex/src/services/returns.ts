@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { PoolClient } from 'pg';
 import { pool } from '@evershop/evershop/lib/postgres';
 import { refundOrder } from '@evershop/evershop/oms/services';
 
@@ -13,8 +14,11 @@ const fail = (message: string, status = 400) => {
   throw Object.assign(new Error(message), { status });
 };
 
-async function transaction(work) {
-  const connection = await pool.connect();
+async function transaction(work, existing?) {
+  if (existing) return work(existing);
+  const connection = (await pool.connect()) as PoolClient & {
+    INTRANSACTION: boolean;
+  };
   try {
     await connection.query('BEGIN');
     // Core query helpers release only connections outside their own transaction.
@@ -29,6 +33,15 @@ async function transaction(work) {
     connection.INTRANSACTION = false;
     connection.release();
   }
+}
+
+export async function returnWindowDays(connection = pool) {
+  const {
+    rows: [policy]
+  } = await connection.query(
+    'SELECT p.settings FROM support_state s JOIN support_policy p ON p.policy_id=s.policy_id WHERE s.id=1'
+  );
+  return Number(policy.settings.returnWindowDays);
 }
 
 export async function listOrders(customerId: number) {
@@ -54,6 +67,7 @@ export async function listReturns(customerId?: number) {
     `
     SELECT r.*, o.uuid AS order_uuid, o.order_number, o.currency, o.customer_full_name,
       o.customer_email,
+      CASE WHEN $1::integer IS NULL THEN (SELECT json_build_object('case_id',c.case_id,'controller',c.controller,'status',c.status,'next_action',c.next_action) FROM support_case c WHERE c.order_id=o.order_id) END AS support,
       (SELECT jsonb_agg(jsonb_build_object('id',i.order_item_id,'name',i.product_name,
         'thumbnail',i.thumbnail,'sku',i.product_sku,'qty',ri.qty,'amount_minor',ri.amount_minor))
        FROM customer_return_item ri JOIN order_item i USING(order_item_id) WHERE ri.return_id=r.return_id) AS items,
@@ -67,7 +81,11 @@ export async function listReturns(customerId?: number) {
   return rows;
 }
 
-export async function createReturn(customerId: number, input) {
+export async function createReturn(
+  customerId: number,
+  input,
+  options: { connection?: any } = {}
+) {
   if (
     !input ||
     typeof input.orderId !== 'string' ||
@@ -139,9 +157,13 @@ export async function createReturn(customerId: number, input) {
     );
     if (!delivery?.delivered_at || order.shipment_status !== 'delivered')
       fail('Returns open after the order has been delivered.');
-    if (Date.now() - new Date(delivery.delivered_at).getTime() > 7 * 86400000)
-      fail('The seven-day return window has closed.');
-    const selected = [];
+    const windowDays = await returnWindowDays(connection);
+    if (
+      Date.now() - new Date(delivery.delivered_at).getTime() >
+      windowDays * 86400000
+    )
+      fail(`The ${windowDays}-day return window has closed.`);
+    const selected: { id: number; qty: number; amountMinor: number }[] = [];
     let totalMinor = 0;
     for (const item of items) {
       const {
@@ -192,17 +214,23 @@ export async function createReturn(customerId: number, input) {
       [saved.return_id, 'customer', 'Return requested.']
     );
     return saved;
-  });
+  }, options.connection);
 }
 
 export async function updateReturn(
   id: string,
   action: string,
   input,
-  seller: string
+  seller: string,
+  options: { connection?: any } = {}
 ) {
   if (!/^[a-f0-9-]{36}$/i.test(id)) fail('Return not found.', 404);
   return transaction(async (connection) => {
+    // Lock orders before returns in both the manual and automated paths.
+    await connection.query(
+      'SELECT order_id FROM "order" WHERE order_id=(SELECT order_id FROM customer_return WHERE return_id=$1) FOR UPDATE',
+      [id]
+    );
     const {
       rows: [record]
     } = await connection.query(
@@ -278,20 +306,18 @@ export async function updateReturn(
       [id, seller, message]
     );
     return saved;
-  });
+  }, options.connection);
 }
 
 export function apiError(response, error) {
   const status = Number(error.status) || 500;
-  response
-    .status(status)
-    .json({
-      error: {
-        message:
-          status === 500
-            ? 'The operation could not be completed. Please try again.'
-            : error.message
-      }
-    });
+  response.status(status).json({
+    error: {
+      message:
+        status === 500
+          ? 'The operation could not be completed. Please try again.'
+          : error.message
+    }
+  });
   if (status === 500) console.error(error);
 }

@@ -7,6 +7,7 @@ function BackIcon({ backUrl = undefined }: { backUrl?: string }) {
   return (
     <a
       href={backUrl}
+      aria-label="Back to list"
       className="breadcrum-icon border block border-border rounded mr-2"
     >
       <span className="flex items-center justify-center">
@@ -23,10 +24,20 @@ function BackIcon({ backUrl = undefined }: { backUrl?: string }) {
   );
 }
 
-function Heading({ heading }: { heading: string }) {
+function Heading({
+  heading,
+  description,
+  eyebrow
+}: {
+  heading: string;
+  description?: string;
+  eyebrow?: string;
+}) {
   return (
-    <div className="self-center">
+    <div className="page-heading-copy self-center">
+      {eyebrow && <span className="page-heading-eyebrow">{eyebrow}</span>}
       <h1 className="page-heading-title">{heading}</h1>
+      {description && <p className="page-heading-description">{description}</p>}
     </div>
   );
 }
@@ -34,16 +45,34 @@ function Heading({ heading }: { heading: string }) {
 export interface PageHeadingProps {
   backUrl?: string;
   heading: string;
+  description?: string;
+  eyebrow?: string;
+  icon?: React.ReactNode;
 }
 
-function PageHeading({ backUrl = undefined, heading }: PageHeadingProps) {
+function PageHeading({
+  backUrl = undefined,
+  heading,
+  description,
+  eyebrow,
+  icon
+}: PageHeadingProps) {
   if (!heading) {
     return null;
   }
 
   return (
-    <div className="page-heading flex justify-between items-center">
-      <div className="flex justify-start space-x-2 items-center">
+    <div
+      className={`page-heading flex justify-between items-center ${
+        description ? 'page-heading-rich' : ''
+      }`}
+    >
+      <div className="page-heading-main flex justify-start space-x-2 items-center">
+        {icon && (
+          <span className="page-heading-symbol" aria-hidden="true">
+            {icon}
+          </span>
+        )}
         <Area
           id="pageHeadingLeft"
           noOuter
@@ -59,7 +88,9 @@ function PageHeading({ backUrl = undefined, heading }: PageHeadingProps) {
             {
               component: { default: Heading },
               props: {
-                heading
+                heading,
+                description,
+                eyebrow
               },
               sortOrder: 0,
               id: 'heading'

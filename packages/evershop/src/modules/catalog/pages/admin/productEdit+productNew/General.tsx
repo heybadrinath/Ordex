@@ -1,3 +1,4 @@
+// Modified for Ordex on 19 October 2026.
 import { CategorySelector } from '@components/admin/CategorySelector.js';
 import Area from '@components/common/Area.js';
 import { Editor } from '@components/common/form/Editor.js';
@@ -36,7 +37,7 @@ const SKUAndPrice: React.FC<{
   };
 }> = ({ sku, price, setting }) => {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <InputField
         name="sku"
         label={_('SKU')}
@@ -263,7 +264,7 @@ export default function General({
       ? `${product.sku}-copy`
       : product?.sku || '';
   return (
-    <Card>
+    <Card id="product-details">
       <CardHeader>
         <CardTitle>{_('General Information')}</CardTitle>
         <CardDescription>
@@ -325,7 +326,10 @@ export default function General({
                       value: taxClass.value,
                       label: taxClass.text
                     }))}
-                    defaultValue={product?.taxClass || ''}
+                    defaultValue={
+                      product?.taxClass ||
+                      (!product ? taxClasses[0]?.value : '')
+                    }
                     required
                     validation={{ required: true }}
                   />
@@ -339,6 +343,7 @@ export default function General({
                 default: (
                   <Editor
                     name="description"
+                    columnToolbar={false}
                     label={_('Description')}
                     value={product?.description}
                   />

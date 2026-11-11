@@ -78,7 +78,7 @@ describe('all-products page blocks', () => {
 
   it('render from the listing context, without props', () => {
     const info = inShell(<ProductListingInfo />);
-    expect(info).toContain('product__listing__general');
+    expect(info).toContain('collection-intro');
     expect(info).toContain('All products');
 
     const products = inShell(<ProductListingProducts />);

@@ -151,9 +151,10 @@ const Image: React.FC<{
         <img src={image.url} alt="" />
       </div>
       {allowDelete && (
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
+          aria-label={_('Remove image')}
+          disabled={deleting}
           className={`remove cursor-pointer text-destructive fill-current ${
             isSingleMode ? 'single-mode-remove' : ''
           }`}
@@ -165,7 +166,6 @@ const Image: React.FC<{
               setDeleting(false);
             }
           }}
-          onKeyDown={() => {}}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -184,7 +184,7 @@ const Image: React.FC<{
             <line x1="10" y1="11" x2="10" y2="17" />
             <line x1="14" y1="11" x2="14" y2="17" />
           </svg>
-        </span>
+        </button>
       )}
       {deleting && (
         <div className="remove">

@@ -1,4 +1,6 @@
+// Modified for Ordex on 19 October 2026.
 import { pool } from '../../../lib/postgres/connection.js';
+import { isModuleEnabled } from '../../../lib/util/featureScope.js';
 import { getActiveTheme } from '../../../lib/util/getActiveTheme.js';
 import type { ChangesetOperationRow } from '../../../types/db/index.js';
 
@@ -39,6 +41,7 @@ export async function loadActiveOps(opts: {
    */
   changesetTheme?: string | null;
 }> {
+  if (!isModuleEnabled('pageBuilder')) return { ops: [] };
   if (opts.previewChangesetToken) {
     // Resolve the previewed changeset first so its theme is available even
     // when it has zero ops (a fresh draft). An unknown token previews

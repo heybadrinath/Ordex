@@ -1,173 +1,85 @@
 // Modified for Ordex on 19 October 2026.
+import React, { useEffect, useState } from 'react';
+import { ArrowUpRight, Gauge } from 'lucide-react';
+import { SegmentedGauge } from '@components/admin/SegmentedGauge.js';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
+  CardDescription
 } from '@components/common/ui/Card.js';
-import { toast } from '@components/common/ui/Sonner.js';
-import { _ } from '@evershop/evershop/lib/locale/translate/_';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
-import './Lifetimesales.scss';
-
-const COLORS = ['#7a9861', '#dbcbb2', '#e8eedf'];
-
-const Dot = ({ variant }) => (
-  <span
-    className="w-2 h-2 rounded-full inline-block"
-    style={{
-      backgroundColor:
-        { info: '#8f9e78', success: '#62864a', critical: '#b68e69' }[variant] ||
-        '#8f9e78'
-    }}
-  />
-);
-
-Dot.propTypes = {
-  variant: PropTypes.oneOf(['info', 'success', 'critical'])
-};
-
+const COLORS = ['var(--foreground)', 'var(--destructive)', '#dfe1e3'];
 export default function LifetimeSale({ api }) {
-  const [data, setData] = React.useState({});
-  const [fetching, setFetching] = React.useState(true);
-  const { orders, total, completed_percentage, cancelled_percentage } = data;
-
-  const chartData = [
-    { name: _('Completed'), value: completed_percentage },
-    { name: _('Cancelled'), value: cancelled_percentage },
-    {
-      name: _('Others'),
-      value: 100 - completed_percentage - cancelled_percentage
-    }
-  ];
-
-  React.useEffect(() => {
-    if (window !== undefined) {
-      fetch(api, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+  const [data, setData] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(api, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Could not load order health.');
+        setData(await response.json());
       })
-        .then((response) => response.json())
-        .then((json) => {
-          setData(json);
-          setFetching(false);
-        })
-        .catch((error) => {
-          toast.error(error.message);
-        });
-    }
-  }, []);
-
-  if (fetching) {
-    return (
-      <Card title="Lifetime Sales">
-        <CardHeader>
-          <CardTitle>{_('Order health')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="skeleton-wrapper-lifetime">
-            <div className="skeleton" />
-            <div className="skeleton" />
-            <div className="skeleton" />
-            <div className="skeleton" />
-          </div>
-        </CardContent>
-        <CardContent>
-          <div className="skeleton-wrapper-lifetime">
-            <div className="skeleton-chart" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  } else {
-    return (
-      <Card title="Lifetime Sales">
-        <CardHeader>
-          <CardTitle>{_('Order health')}</CardTitle>
-          <CardDescription>
-            {_(
-              'Overview of total sales and order status over the lifetime of your store'
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-2">
-            <div className="flex space-x-2 items-center">
-              <Dot variant="info" />
-              <div className="self-center">
-                {_('${count} orders', { count: orders })}
-              </div>
+      .catch((error) => {
+        if (error.name !== 'AbortError') setError(error.message);
+      });
+    return () => controller.abort();
+  }, [api]);
+  const completed = Number(data?.completed_percentage || 0);
+  const cancelled = Number(data?.cancelled_percentage || 0);
+  const segments = [
+    { name: 'Completed & delivered', value: completed },
+    { name: 'Cancelled', value: cancelled },
+    { name: 'Other orders', value: Math.max(0, 100 - completed - cancelled) }
+  ];
+  return (
+    <Card className="order-health-card">
+      <CardHeader>
+        <CardTitle>
+          <Gauge size={16} /> Order performance
+        </CardTitle>
+        <CardDescription>All-time fulfilment</CardDescription>
+        <a
+          className="panel-open"
+          href="/admin/orders"
+          aria-label="View order performance"
+        >
+          <ArrowUpRight size={16} />
+        </a>
+      </CardHeader>
+      <CardContent>
+        {error && <p role="alert">{error}</p>}
+        {!data && !error && <p role="status">Loading order health…</p>}
+        {data && (
+          <>
+            <SegmentedGauge
+              value={data.orders}
+              caption="Total orders"
+              label={`${data.orders} total orders, ${completed}% completed and delivered, ${cancelled}% cancelled`}
+              segments={segments.map((entry, index) => ({
+                label: entry.name,
+                value: entry.value,
+                color: index === 1 ? COLORS[1] : undefined
+              }))}
+            />
+            <div className="health-legend">
+              {segments.map((entry, index) => (
+                <div key={entry.name}>
+                  <i style={{ background: COLORS[index] }} />
+                  {entry.name}
+                  <b>{entry.value}%</b>
+                </div>
+              ))}
             </div>
-            <div className="flex space-x-2 items-center">
-              <Dot variant="info" />
-              <div className="self-center">
-                {_('${total} lifetime sale', { total })}
-              </div>
+            <div className="health-total">
+              <span>Total order value</span>
+              <strong>{data.total}</strong>
             </div>
-            <div className="flex space-x-2 items-center">
-              <Dot variant="success" />
-              <div className="self-center">
-                {_('${pct}% of orders completed', {
-                  pct: completed_percentage
-                })}
-              </div>
-            </div>
-            <div className="flex space-x-2 items-center">
-              <Dot variant="critical" />
-              <div className="self-center">
-                {_('${pct}% of orders cancelled', {
-                  pct: cancelled_percentage
-                })}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-        <CardContent>
-          <div style={{ height: '200px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  innerRadius={58}
-                  outerRadius={82}
-                  paddingAngle={3}
-                  labelLine={false}
-                  fill="#7a9861"
-                  dataKey="value"
-                  isAnimationActive={false}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
-
-LifetimeSale.propTypes = {
-  api: PropTypes.string.isRequired
-};
-
-export const layout = {
-  areaId: 'rightSide',
-  sortOrder: 10
-};
-
-export const query = `
-  query Query {
-    api: url(routeId: "lifetimesales")    
-  }
-`;
+export const layout = { areaId: 'rightSide', sortOrder: 10 };
+export const query = `query { api: url(routeId:"lifetimesales") }`;

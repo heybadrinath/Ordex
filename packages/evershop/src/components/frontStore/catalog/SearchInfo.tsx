@@ -24,19 +24,31 @@ export function SearchInfo() {
       {/* Inline search box (reference): a plain GET form that re-runs the
           existing /search route, so shoppers can refine without the header
           overlay. No new API — same `keyword` param the page already reads. */}
-      <form action="/search" method="GET" className="mb-8 mt-2">
-        <div className="relative mx-auto max-w-2xl">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="search"
-            name="keyword"
-            defaultValue={keyword}
-            placeholder={_('Search products…')}
-            aria-label={_('Search')}
-            className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground"
-          />
-        </div>
-      </form>
+      <section className="search-intro">
+        <span className="eyebrow">Find your next favourite</span>
+        <h2>What are you looking for?</h2>
+        <form action="/search" method="GET" className="search-intro-form">
+          <div className="relative mx-auto max-w-2xl">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              name="keyword"
+              defaultValue={keyword}
+              placeholder={_('Search products…')}
+              aria-label={_('Search')}
+              className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground"
+            />
+            <button type="submit" className="primary-button">
+              Search
+            </button>
+          </div>
+        </form>
+        <p>
+          Try <a href="/search?keyword=lamp">lighting</a>,{' '}
+          <a href="/search?keyword=coffee">coffee</a> or{' '}
+          <a href="/search?keyword=desk">something for your desk</a>.
+        </p>
+      </section>
       {/* Re-skin (2026-07-10): "N results for <query>" (reference). Content is
           already inside .page-width via Base, so no nested page-width here. */}
       <div className="mb-8">

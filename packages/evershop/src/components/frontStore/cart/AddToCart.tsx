@@ -43,9 +43,9 @@ export const AddToCart: React.FC<AddToCartProps> = ({
   const cartDispatch = useCartDispatch();
   const cartState = useCartState();
   const [localError, setLocalError] = useState<string | null>(null);
-  const canAddToCart = product.isInStock && qty > 0 && !!cartState.data;
-
-  const isLoading = cartState.loading;
+  const [isLoading, setIsLoading] = useState(false);
+  const canAddToCart =
+    product.isInStock && qty > 0 && !!cartState.data && !cartState.loading;
 
   const clearError = useCallback(() => {
     setLocalError(null);
@@ -53,6 +53,7 @@ export const AddToCart: React.FC<AddToCartProps> = ({
   }, [cartDispatch]);
 
   const addToCart = useCallback(async () => {
+    if (isLoading || cartState.loading) return;
     if (!canAddToCart) {
       const errorMsg = !product.isInStock
         ? _('Product is out of stock')
@@ -66,6 +67,7 @@ export const AddToCart: React.FC<AddToCartProps> = ({
     }
 
     try {
+      setIsLoading(true);
       setLocalError(null);
       cartDispatch.clearError();
       await cartDispatch.addItem({
@@ -80,9 +82,13 @@ export const AddToCart: React.FC<AddToCartProps> = ({
           : _('Failed to add item to cart');
       setLocalError(errorMessage);
       onError?.(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   }, [
     canAddToCart,
+    isLoading,
+    cartState.loading,
     product.isInStock,
     product.sku,
     qty,

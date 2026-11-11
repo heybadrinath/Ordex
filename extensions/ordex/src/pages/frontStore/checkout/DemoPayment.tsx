@@ -16,6 +16,8 @@ function PlaceDemoOrder() {
       size="xl"
       className="w-full"
       disabled={loadingStates.placingOrder || orderPlaced}
+      isLoading={loadingStates.placingOrder}
+      loadingText="Placing your order…"
       onClick={async () => {
         try {
           await checkout();

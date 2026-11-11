@@ -1,3 +1,4 @@
+// Modified for Ordex on 20 October 2026.
 import { SettingMenuItem } from '@components/admin/SettingMenuItem.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
@@ -12,8 +13,8 @@ export default function StoreSettingMenu({
   return (
     <SettingMenuItem
       url={storeSettingUrl}
-      title={_('Store Setting')}
-      description={_('Configure your store information')}
+      title={_('Store details')}
+      description={_('Identity, contact and location')}
     />
   );
 }

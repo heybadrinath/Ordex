@@ -101,7 +101,10 @@ export function Shipment() {
       }
     };
 
-    if (watchedShippingAddress && dirtyFields.shippingAddress) {
+    if (
+      watchedShippingAddress &&
+      (dirtyFields.shippingAddress || !shippingAddress)
+    ) {
       // Clear existing timeout
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
@@ -199,6 +202,7 @@ export function Shipment() {
           </CardHeader>
           <CardContent>
             <CustomerAddressForm
+              demoDefaults
               surface="shipping"
               namePrefix="shippingAddress"
               address={shippingAddress}

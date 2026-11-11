@@ -3,6 +3,7 @@ import { Button } from '@components/common/ui/Button.js';
 import { CartTotalSummary } from '@components/frontStore/cart/CartTotalSummary.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { ReceiptText, ShieldCheck, ArrowUpRight } from 'lucide-react';
 
 /**
  * Cart page block: the order summary card (totals, checkout button, continue
@@ -11,11 +12,17 @@ import React from 'react';
  * inside the `ShoppingCart` shell so a theme can move it from `layouts.json`.
  * Fetches the checkout URL with its own query.
  */
-export default function CartSummary({ checkoutUrl }: { checkoutUrl: string }): React.ReactElement {
+export default function CartSummary({
+  checkoutUrl
+}: {
+  checkoutUrl: string;
+}): React.ReactElement {
   return (
     <>
       <Area id="shoppingCartBeforeSummary" noOuter />
       <div className="cart-summary rounded-lg border border-border bg-card p-6">
+        <ReceiptText size={28} strokeWidth={1.3} />
+        <span className="eyebrow">Your good finds, together</span>
         <h2 className="h4">{_('Order summary')}</h2>
         <div className="mt-4">
           <CartTotalSummary />
@@ -30,6 +37,7 @@ export default function CartSummary({ checkoutUrl }: { checkoutUrl: string }): R
             className={'w-full'}
           >
             {_('Proceed to checkout')}
+            <ArrowUpRight size={18} />
           </Button>
         </div>
         <a
@@ -38,6 +46,10 @@ export default function CartSummary({ checkoutUrl }: { checkoutUrl: string }): R
         >
           {_('Continue shopping')}
         </a>
+        <p className="receipt-note">
+          <ShieldCheck size={16} />
+          Demo checkout. No real payment.
+        </p>
         <Area id="shoppingCartAfterSummary" noOuter />
       </div>
     </>

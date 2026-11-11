@@ -48,6 +48,7 @@ const SubmitButton: React.FC<{ formId: string }> = ({ formId }) => {
           );
         }}
         isLoading={isSubmitting}
+        loadingText={_('Signing in…')}
       >
         {_(isSubmitting ? 'Signing In...' : 'Sign In')}
       </Button>
@@ -90,14 +91,7 @@ export const CustomerLoginForm: React.FC<{
           }}
           onSubmit={async (data) => {
             try {
-              await login(
-                {
-                  email: data.email,
-                  password: data.password,
-                  ...data
-                },
-                redirectUrl
-              );
+              await login(data, redirectUrl);
             } catch (error) {
               onError?.(error);
             }

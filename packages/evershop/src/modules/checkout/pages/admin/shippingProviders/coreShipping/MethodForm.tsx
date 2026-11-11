@@ -122,6 +122,7 @@ export function MethodForm({
             ? 'coreMethodCreateForm'
             : `coreMethodEditForm_${method!.uuid}`
         }
+        demoProfile={isCreate ? 'shippingMethod' : undefined}
         method={httpMethod}
         action={action}
         form={form}

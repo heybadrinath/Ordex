@@ -7,10 +7,16 @@
     "packages/*",
     "extensions/*"
   ],
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
   "scripts": {
     "dev": "node ./packages/evershop/dist/bin/dev/index.js",
     "start": "node ./packages/evershop/dist/bin/start/index.js",
+    "start:worker": "node scripts/start-worker.mjs",
     "build": "node ./packages/evershop/dist/bin/build/index.js",
+    "heroku-build": "npm run compile:all && npm run build",
     "setup": "evershop install",
     "user:create": "evershop user:create",
     "seed": "evershop seed",
@@ -37,7 +43,14 @@
     "compile:all": "npm run compile:db && npm run compile && npm run compile:extension",
     "demo:setup": "npm run compile:all && node scripts/setup-demo.mjs",
     "demo:seed": "node scripts/seed-demo.mjs",
-    "test:returns": "node --test tests/returns.test.mjs"
+    "test:returns": "node --test tests/returns.test.mjs",
+    "test:support": "node --test tests/support.test.mjs",
+    "test:scope": "node --test tests/scope.test.mjs",
+    "test:hosting": "node --test tests/hosting.test.mjs",
+    "demo:history": "node scripts/seed-history.mjs",
+    "typecheck": "tsc --project tsconfig.ordex.json",
+    "test:improvements": "node --test tests/support-improvements.test.mjs",
+    "check:release": "npm run compile:all && npm run typecheck && npm run build && npm run test:scope && npm run test:hosting && node --test tests/support-audit.test.mjs && node scripts/check-demo-release.mjs"
   },
   "author": "The Nguyen (https://evershop.io)",
   "license": "GNU GENERAL PUBLIC LICENSE 3.0",
@@ -73,6 +86,8 @@
     "@sendgrid/mail": "^8.1.6",
     "@types/react-slick": "^0.23.13",
     "@types/uuid": "^10.0.0",
+    "mammoth": "1.13.0",
+    "pdfjs-dist": "6.4.299",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^13.0.0"

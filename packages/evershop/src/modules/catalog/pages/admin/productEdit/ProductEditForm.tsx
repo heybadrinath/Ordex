@@ -1,4 +1,5 @@
 import Area from '@components/common/Area.js';
+import { ProductEditor } from '@components/admin/ProductEditor.js';
 import { Form, useFormContext } from '@components/common/form/Form.js';
 import { useAlertContext } from '@components/common/modal/Alert.js';
 import { Button } from '@components/common/ui/Button.js';
@@ -92,13 +93,16 @@ const FormButton: React.FC<{
     <div className="form-submit-button flex border-t border-border mt-4 pt-4 justify-between">
       <Button
         size={'lg'}
-        variant="destructive"
+        variant="outline"
         onClick={() => {
           window.location.href = cancelUrl;
         }}
       >
         {_('Cancel')}
       </Button>
+      <span className="form-save-note">
+        Save changes to update this product.
+      </span>
       <Button
         onClick={() => {
           (document.getElementById(formId) as HTMLFormElement).dispatchEvent(
@@ -107,7 +111,7 @@ const FormButton: React.FC<{
         }}
         isLoading={isSubmitting}
       >
-        {_('Save')}
+        {_('Save changes')}
       </Button>
     </div>
   );
@@ -117,12 +121,14 @@ export default function ProductEditForm({
   action,
   gridUrl,
   newProductUrl,
-  product
+  product,
+  setting
 }: {
   action: string;
   gridUrl: string;
   newProductUrl: string;
-  product: { uuid: string };
+  product: { uuid: string; url: string };
+  setting: { storeCurrency: string };
 }) {
   const form = useForm({
     shouldUnregister: true
@@ -172,14 +178,14 @@ export default function ProductEditForm({
       id="productEditForm"
       onSubmit={submit}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
+      <ProductEditor currency={setting.storeCurrency} storeUrl={product.url}>
+        <div className="editor-left">
           <Area id="leftSide" noOuter />
         </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
+        <div className="editor-right">
           <Area id="rightSide" noOuter />
         </div>
-      </div>
+      </ProductEditor>
       <FormButton
         formId="productEditForm"
         cancelUrl={gridUrl}
@@ -201,6 +207,8 @@ export const query = `
     newProductUrl: url(routeId: "productNew"),
     product(id: getContextValue("productId", null)) {
       uuid
+      url
     }
+    setting { storeCurrency }
   }
 `;

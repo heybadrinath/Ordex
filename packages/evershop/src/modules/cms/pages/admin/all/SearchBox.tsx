@@ -5,7 +5,7 @@ import {
   InputGroupInput
 } from '@components/common/ui/InputGroup.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
-import { Search } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Search } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useQuery } from 'urql';
 import { NoResult } from './search/NoResult.js';
@@ -67,6 +67,19 @@ export default function SearchBox({ resourceLinks }: SearchBoxProps) {
   const [keyword, setKeyword] = React.useState('');
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [today, setToday] = useState('');
+  React.useEffect(
+    () =>
+      setToday(
+        new Date().toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          timeZone: 'Asia/Kolkata'
+        })
+      ),
+    []
+  );
   const InputRef = useRef<HTMLInputElement>(null);
 
   const clickRef = React.useRef<HTMLDivElement>(null);
@@ -100,58 +113,71 @@ export default function SearchBox({ resourceLinks }: SearchBoxProps) {
         reexecuteQuery({ requestPolicy: 'network-only' });
         setLoading(false);
       }
-    }, 1500);
+    }, 350);
 
     return () => clearTimeout(timer);
   }, [keyword]);
 
   return (
-    <div className="relative self-center ml-[14.563rem] w-[34.375rem]">
-      <InputGroup className="bg-[#f1f2f3] rounded-[3px] border-[#f1f2f3]">
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-        <InputGroupInput
-          type="text"
-          placeholder={_('Search')}
-          ref={InputRef}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-      </InputGroup>
-      {showResult && (
-        <div
-          className="absolute top-[calc(100%+1rem)] left-0 bg-white rounded-[5px] w-full py-5 px-2.5 border border-border shadow-lg z-50 max-h-[30rem] overflow-y-auto"
-          ref={clickRef}
-        >
-          {(loading || fetching) && (
-            <div className="p-2 flex justify-center items-center">
-              <Spinner width={25} height={25} />
-            </div>
-          )}
-          {!keyword && (
-            <div className="text-center">
-              <span>
-                {_('Search for products, orders, and other resources')}
-              </span>
-            </div>
-          )}
-          {data?.products.items.length === 0 &&
-            data?.customers.items.length === 0 &&
-            data?.orders.items.length === 0 &&
-            keyword &&
-            !loading && (
-              <NoResult keyword={keyword} resourseLinks={resourceLinks} />
+    <div className="admin-header-tools">
+      <div className="admin-header-search relative self-center">
+        <InputGroup className="bg-[#f1f2f3] rounded-[3px] border-[#f1f2f3]">
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            type="text"
+            aria-label={_('Search products, orders and customers')}
+            placeholder={_('Search products, orders and customers')}
+            ref={InputRef}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') setShowResult(false);
+            }}
+          />
+        </InputGroup>
+        {showResult && (
+          <div
+            className="absolute top-[calc(100%+1rem)] left-0 bg-white rounded-[5px] w-full py-5 px-2.5 border border-border shadow-lg z-50 max-h-[30rem] overflow-y-auto"
+            ref={clickRef}
+          >
+            {(loading || fetching) && (
+              <div className="p-2 flex justify-center items-center">
+                <Spinner width={25} height={25} />
+              </div>
             )}
-          {data &&
-            !loading &&
-            !fetching &&
-            (data?.products.items.length > 0 ||
-              data?.customers.items.length > 0 ||
-              data?.orders.items.length > 0) && (
-              <Results keyword={keyword} results={data} />
+            {!keyword && (
+              <div className="text-center">
+                <span>
+                  {_('Search for products, orders, and other resources')}
+                </span>
+              </div>
             )}
-        </div>
-      )}
+            {data?.products.items.length === 0 &&
+              data?.customers.items.length === 0 &&
+              data?.orders.items.length === 0 &&
+              keyword &&
+              !loading && (
+                <NoResult keyword={keyword} resourseLinks={resourceLinks} />
+              )}
+            {data &&
+              !loading &&
+              !fetching &&
+              (data?.products.items.length > 0 ||
+                data?.customers.items.length > 0 ||
+                data?.orders.items.length > 0) && (
+                <Results keyword={keyword} results={data} />
+              )}
+          </div>
+        )}
+      </div>
+      <span className="admin-today">
+        <CalendarDays size={15} aria-hidden="true" />
+        {today}
+      </span>
+      <a className="admin-header-store" href="/">
+        View store <ArrowUpRight size={15} aria-hidden="true" />
+      </a>
     </div>
   );
 }

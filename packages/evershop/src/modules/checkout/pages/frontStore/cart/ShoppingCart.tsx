@@ -20,7 +20,7 @@ export default function ShoppingCart() {
       {cart.items.length > 0 ? (
         <>
           <Area id="shoppingCartHeader" noOuter />
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
+          <div className="shopping-cart-layout grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
             <div>
               <Area id="shoppingCartItems" noOuter />
             </div>

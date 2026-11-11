@@ -147,6 +147,8 @@ async function saveOrder<T = CreateOrderResult>(
   const order = await insert('order')
     .given({
       ...cart.exportData(),
+      created_at: new Date(),
+      updated_at: new Date(),
       uuid: uuidv4().replace(/-/g, ''),
       order_number:
         10000 + parseInt(previous[0] ? previous[0].order_id : 0, 10) + 1,

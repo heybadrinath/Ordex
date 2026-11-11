@@ -1,3 +1,4 @@
+// Modified for Ordex on 20 October 2026.
 import { SettingMenuItem } from '@components/admin/SettingMenuItem.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
@@ -17,10 +18,8 @@ export default function ShippingProvidersMenu({
   return (
     <SettingMenuItem
       url={shippingProvidersUrl}
-      title={_('Shipping Providers')}
-      description={_(
-        'Manage shipping integrations and their methods (Core, USPS, FedEx, …)'
-      )}
+      title={_('Shipping methods')}
+      description={_('Services and delivery rates')}
     />
   );
 }

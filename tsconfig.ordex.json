@@ -1,0 +1,30 @@
+{
+  "extends": "./packages/evershop/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "paths": {
+      "@components/*": ["packages/evershop/src/components/*"],
+      "@evershop/evershop/*": ["packages/evershop/src/*"],
+      "@evershop/evershop/checkout/services": [
+        "packages/evershop/src/modules/checkout/services/index.ts"
+      ],
+      "@evershop/evershop/oms/services": [
+        "packages/evershop/src/modules/oms/services/index.ts"
+      ],
+      "@evershop/evershop/types/*": [
+        "packages/evershop/src/types/*.ts",
+        "packages/evershop/src/types/*.tsx"
+      ],
+      "@evershop/evershop/lib/address/types": [
+        "packages/evershop/src/lib/address/types.ts"
+      ],
+      "@evershop/evershop/lib/postgres": [
+        "packages/evershop/src/lib/postgres/connection.ts"
+      ]
+    }
+  },
+  "include": ["packages/evershop/src", "extensions/ordex/src"],
+  "exclude": ["**/tests/**", "**/*.test.ts", "**/*.test.tsx"]
+}

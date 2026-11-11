@@ -28,7 +28,7 @@ export default function Inventory({ product }: InventoryProps) {
     manageStock: undefined
   };
   return (
-    <Card className="bg-popover">
+    <Card id="product-inventory" className="bg-popover">
       <CardHeader>
         <CardTitle>{_('Inventory')}</CardTitle>
         <CardDescription>

@@ -1,0 +1,20 @@
+export const attributeSwatches: Record<string, string> = {
+  white: '#fff',
+  black: '#303033',
+  yellow: '#e4c461',
+  blue: '#729cb7',
+  red: '#c97873',
+  green: '#91a98c',
+  orange: '#d9a16e',
+  grey: '#abaeb2',
+  gray: '#abaeb2',
+  pink: '#e2bac9',
+  purple: '#b5a1ca',
+  brown: '#a18772',
+  navy: '#485a72',
+  beige: '#d6c9b5',
+  tan: '#bc9b77',
+  taupe: '#a79e91',
+  cream: '#eee8d7',
+  olive: '#939c73'
+};

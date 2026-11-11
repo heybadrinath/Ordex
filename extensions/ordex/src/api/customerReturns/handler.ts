@@ -1,6 +1,7 @@
 import {
   listOrders,
   listReturns,
+  returnWindowDays,
   createReturn,
   apiError
 } from '../../services/returns.js';
@@ -15,7 +16,8 @@ export default async (request, response) => {
       return response.json({
         data: {
           orders: await listOrders(customer.customer_id),
-          returns: await listReturns(customer.customer_id)
+          returns: await listReturns(customer.customer_id),
+          returnWindowDays: await returnWindowDays()
         }
       });
     response

@@ -103,7 +103,8 @@ const Guest: React.FC<{
   const { login } = useCustomerDispatch();
   const { form } = useCheckout();
   const { updateCheckoutData } = useCheckoutDispatch();
-  const contactEmail = form.watch('contact.email', email);
+  const initialEmail = email || 'guest@ordex.example';
+  const contactEmail = form.watch('contact.email', initialEmail);
   const handleLoginClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowLogin(true);
@@ -156,7 +157,7 @@ const Guest: React.FC<{
   return (
     <div>
       <EmailField
-        defaultValue={email}
+        defaultValue={initialEmail}
         name="contact.email"
         label={_('Email')}
         required

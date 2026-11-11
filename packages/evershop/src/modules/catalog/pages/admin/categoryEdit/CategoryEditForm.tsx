@@ -1,3 +1,7 @@
+import {
+  CatalogEditor,
+  type EditorEntity
+} from '@components/admin/CatalogEditor.js';
 import { FormButtons } from '@components/admin/FormButtons.js';
 import Area from '@components/common/Area.js';
 import { Form } from '@components/common/form/Form.js';
@@ -6,11 +10,13 @@ import React from 'react';
 interface CategoryEditFormProps {
   action: string;
   gridUrl: string;
+  category?: EditorEntity | null;
 }
 
 export default function CategoryEditForm({
   action,
-  gridUrl
+  gridUrl,
+  category
 }: CategoryEditFormProps) {
   return (
     <Form
@@ -19,14 +25,13 @@ export default function CategoryEditForm({
       id="categoryEditForm"
       submitBtn={false}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="leftSide" noOuter />
-        </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
-          <Area id="rightSide" noOuter />
-        </div>
-      </div>
+      <CatalogEditor
+        kind="category"
+        entity={category}
+        aside={<Area id="rightSide" noOuter />}
+      >
+        <Area id="leftSide" noOuter />
+      </CatalogEditor>
       <FormButtons formId="categoryEditForm" cancelUrl={gridUrl} />
     </Form>
   );
@@ -39,6 +44,9 @@ export const layout = {
 
 export const query = `
   query Query {
+    category(id: getContextValue("categoryId", null)) {
+      name status url image { url }
+    }
     action: url(routeId: "updateCategory", params: [{key: "id", value: getContextValue("categoryUuid")}]),
     gridUrl: url(routeId: "categoryGrid")
   }

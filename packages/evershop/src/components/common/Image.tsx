@@ -1,6 +1,7 @@
 import { parseImageSizes } from '@evershop/evershop/lib/util/parseImageSizes';
 import React, { useEffect, useRef, useState } from 'react';
 import { useIsInPageBuilderIframe } from './page-builder/pageBuilderMode.js';
+import './Loading.scss';
 
 /** 1x1 transparent GIF — stands in for an image that has not arrived yet. */
 const BLANK_PIXEL =
@@ -8,80 +9,13 @@ const BLANK_PIXEL =
 
 const SKELETON_CLASS = 'evershop-image-skeleton';
 
-/*
- * The skeleton's CSS travels with the component instead of living in a
- * stylesheet, for two reasons that are both load-bearing:
- *
- * 1. `animate-pulse` cannot express it. That utility animates OPACITY, so
- *    pulsing a translucent tint swings between two nearly identical colours.
- *    Measured on the storefront: the animation genuinely runs, it is simply
- *    not perceptible. A moving highlight reads as loading at any tint.
- * 2. A hand-written rule has nowhere to live. A theme REPLACES core's
- *    frontStore `tailwind.css` and `global.scss` wholesale, so a rule added to
- *    either is dropped in every themed store. (Tailwind UTILITIES written in
- *    core source still generate — the theme's entry scans core — which is why
- *    `bg-foreground/15` worked and `.evershop-skeleton` did not.)
- *
- * Injected once per document, only ever from inside the page builder, so the
- * live storefront never runs this. Theme tokens are used where available with
- * neutral fallbacks, so it degrades rather than disappearing.
- *
- * The sheen is deliberately identical to the FileBrowser's file-item skeleton
- * (`.file-browser__skeleton-well` in components/admin/FileBrowser.scss) so a
- * merchant sees one loading language across the admin. The two cannot share a
- * stylesheet — that one is admin-only CSS, this one has to be injected because
- * a theme replaces core's frontStore CSS wholesale — so if either changes,
- * change both.
- *
- * One deliberate difference: the BASE is `--muted` darkened by 12%, where the
- * FileBrowser uses `--muted` alone. The sweep is identical; only the surface
- * underneath differs. `--muted` sits on white in admin and reads as grey, but
- * a storefront theme resolves it against its own page — on the current one
- * that is oklch(0.925) on a oklch(0.97) cream ground, a gap of 0.045 in a
- * matching hue, which is invisible. Darkening the base reproduces the admin's
- * APPEARANCE rather than its literal value. Drop the color-mix for the
- * literal one.
- */
-const SKELETON_STYLE_ID = 'evershop-image-skeleton-style';
-
-function ensureSkeletonStyle(): void {
-  if (typeof document === 'undefined') return;
-  if (document.getElementById(SKELETON_STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = SKELETON_STYLE_ID;
-  style.textContent = `
-@keyframes evershop-image-skeleton-sweep {
-  from { background-position: 150% 0; }
-  to { background-position: -50% 0; }
-}
-.${SKELETON_CLASS} {
-  background-color: color-mix(
-    in oklab,
-    var(--foreground, oklch(0.2 0 0)) 12%,
-    var(--muted, #f4f4f5)
-  );
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.65) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  background-repeat: no-repeat;
-  animation: evershop-image-skeleton-sweep 1.2s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .${SKELETON_CLASS} { animation: none; }
-}`;
-  document.head.appendChild(style);
-}
-
 export type ImageProps = {
   src: string;
   width: number; // Intrinsic width of the image
   height: number; // Intrinsic height of the image
   alt: string;
   quality?: number;
+  unoptimized?: boolean;
   priority?: boolean;
   sizes?: string;
   loading?: 'eager' | 'lazy' | undefined;
@@ -147,6 +81,7 @@ export function Image({
   height,
   alt,
   quality = 75,
+  unoptimized = false,
   loading = 'eager',
   decoding = 'async',
   priority = false,
@@ -158,10 +93,12 @@ export function Image({
   objectFit = 'cover',
   ...props
 }: ImageProps): React.ReactElement | null {
-  const srcset = buildImageSrcSet(src, width, sizes, quality);
-  const fallbackSrc = `/images?src=${encodeURIComponent(
-    src
-  )}&w=${width}&q=${quality}`;
+  const srcset = unoptimized
+    ? undefined
+    : buildImageSrcSet(src, width, sizes, quality);
+  const fallbackSrc = unoptimized
+    ? src
+    : `/images?src=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
 
   // Page-builder only: hold a skeleton at the NEW image's dimensions instead of
   // the previous image, for the window where the box is sized but has no bytes.
@@ -182,10 +119,6 @@ export function Image({
   // `width`/`height`/`aspectRatio` already describe the incoming image, so the
   // skeleton holds its shape and the swap does not reflow.
   //
-  // Deliberately NOT on the live storefront. Holding a hero behind a
-  // placeholder would delay LCP for every visitor, and the merchant is the
-  // only one who needs to be told "this is loading, not broken". The cold cost
-  // a first visitor pays is a cache-warming problem, not a feedback one.
   const inPageBuilder = useIsInPageBuilderIframe();
   const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -229,10 +162,6 @@ export function Image({
   }, [inPageBuilder, fallbackSrc, srcset, sizes, confirmedSrc]);
 
   useEffect(() => {
-    if (inPageBuilder) ensureSkeletonStyle();
-  }, [inPageBuilder]);
-
-  useEffect(() => {
     const img = imgRef.current;
     // `complete` covers the load that finished before React attached `onLoad`.
     // SSR'd markup starts fetching during HTML parse, well before hydration,
@@ -246,16 +175,16 @@ export function Image({
   // `awaitingSwap` has to hold the skeleton on its own: the blank pixel
   // "loads" instantly, so `loaded` goes true while the real bytes are still
   // in flight.
-  const showSkeleton = inPageBuilder && (awaitingSwap || !loaded);
+  const showSkeleton = awaitingSwap || !loaded;
 
   // Both handlers pass through to a caller-supplied one, since the explicit
   // attribute below overrides the `{...props}` spread.
   const handleLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    if (inPageBuilder) setLoaded(true);
+    setLoaded(true);
     props.onLoad?.(event);
   };
   const handleError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    if (inPageBuilder) setLoaded(true);
+    setLoaded(true);
     props.onError?.(event);
   };
 
@@ -282,6 +211,7 @@ export function Image({
           ? `${props.className ?? ''} ${SKELETON_CLASS}`.trim()
           : props.className
       }
+      data-image-state={showSkeleton ? 'loading' : 'ready'}
       onLoad={handleLoad}
       onError={handleError}
       src={shownSrc}
@@ -292,7 +222,7 @@ export function Image({
       width={width}
       height={height}
       style={{
-        ...baseStyle,
+        ...(unoptimized ? {} : baseStyle),
         ...props.style
       }}
       loading={loading}

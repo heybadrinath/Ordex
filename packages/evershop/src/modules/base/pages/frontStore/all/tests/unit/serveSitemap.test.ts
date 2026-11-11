@@ -45,7 +45,9 @@ function makeRes(): any {
 function makeDeps(over: Partial<ServeSitemapDeps> = {}): ServeSitemapDeps {
   return {
     ensureSitemap: jest.fn(async () => Buffer.from('<sitemapindex/>')),
-    getConfig: () => getSitemapConfig(),
+    // These cases exercise enabled sitemap behavior explicitly. The app's
+    // default product configuration may disable sitemap generation.
+    getConfig: () => ({ ...getSitemapConfig(), enabled: true }),
     getRobotsOverride: async () => null,
     getBaseUrl: () => 'https://shop.com',
     ...over

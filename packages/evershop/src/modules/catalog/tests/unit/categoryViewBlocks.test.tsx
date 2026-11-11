@@ -48,7 +48,7 @@ describe('category page blocks', () => {
 
   it('render the shared components from the category context, without props', () => {
     const info = inShell(<CategoryInfo />);
-    expect(info).toContain('category__general');
+    expect(info).toContain('collection-intro');
     expect(info).toContain('Women');
     expect(inShell(<CategorySorting />).length).toBeGreaterThan(0);
     expect(() => inShell(<CategoryPagination />)).not.toThrow();

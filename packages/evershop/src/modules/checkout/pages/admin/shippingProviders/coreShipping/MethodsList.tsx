@@ -20,6 +20,7 @@ import {
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import axios from 'axios';
 import React from 'react';
+import { Truck, ArrowUpRight } from 'lucide-react';
 import { useQuery } from 'urql';
 import { MethodForm } from './MethodForm.js';
 
@@ -166,6 +167,41 @@ export function MethodsList() {
 
   return (
     <div className="px-5 space-y-3">
+      <div className="shipping-service-previews">
+        {(data.coreShippingMethods ?? []).map((m: CoreMethod) => (
+          <button
+            key={m.uuid}
+            type="button"
+            className="shipping-service-card"
+            onClick={() => setEditing(m)}
+            aria-label={`Edit service ${m.name}`}
+          >
+            <span className="service-icon">
+              <Truck size={27} strokeWidth={1.4} />
+            </span>
+            <span>
+              <strong>{m.name}</strong>
+              <small>
+                {m.isEnabled ? 'Enabled' : 'Disabled'} ·{' '}
+                {m.defaultCarrierCode || 'No default carrier'}
+              </small>
+            </span>
+            <span className="service-zones">
+              <b>
+                {m.rates.filter((r) => r.isEnabled).length} active zone rates
+              </b>
+              <small>
+                {m.rates
+                  .filter((r) => r.isEnabled)
+                  .map((r) => r.zone?.name)
+                  .filter(Boolean)
+                  .join(' · ') || 'Add a zone rate to offer this service'}
+              </small>
+            </span>
+            <ArrowUpRight size={17} />
+          </button>
+        ))}
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -234,9 +270,7 @@ export function MethodsList() {
 
       <div className="flex justify-end">
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger>
-            <Button>{_('+ Add Method')}</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button />}>{_('+ Add Method')}</DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{_('Add Shipping Method')}</DialogTitle>

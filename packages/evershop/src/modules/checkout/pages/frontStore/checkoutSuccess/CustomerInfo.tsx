@@ -1,11 +1,12 @@
 // Modified for Ordex on 19 October 2026.
 import { AddressSummary } from '@components/common/customer/address/AddressSummary.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
-import { Check } from 'lucide-react';
+import { Check, ArrowUpRight } from 'lucide-react';
 import React from 'react';
 
 interface CustomerInfoProps {
   order: {
+    uuid: string;
     orderNumber: string;
     customerFullName: string;
     customerEmail: string;
@@ -27,6 +28,7 @@ interface CustomerInfoProps {
 
 export default function CustomerInfo({
   order: {
+    uuid,
     orderNumber,
     customerFullName,
     customerEmail,
@@ -43,7 +45,8 @@ export default function CustomerInfo({
   const confirmation = _(
     'Order #${orderNumber} is confirmed. Your receipt is saved in your account.'
   );
-  const [confirmBefore, confirmAfter = ''] = confirmation.split('${orderNumber}');
+  const [confirmBefore, confirmAfter = ''] =
+    confirmation.split('${orderNumber}');
   return (
     <div className="checkout-success-customer-info">
       <div className="text-center">
@@ -58,6 +61,12 @@ export default function CustomerInfo({
           <span className="font-medium text-foreground">{orderNumber}</span>
           {confirmAfter}
         </p>
+        <a
+          className="primary-button confirmation-order-link"
+          href={`/account/orders/${uuid}`}
+        >
+          View your order <ArrowUpRight size={18} />
+        </a>
       </div>
 
       <div className="customer-info mt-8 rounded-lg border border-border p-6">
@@ -115,6 +124,7 @@ export const layout = {
 export const query = `
   query Query {
     order (uuid: getContextValue('orderId')) {
+      uuid
       orderNumber
       customerFullName
       customerEmail

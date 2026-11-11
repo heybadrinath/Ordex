@@ -1,0 +1,1 @@
+{ "path": "/support/customer", "methods": ["GET", "POST"], "access": "public" }

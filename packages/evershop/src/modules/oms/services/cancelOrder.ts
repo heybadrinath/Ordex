@@ -18,6 +18,7 @@ import { getPaymentMethodFactory } from '../../checkout/services/getAvailablePay
 import addOrderActivityLog from './addOrderActivityLog.js';
 import { updatePaymentStatus } from './updatePaymentStatus.js';
 import { updateShipmentStatus } from './updateShipmentStatus.js';
+import { findCaptureTransaction, sumRefundedAmount } from './refundStatus.js';
 
 /**
  * Order-level cancelability check. The two sides answer different questions
@@ -77,10 +78,19 @@ function validateStatus(paymentStatus: string, shipmentStatus: string) {
   return true;
 }
 
+export { validateStatus as canCancelOrder };
+
 async function updatePaymentStatusToCancel(
   orderID: number,
   connection: PoolClient
 ) {
+  const transactions = await select()
+    .from('payment_transaction')
+    .where('payment_transaction_order_id', '=', orderID)
+    .execute(connection);
+  const capture = findCaptureTransaction(transactions);
+  if (capture && sumRefundedAmount(transactions) >= Number(capture.amount))
+    return;
   await updatePaymentStatus(orderID, 'canceled', connection);
 }
 
@@ -168,16 +178,40 @@ async function maybeVoidAuthorization(order: OrderRow, connection: PoolClient) {
   await factory.void({ order, transaction: authorization });
 }
 
-async function cancelOrder(uuid: string, reason: string | undefined) {
-  const connection = await getConnection(pool);
+async function cancelOrder(
+  uuid: string,
+  reason: string | undefined,
+  options: { connection?: PoolClient } = {}
+) {
+  const connection = options.connection || (await getConnection(pool));
   try {
-    await startTransaction(connection);
-    const order = await select()
-      .from('order')
-      .where('uuid', '=', uuid)
-      .load(connection, false);
+    if (!options.connection) await startTransaction(connection);
+    const found = (
+      await connection.query('SELECT order_id FROM "order" WHERE uuid=$1', [
+        uuid
+      ])
+    ).rows[0];
+    if (!found) throw new Error('Order not found');
+    await connection.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
+      `shipment:${found.order_id}`
+    ]);
+    const order = (
+      await connection.query(
+        'SELECT * FROM "order" WHERE order_id=$1 FOR UPDATE',
+        [found.order_id]
+      )
+    ).rows[0];
     if (!order) {
       throw new Error('Order not found');
+    }
+    if (order.status === 'canceled') {
+      // Older cancellations may still have a captured balance to reconcile.
+      await hookable(updatePaymentStatusToCancel, { order })(
+        order.order_id,
+        connection
+      );
+      if (!options.connection) await commit(connection);
+      return;
     }
 
     const statusCheck = hookable(validateStatus, { order })(
@@ -201,6 +235,10 @@ async function cancelOrder(uuid: string, reason: string | undefined) {
       order.order_id,
       connection
     );
+    await connection.query(
+      'UPDATE "order" SET status=$2,shipment_status=$2 WHERE order_id=$1',
+      [order.order_id, 'canceled']
+    );
     await addOrderActivityLog(
       order.order_id,
       `Order canceled ${reason ? `(${reason})` : ''}`,
@@ -216,10 +254,10 @@ async function cancelOrder(uuid: string, reason: string | undefined) {
       { orderId: order.order_id, reason },
       connection
     );
-    await commit(connection);
+    if (!options.connection) await commit(connection);
   } catch (err) {
     error(err);
-    await rollback(connection);
+    if (!options.connection) await rollback(connection);
     throw err;
   }
 }
@@ -230,17 +268,18 @@ async function cancelOrder(uuid: string, reason: string | undefined) {
  * @param reason - The reason for cancellation.
  * @returns A promise that resolves when the order is canceled.
  */
-export default async (uuid: string, reason: string | undefined) => {
-  await hookable(cancelOrder, { uuid })(uuid, reason);
+export default async (
+  uuid: string,
+  reason: string | undefined,
+  options: { connection?: PoolClient } = {}
+) => {
+  await hookable(cancelOrder, { uuid })(uuid, reason, options);
 };
 
 export function hookBeforeValidateStatus(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    paymentStatus: string,
-    shipmentStatus: string
-    ]
+    ...args: [paymentStatus: string, shipmentStatus: string]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -250,10 +289,7 @@ export function hookBeforeValidateStatus(
 export function hookAfterValidateStatus(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    paymentStatus: string,
-    shipmentStatus: string
-    ]
+    ...args: [paymentStatus: string, shipmentStatus: string]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -263,10 +299,7 @@ export function hookAfterValidateStatus(
 export function hookBeforeUpdatePaymentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -276,10 +309,7 @@ export function hookBeforeUpdatePaymentStatusToCancel(
 export function hookAfterUpdatePaymentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -289,10 +319,7 @@ export function hookAfterUpdatePaymentStatusToCancel(
 export function hookBeforeUpdateShipmentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -302,10 +329,7 @@ export function hookBeforeUpdateShipmentStatusToCancel(
 export function hookAfterUpdateShipmentStatusToCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -315,10 +339,7 @@ export function hookAfterUpdateShipmentStatusToCancel(
 export function hookBeforeReStockAfterCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -328,10 +349,7 @@ export function hookBeforeReStockAfterCancel(
 export function hookAfterReStockAfterCancel(
   callback: (
     this: { order: Record<string, any> },
-    ...args: [
-    orderID: number,
-    connection: PoolClient
-    ]
+    ...args: [orderID: number, connection: PoolClient]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -341,10 +359,7 @@ export function hookAfterReStockAfterCancel(
 export function hookBeforeCancelOrder(
   callback: (
     this: { uuid: string },
-    ...args: [
-    uuid: string,
-    reason: string | undefined
-    ]
+    ...args: [uuid: string, reason: string | undefined]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {
@@ -354,10 +369,7 @@ export function hookBeforeCancelOrder(
 export function hookAfterCancelOrder(
   callback: (
     this: { uuid: string },
-    ...args: [
-    uuid: string,
-    reason: string | undefined
-    ]
+    ...args: [uuid: string, reason: string | undefined]
   ) => void | Promise<void>,
   priority: number = 10
 ): void {

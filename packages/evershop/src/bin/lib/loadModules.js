@@ -1,6 +1,8 @@
+// Modified for Ordex on 19 October 2026.
 import { readdirSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { isModuleEnabled } from '../../lib/util/featureScope.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -102,6 +104,8 @@ export function loadModule(path) {
     }));
 }
 
-export function getCoreModules() {
-  return coreModules;
+export function getCoreModules({ includeDisabled = false } = {}) {
+  return includeDisabled
+    ? coreModules
+    : coreModules.filter((module) => isModuleEnabled(module.name));
 }

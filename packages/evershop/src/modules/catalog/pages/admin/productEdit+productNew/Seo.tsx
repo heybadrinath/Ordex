@@ -130,7 +130,7 @@ export default function SEO({ product, duplicateSource }: SEOProps) {
   ];
 
   return (
-    <Card>
+    <Card id="product-search">
       <CardHeader>
         <CardTitle>{_('SEO')}</CardTitle>
         <CardDescription>{_('Manage the SEO settings.')}</CardDescription>

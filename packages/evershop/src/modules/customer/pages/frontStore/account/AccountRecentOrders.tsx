@@ -1,3 +1,4 @@
+// Modified for Ordex on 19 October 2026.
 import OrderHistory from '@components/frontStore/customer/OrderHistory.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
@@ -11,15 +12,15 @@ export default function AccountRecentOrders(): React.ReactElement {
   return (
     <section className="account-recent-orders py-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="h5">{_('Recent orders')}</h2>
+        <h2 className="h5">{_('Recently ordered')}</h2>
         <a
           href="/account/orders"
           className="text-sm text-muted-foreground hover:text-foreground hover:underline"
         >
-          {_('View all')}
+          {_('View all orders')}
         </a>
       </div>
-      <OrderHistory />
+      <OrderHistory limit={3} />
     </section>
   );
 }

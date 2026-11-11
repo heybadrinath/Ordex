@@ -24,6 +24,7 @@ async function call(path, { cookies = '', body, method } = {}) {
 }
 
 before(async () => {
+  assert.match(process.env.DB_NAME || '', /_qa$/, 'Use a disposable database ending in _qa.');
   process.env.NODE_ENV = 'development';
   process.env.ALLOW_CONFIG_MUTATIONS = 'true';
   ({ pool } = await import(
@@ -68,8 +69,10 @@ before(async () => {
     telephone: '+919000000000'
   };
   const product = (
-    await pool.query("SELECT * FROM product WHERE sku='CUP-001-WHT'")
+    await pool.query(`SELECT p.* FROM product p JOIN product_inventory i ON i.product_inventory_product_id=p.product_id
+      WHERE p.status=true AND i.qty>=2 ORDER BY p.price LIMIT 1`)
   ).rows[0];
+  assert.ok(product, 'An in-stock product is available for the return fixture');
   const shipping = (
     await pool.query(
       "SELECT uuid FROM core_shipping_method WHERE name='Standard delivery'"
@@ -266,18 +269,24 @@ test('return lifecycle is persistent, duplicate-safe and separate from stock', a
     'refunded'
   );
   assert.equal(
-    persisted.data.data.orders.find((o) => o.uuid === fixture.uuid).items[0].remaining_qty,
+    persisted.data.data.orders.find((o) => o.uuid === fixture.uuid).items[0]
+      .remaining_qty,
     1
   );
 });
 
 test('the customer return page is reachable and requires customer login', async () => {
-  const anonymous = await fetch(`${base}/account/returns`, { redirect: 'manual' });
+  const anonymous = await fetch(`${base}/account/returns`, {
+    redirect: 'manual'
+  });
   assert.equal(anonymous.status, 302);
   assert.ok(anonymous.headers.get('location').includes('/account/login'));
   const customer = await fetch(`${base}/account/returns`, {
     headers: { Cookie: customerCookies }
   });
   assert.equal(customer.status, 200);
-  assert.match(await customer.text(), /A little care, after checkout/);
+  assert.ok(
+    (await customer.text()).includes('<h1>Returns &amp; refunds</h1>'),
+    'Customer return workspace heading is present'
+  );
 });

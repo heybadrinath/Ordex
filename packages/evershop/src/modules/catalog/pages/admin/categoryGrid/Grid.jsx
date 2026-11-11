@@ -1,3 +1,5 @@
+import { DirectoryHeading } from '@components/admin/GridViews.js';
+import { Search } from 'lucide-react';
 import { GridPagination } from '@components/admin/grid/GridPagination';
 import { SortableHeader } from '@components/admin/grid/header/Sortable';
 import { Status } from '@components/admin/Status.js';
@@ -7,6 +9,7 @@ import { InputField } from '@components/common/form/InputField.js';
 import { useAlertContext } from '@components/common/modal/Alert';
 import { Button } from '@components/common/ui/Button.js';
 import { ButtonGroup } from '@components/common/ui/ButtonGroup.js';
+import { ArrowUpRight } from 'lucide-react';
 import { Card } from '@components/common/ui/Card';
 import {
   CardAction,
@@ -118,12 +121,15 @@ export default function CategoryGrid({
   const [selectedRows, setSelectedRows] = useState([]);
 
   return (
-    <Card>
+    <Card className="workspace-grid">
+      <DirectoryHeading title="Categories" total={total} />
       <CardHeader className="flex justify-between">
         <Form submitBtn={false} id="categoryGridFilter">
           <InputField
+            prefixIcon={<Search size={16} />}
             name="name"
-            placeholder={_('Search')}
+            placeholder={_('Search categories')}
+            aria-label={_('Search categories')}
             defaultValue={currentFilters.find((f) => f.key === 'name')?.value}
             onKeyPress={(e) => {
               // If the user press enter, we should submit the form
@@ -192,6 +198,22 @@ export default function CategoryGrid({
                   },
                   {
                     component: {
+                      default: () => <TableHead>Products</TableHead>
+                    },
+                    sortOrder: 20
+                  },
+                  {
+                    component: {
+                      default: () => (
+                        <TableHead>
+                          <span className="sr-only">View storefront</span>
+                        </TableHead>
+                      )
+                    },
+                    sortOrder: 30
+                  },
+                  {
+                    component: {
                       default: () => (
                         <SortableHeader
                           name="status"
@@ -242,6 +264,36 @@ export default function CategoryGrid({
                         )
                       },
                       sortOrder: 10
+                    },
+                    {
+                      component: {
+                        default: () => (
+                          <TableCell>
+                            <span className="catalog-count">
+                              {c.products?.total ?? '—'}
+                            </span>{' '}
+                            products
+                          </TableCell>
+                        )
+                      },
+                      sortOrder: 20
+                    },
+                    {
+                      component: {
+                        default: () => (
+                          <TableCell>
+                            <a
+                              className="catalog-preview-link"
+                              href={c.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View store <ArrowUpRight size={14} />
+                            </a>
+                          </TableCell>
+                        )
+                      },
+                      sortOrder: 30
                     },
                     {
                       component: {
@@ -306,6 +358,9 @@ export const query = `
     categories (filters: $filters) {
       items {
         categoryId
+        image { url }
+        url
+        products { total }
         uuid
         name
         status

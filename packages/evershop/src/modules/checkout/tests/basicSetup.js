@@ -1,4 +1,5 @@
 process.env.ALLOW_CONFIG_MUTATIONS = true;
+import config from 'config';
 import { addProcessor, addFinalProcessor } from '../../../lib/util/registry.js';
 import { registerCartBaseFields } from '../services/cart/registerCartBaseFields.js';
 import { registerCartItemBaseFields } from '../services/cart/registerCartItemBaseFields.js';
@@ -10,6 +11,15 @@ import { registerCartItemPromotionFields } from '../../promotion/services/regist
 import { coupons } from './coupons.js';
 import { registerDefaultValidators } from '../../promotion/services/registerDefaultValidators.js';
 import { registerDefaultCalculators } from '../../promotion/services/registerDefaultCalculators.js';
+
+// These isolated calculation tests exercise EverShop's coupon math. The Ordex
+// runtime disables coupon routes, so enable the validator only in this fixture.
+const disabledRoutes = config.get('system.disabledRoutes') || [];
+config.util.extendDeep(config, {
+  system: {
+    disabledRoutes: disabledRoutes.filter((route) => route !== 'couponApply')
+  }
+});
 
 // Default tax configuration
 addProcessor('cartFields', registerCartBaseFields, 0);

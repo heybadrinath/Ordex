@@ -1,6 +1,7 @@
 import config from 'config';
 import { registerPaymentMethod } from '@evershop/evershop/checkout/services';
-import { hookAfter } from '@evershop/evershop/lib/util/hookable';
+import { hookAfter, hookBefore } from '@evershop/evershop/lib/util/hookable';
+import { settleDemoCancellation } from './services/cancellations.js';
 import {
   addPaymentTransaction,
   updatePaymentStatus,
@@ -9,7 +10,7 @@ import {
 import { pool } from '@evershop/evershop/lib/postgres';
 import { registerEmailService } from '@evershop/evershop/lib/mail/emailHelper';
 
-export default async function bootstrap() {
+export default async function bootstrap(context: { process?: string } = {}) {
   registerEmailService({
     sendEmail: async ({ to, subject }) => {
       await pool.query(
@@ -59,7 +60,9 @@ export default async function bootstrap() {
     supportsPartialRefund: true,
     refund: async ({ order, amount, currency, operationId, connection }) => {
       if (!operationId || !connection)
-        throw new Error('Demo refunds require an inspected return.');
+        throw new Error(
+          'Demo refunds require a verified operation and transaction.'
+        );
       const amountMinor = Math.round(amount * 100);
       const transactionId = `demo-refund-${operationId}`;
       await connection.query(
@@ -91,6 +94,12 @@ export default async function bootstrap() {
       };
     }
   });
+  hookBefore(
+    'updatePaymentStatusToCancel',
+    async function (_orderId, connection) {
+      await settleDemoCancellation(this.order, connection);
+    }
+  );
   hookAfter(
     'saveOrder',
     async function initializeDemoPayment(order, _cart, connection) {
@@ -116,6 +125,16 @@ export default async function bootstrap() {
         'capture'
       );
       await updatePaymentStatus(order.order_id, 'demo_captured', connection);
+      await connection.query(
+        `INSERT INTO support_delivery_watch(order_id,dispatch_due_at,expected_at,next_check_at)
+        VALUES($1,now()+interval '24 hours',now()+interval '72 hours',now()+interval '24 hours')
+        ON CONFLICT(order_id) DO NOTHING`,
+        [order.order_id]
+      );
     }
   );
+  if (context.process === 'cronjob') {
+    const { startAgent } = await import('./services/support/agent.js');
+    startAgent();
+  }
 }

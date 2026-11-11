@@ -12,3 +12,12 @@ test-results/
 playwright-report/
 .project-local/
 AGENTS.md
+# Internal planning and research stay local. The support guide is public.
+/docs/Seller_Rescue_Project_Prompt.txt
+/docs/prd.md
+/docs/implementation-plan.md
+/docs/research.md
+/docs/platform-comparison.md
+/docs/codebase-shortlist.md
+
+/public/sitemap*.xml

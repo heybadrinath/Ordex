@@ -1,10 +1,9 @@
 body.productEdit,
 body.productNew {
   .main-content-inner {
-    max-width: 62.5rem;
-    margin: 1.875rem auto;
+    margin: 0 auto;
   }
   .page-heading {
-    max-width: 62.5rem;
+    max-width: none;
   }
 }

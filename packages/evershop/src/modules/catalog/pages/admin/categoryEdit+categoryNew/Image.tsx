@@ -31,7 +31,7 @@ export default function Image({ category }: ImageProps) {
   }, [image, setValue]);
 
   return (
-    <Card>
+    <Card id="category-image" className="editor-section-card">
       <CardHeader>
         <CardTitle>{_('Category Image')}</CardTitle>
         <CardDescription>

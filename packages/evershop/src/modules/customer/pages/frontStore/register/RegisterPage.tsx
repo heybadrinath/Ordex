@@ -16,7 +16,9 @@ export default function RegisterPage({ homeUrl, loginUrl }: RegisterPageProps) {
           <CardContent className="px-8">
             <CustomerRegistrationForm
               title={_('Create account')}
-              subtitle={_('Join us for exclusive offers and order tracking')}
+              subtitle={_(
+                'Keep your orders, deliveries and returns in one place'
+              )}
               redirectUrl={homeUrl}
               onError={(error) => {
                 toast.error(error);

@@ -1,3 +1,4 @@
+// Modified for Ordex on 19 October 2026.
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useState, useRef } from 'react';
@@ -244,6 +245,15 @@ export const Media: React.FC<MediaProps> = ({
               <div
                 key={index}
                 className="product-image"
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${product.name} image`}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openModal(index);
+                  }
+                }}
                 onClick={() => openModal(index)}
                 style={{
                   width: '100%',
@@ -313,10 +323,7 @@ export const Media: React.FC<MediaProps> = ({
                   </svg>
                 </div>
               )}
-              <SliderComponent
-                ref={modalSliderRef}
-                {...modalSliderSettings}
-              >
+              <SliderComponent ref={modalSliderRef} {...modalSliderSettings}>
                 {allImages.map((image, index) => (
                   <div key={index} className="modal-image">
                     <Image

@@ -24,6 +24,12 @@ interface MediaProps {
     }[];
   };
 }
+const sampleImage = {
+  uuid: 'sample-cover',
+  path: '/assets/ordex/catalog/mug.jpg',
+  url: '/assets/ordex/catalog/mug.jpg'
+};
+
 export default function Media({ product }: MediaProps) {
   const control = useFormContext().control;
   const { fields, append, remove, replace } = useFieldArray({
@@ -33,11 +39,13 @@ export default function Media({ product }: MediaProps) {
   useEffect(() => {
     const images = product?.image
       ? [product.image].concat(product?.gallery || [])
-      : [];
+      : product
+      ? []
+      : [sampleImage];
     replace(images);
   }, []);
   return (
-    <Card title={_('Media')}>
+    <Card id="product-media" title={_('Media')}>
       <CardHeader>
         <CardTitle>{_('Media')}</CardTitle>
         <CardDescription>
@@ -49,7 +57,11 @@ export default function Media({ product }: MediaProps) {
       <CardContent>
         <ImageUploader
           currentImages={
-            product?.image ? [product.image].concat(product?.gallery || []) : []
+            product?.image
+              ? [product.image].concat(product?.gallery || [])
+              : product
+              ? []
+              : [sampleImage]
           }
           allowDelete={true}
           allowSwap={true}

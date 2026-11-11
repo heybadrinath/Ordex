@@ -1,16 +1,12 @@
-import { SettingMenu } from '@components/admin/SettingMenu.js';
+// Modified for Ordex on 20 October 2026.
+import { SettingsLayout } from '@components/admin/SettingsLayout.js';
+import { CustomerFormPreview } from '@components/admin/SettingsPreviews.js';
 import Area from '@components/common/Area.js';
 import { Form } from '@components/common/form/Form.js';
-import { Button } from '@components/common/ui/Button.js';
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@components/common/ui/Card.js';
+import { Card } from '@components/common/ui/Card.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { useForm } from 'react-hook-form';
 import {
   AddressSection,
   type CountryOption,
@@ -36,50 +32,40 @@ export default function CustomerSetting({
   countries,
   setting
 }: CustomerSettingProps) {
+  const form = useForm({ shouldUnregister: true, shouldFocusError: false });
   return (
-    <div className="main-content-inner">
-      <div className="grid grid-cols-6 gap-x-5 grid-flow-row ">
-        <div className="col-span-2">
-          <SettingMenu />
-        </div>
-        <div className="col-span-4">
-          <Form
-            method="POST"
-            id="customerSetting"
-            action={saveSettingApi}
-            submitBtn={false}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{_('Customer Settings')}</CardTitle>
-                <CardDescription>
-                  {_('Rules for customer accounts, checkout and addresses')}
-                </CardDescription>
-              </CardHeader>
-              <Area
-                id="customerSettingSections"
-                noOuter
-                coreComponents={[
-                  {
-                    id: 'addresses',
-                    component: { default: AddressSection },
-                    props: { setting, countries },
-                    sortOrder: 10
-                  }
-                ]}
-              />
-              <CardFooter>
-                <div className="flex justify-end w-full">
-                  <Button type="submit" form="customerSetting">
-                    {_('Save Settings')}
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </Form>
-        </div>
-      </div>
-    </div>
+    <SettingsLayout
+      title={_('Customer settings')}
+      description={_(
+        'Choose what customers enter in their address book and at checkout.'
+      )}
+      formId="customerSetting"
+      preview={<CustomerFormPreview control={form.control} initial={setting}/>}
+      saving={form.formState.isSubmitting}
+    >
+      <Form
+        form={form}
+        method="POST"
+        id="customerSetting"
+        action={saveSettingApi}
+        submitBtn={false}
+      >
+        <Card>
+          <Area
+            id="customerSettingSections"
+            noOuter
+            coreComponents={[
+              {
+                id: 'addresses',
+                component: { default: AddressSection },
+                props: { setting, countries },
+                sortOrder: 10
+              }
+            ]}
+          />
+        </Card>
+      </Form>
+    </SettingsLayout>
   );
 }
 

@@ -121,8 +121,7 @@ export function NewShipmentDialog({
   onCreated: () => void;
 }) {
   const isRegisteredHint =
-    !!defaultCarrierCode &&
-    carriers.some((c) => c.code === defaultCarrierCode);
+    !!defaultCarrierCode && carriers.some((c) => c.code === defaultCarrierCode);
   const initialCarrier = isRegisteredHint
     ? (defaultCarrierCode as string)
     : carriers[0]?.code ?? '';
@@ -143,7 +142,11 @@ export function NewShipmentDialog({
   React.useEffect(() => {
     if (!open) return;
     setDraft(seedDraft(unshippedItems));
-    setTrackingNumber('');
+    setTrackingNumber(
+      initialCarrier === 'demo'
+        ? `DEMO-${Date.now().toString(36).toUpperCase()}`
+        : ''
+    );
     setNotifyCustomer(true);
     setCarrier(initialCarrier);
   }, [open]);
@@ -285,7 +288,9 @@ export function NewShipmentDialog({
         </div>
 
         <div
-          className={`grid gap-3 ${showTrackingInput ? 'grid-cols-2' : 'grid-cols-1'}`}
+          className={`grid gap-3 ${
+            showTrackingInput ? 'grid-cols-2' : 'grid-cols-1'
+          }`}
         >
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">{_('Carrier')}</Label>
@@ -336,9 +341,7 @@ export function NewShipmentDialog({
             htmlFor="new-shipment-notify-customer"
             className="grow cursor-pointer"
           >
-            <div className="font-semibold text-sm">
-              {_('Notify customer')}
-            </div>
+            <div className="font-semibold text-sm">{_('Notify customer')}</div>
             <div className="text-xs text-muted-foreground">
               {showTrackingInput
                 ? _('Email a shipment confirmation with tracking details')

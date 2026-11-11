@@ -1,4 +1,6 @@
-import { SettingMenu } from '@components/admin/SettingMenu.js';
+// Modified for Ordex on 20 October 2026.
+import { SettingsLayout } from '@components/admin/SettingsLayout.js';
+import { CatalogImagePreview } from '@components/admin/SettingsPreviews.js';
 import { Form } from '@components/common/form/Form.js';
 import { InputField } from '@components/common/form/InputField.js';
 import { ToggleField } from '@components/common/form/ToggleField.js';
@@ -11,6 +13,7 @@ import {
 } from '@components/common/ui/Card.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import React from 'react';
+import { useForm } from 'react-hook-form';
 import {
   ProductRecommendations,
   ProductRecommendationsProps
@@ -36,97 +39,97 @@ export default function CatalogSetting({
   recommendationStatSummary,
   attributes
 }: CatalogSettingProps) {
+  const form = useForm({ shouldUnregister: true, shouldFocusError: false });
   return (
-    <div className="main-content-inner">
-      <div className="grid grid-cols-6 gap-x-5 grid-flow-row">
-        <div className="col-span-2">
-          <SettingMenu />
+    <SettingsLayout
+      title={_('Catalog settings')}
+      description={_('Fine-tune product listings, images and recommendations.')}
+      formId="catalogSetting"
+      preview={<CatalogImagePreview control={form.control} initial={setting}/>}
+      saving={form.formState.isSubmitting}
+    >
+      <Form
+        form={form}
+        submitBtn={false}
+        id="catalogSetting"
+        method="POST"
+        action={saveSettingApi}
+        successMessage={_('Catalog settings have been saved successfully!')}
+      >
+        <div className="grid grid-cols-1 gap-5">
+          <Card>
+            <CardHeader>
+              <CardTitle>{_('Product listing')}</CardTitle>
+              <CardDescription>
+                {_('Control how products appear in storefront listings.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-5">
+                <ToggleField
+                  name="catalogShowOutOfStockProduct"
+                  label={_('Show out of stock products')}
+                  defaultValue={setting.catalogShowOutOfStockProduct ?? false}
+                  helperText={_(
+                    'When enabled, products with no available stock stay visible on the storefront.'
+                  )}
+                />
+                <InputField
+                  type="number"
+                  name="catalogCollectionPageSize"
+                  label={_('Products per page')}
+                  defaultValue={setting.catalogCollectionPageSize ?? 20}
+                  min={1}
+                  helperText={_(
+                    'Number of products shown per page on category and collection listings.'
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{_('Product images')}</CardTitle>
+              <CardDescription>
+                {_(
+                  'Set the image proportions and maximum resolution used across the storefront.'
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-5">
+                <InputField
+                  type="number"
+                  name="catalogProductImageWidth"
+                  label={_('Original image width (px)')}
+                  defaultValue={setting.catalogProductImageWidth ?? 1200}
+                  min={1}
+                  helperText={_(
+                    'The width of your original product images. 1920px or larger is recommended so the product-page zoom stays sharp on large, high-density screens.'
+                  )}
+                />
+                <InputField
+                  type="number"
+                  name="catalogProductImageHeight"
+                  label={_('Original image height (px)')}
+                  defaultValue={setting.catalogProductImageHeight ?? 1200}
+                  min={1}
+                  helperText={_(
+                    'The height of your original product images. Width ÷ height is the aspect ratio applied to every product image.'
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          <ProductRecommendations
+            recomputeApi={recomputeApi}
+            setting={setting}
+            recommendationStatSummary={recommendationStatSummary}
+            attributes={attributes}
+          />
         </div>
-        <div className="col-span-4">
-          <Form
-            id="catalogSetting"
-            method="POST"
-            action={saveSettingApi}
-            successMessage={_('Catalog settings have been saved successfully!')}
-          >
-            <div className="grid grid-cols-1 gap-5">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{_('Product listing')}</CardTitle>
-                  <CardDescription>
-                    {_('Control how products appear in storefront listings.')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-5">
-                    <ToggleField
-                      name="catalogShowOutOfStockProduct"
-                      label={_('Show out of stock products')}
-                      defaultValue={
-                        setting.catalogShowOutOfStockProduct ?? false
-                      }
-                      helperText={_(
-                        'When enabled, products with no available stock stay visible on the storefront.'
-                      )}
-                    />
-                    <InputField
-                      type="number"
-                      name="catalogCollectionPageSize"
-                      label={_('Products per page')}
-                      defaultValue={setting.catalogCollectionPageSize ?? 20}
-                      min={1}
-                      helperText={_(
-                        'Number of products shown per page on category and collection listings.'
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{_('Product images')}</CardTitle>
-                  <CardDescription>
-                    {_(
-                      'The size your product images are created at. This sets the reference aspect ratio and the maximum resolution used for product images across the storefront — listings, cart, checkout, and product pages. Each placement fits its width and derives the height from this ratio.'
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-5">
-                    <InputField
-                      type="number"
-                      name="catalogProductImageWidth"
-                      label={_('Original image width (px)')}
-                      defaultValue={setting.catalogProductImageWidth ?? 1200}
-                      min={1}
-                      helperText={_(
-                        'The width of your original product images. 1920px or larger is recommended so the product-page zoom stays sharp on large, high-density screens.'
-                      )}
-                    />
-                    <InputField
-                      type="number"
-                      name="catalogProductImageHeight"
-                      label={_('Original image height (px)')}
-                      defaultValue={setting.catalogProductImageHeight ?? 1200}
-                      min={1}
-                      helperText={_(
-                        'The height of your original product images. Width ÷ height is the aspect ratio applied to every product image.'
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <ProductRecommendations
-                recomputeApi={recomputeApi}
-                setting={setting}
-                recommendationStatSummary={recommendationStatSummary}
-                attributes={attributes}
-              />
-            </div>
-          </Form>
-        </div>
-      </div>
-    </div>
+      </Form>
+    </SettingsLayout>
   );
 }
 
@@ -140,6 +143,7 @@ export const query = `
     saveSettingApi: url(routeId: "saveSetting")
     recomputeApi: url(routeId: "recomputeRecommendationStats")
     setting {
+      storeTimeZone
       catalogShowOutOfStockProduct
       catalogCollectionPageSize
       catalogProductImageWidth

@@ -134,6 +134,7 @@ export const DefaultCategoryFilterRender: React.FC<{
                 >
                   <Checkbox
                     id={`category-${category.categoryId}`}
+                    aria-label={category.name}
                     checked={isSelected}
                     onCheckedChange={(checked) =>
                       handleCategoryChange(

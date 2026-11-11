@@ -1,3 +1,4 @@
+import { Image } from '@components/common/Image.js';
 import { TableCell } from '@components/common/ui/Table.js';
 import React from 'react';
 
@@ -12,7 +13,14 @@ export function Thumbnail({ imageUrl, qty }: ThumbnailProps) {
       <div className="relative w-12 h-12 flex justify-center border border-divider rounded-[3px] p-0.5 box-border">
         <div className="self-center text-border">
           {imageUrl && (
-            <img src={imageUrl} alt="" className="max-w-full h-auto" />
+            <Image
+              unoptimized
+              src={imageUrl}
+              alt=""
+              className="max-w-full h-auto"
+              width={72}
+              height={72}
+            />
           )}
           {!imageUrl && (
             <svg

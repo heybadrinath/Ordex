@@ -1,3 +1,4 @@
+// Modified for Ordex on 19 October 2026.
 import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -51,7 +52,11 @@ export const start = async function start(context, cb) {
 
   /** Migration */
   try {
-    await migrate(modules);
+    // Retain shared schema and existing data even for modules disabled at runtime.
+    await migrate([
+      ...getCoreModules({ includeDisabled: true }),
+      ...getEnabledExtensions()
+    ]);
   } catch (e) {
     error(e);
     process.exit(0);
@@ -82,8 +87,11 @@ export const start = async function start(context, cb) {
   server.listen(port);
 
   // Spawn the child process to manage events
-  let subscriberChild = startSubscriberProcess(context);
-  let jobChild = startCronProcess(context);
+  const runBackgroundWorkers = process.env.RUN_BACKGROUND_WORKERS !== 'false';
+  let subscriberChild = runBackgroundWorkers
+    ? startSubscriberProcess(context)
+    : undefined;
+  let jobChild = runBackgroundWorkers ? startCronProcess(context) : undefined;
 
   process.on('exit', (code) => {
     // Cleanup child processes on exit
@@ -99,12 +107,14 @@ export const start = async function start(context, cb) {
     }
   });
   process.on('RESTART_CRONJOB', () => {
+    if (!jobChild) return;
     debug('Restarting the cron job process');
     jobChild.kill('SIGTERM');
     jobChild = startCronProcess(context);
   });
 
   process.on('RESTART_SUBSCRIBER', () => {
+    if (!subscriberChild) return;
     debug('Restarting the subscriber process');
     subscriberChild.kill('SIGTERM');
     subscriberChild = startSubscriberProcess(context);

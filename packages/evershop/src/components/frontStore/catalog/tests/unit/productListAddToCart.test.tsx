@@ -95,7 +95,7 @@ describe('a product that is out of stock', () => {
         <ProductList products={products as never} {...props} />
       </AppProvider>
     );
-  const soldOutButtons = (markup: string) => markup.match(/<button[^>]*disabled[^>]*>Sold out<\/button>/g) ?? [];
+  const soldOutButtons = (markup: string) => markup.match(/<button\b(?=[^>]*disabled)[^>]*>[\s\S]*?Sold out[\s\S]*?<\/button>/g) ?? [];
 
   beforeEach(() => {
     cart = { data: { items: [] }, loading: false };

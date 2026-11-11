@@ -1,5 +1,6 @@
 import { FormButtons } from '@components/admin/FormButtons.js';
 import Area from '@components/common/Area.js';
+import { ProductEditor } from '@components/admin/ProductEditor.js';
 import { Form } from '@components/common/form/Form.js';
 import { toast } from '@components/common/ui/Sonner.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
@@ -8,10 +9,12 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 
 export default function ProductNewForm({
   action,
-  gridUrl
+  gridUrl,
+  setting
 }: {
   action: string;
   gridUrl: string;
+  setting: { storeCurrency: string };
 }) {
   const form = useForm({
     shouldUnregister: true
@@ -48,21 +51,26 @@ export default function ProductNewForm({
   return (
     <Form
       id="productNewForm"
+      demoProfile="product"
       method="POST"
       action={action}
       form={form}
       onSubmit={submit}
       submitBtn={false}
     >
-      <div className="grid grid-cols-3 gap-x-5 grid-flow-row ">
-        <div className="col-span-2 grid grid-cols-1 gap-5 auto-rows-max">
+      <ProductEditor currency={setting.storeCurrency}>
+        <div className="editor-left">
           <Area id="leftSide" noOuter />
         </div>
-        <div className="col-span-1 grid grid-cols-1 gap-5 auto-rows-max">
+        <div className="editor-right">
           <Area id="rightSide" noOuter />
         </div>
-      </div>
-      <FormButtons formId="productNewForm" cancelUrl={gridUrl} />
+      </ProductEditor>
+      <FormButtons
+        formId="productNewForm"
+        cancelUrl={gridUrl}
+        submitLabel="Create product"
+      />
     </Form>
   );
 }
@@ -76,5 +84,6 @@ export const query = `
   query Query {
     action: url(routeId: "createProduct"),
     gridUrl: url(routeId: "productGrid")
+    setting { storeCurrency }
   }
 `;

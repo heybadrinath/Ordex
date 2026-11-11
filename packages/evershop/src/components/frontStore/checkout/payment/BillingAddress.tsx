@@ -119,9 +119,7 @@ export function BillingAddress({
                 <Item
                   variant={'outline'}
                   onClick={(e: React.MouseEvent) => {
-                    if (
-                      (e.target as HTMLElement).closest('[role="radio"]')
-                    ) {
+                    if ((e.target as HTMLElement).closest('[role="radio"]')) {
                       return;
                     }
                     if (!useSameAddress) {
@@ -133,7 +131,11 @@ export function BillingAddress({
                   <ItemContent>
                     <ItemTitle>
                       <label className="flex items-center space-x-3 w-full cursor-pointer">
-                        <RadioGroupItem id="same-address" value="same" />
+                        <RadioGroupItem
+                          id="same-address"
+                          value="same"
+                          aria-label={_('Same as shipping address')}
+                        />
                         <span className="select-none">
                           {_('Same as shipping address')}
                         </span>
@@ -162,6 +164,7 @@ export function BillingAddress({
                       <label className="flex items-center space-x-3 w-full cursor-pointer">
                         <RadioGroupItem
                           id="different-address"
+                          aria-label={_('Use a different billing address')}
                           value="different"
                         />
                         <span className="select-none">
@@ -174,6 +177,7 @@ export function BillingAddress({
                       <ItemDescription className="text-inherit mt-3 overflow-visible">
                         <div className="text-inherit">
                           <CustomerAddressForm
+                            demoDefaults
                             surface="billing"
                             namePrefix="billingAddress"
                             address={undefined} // Always start empty for different address
@@ -197,6 +201,7 @@ export function BillingAddress({
               <ItemDescription className="text-inherit mt-3 overflow-visible">
                 <div className="text-inherit">
                   <CustomerAddressForm
+                    demoDefaults
                     surface="billing"
                     namePrefix="billingAddress"
                     address={undefined} // Always start empty for different address

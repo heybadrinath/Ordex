@@ -19,30 +19,18 @@ import { useForm } from 'react-hook-form';
 interface CancelButtonProps {
   order: {
     cancelApi: string;
-    paymentStatus: {
-      code: string;
-      isCancelable: boolean;
-    };
-    shipmentStatus: {
-      code: string;
-      isCancelable: boolean;
-    };
+    canCancel: boolean;
   };
 }
 export default function CancelButton({
-  order: { cancelApi, paymentStatus, shipmentStatus }
+  order: { cancelApi, canCancel }
 }: CancelButtonProps) {
   const form = useForm();
   return (
-    <RenderIfTrue
-      condition={
-        paymentStatus.isCancelable !== false &&
-        shipmentStatus.isCancelable !== false
-      }
-    >
+    <RenderIfTrue condition={canCancel === true}>
       <Dialog>
-        <DialogTrigger>
-          <Button variant="destructive">{_('Cancel Order')}</Button>
+        <DialogTrigger render={<Button variant="destructive" />}>
+          {_('Cancel Order')}
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -76,8 +64,8 @@ export default function CancelButton({
             </div>
           </Form>
           <DialogFooter>
-            <DialogClose>
-              <Button variant="outline">{_('Cancel')}</Button>
+            <DialogClose render={<Button variant="outline" />}>
+              {_('Cancel')}
             </DialogClose>
             <Button
               variant="default"
@@ -107,14 +95,7 @@ export const layout = {
 export const query = `
   query Query {
     order(uuid: getContextValue("orderId")) {
-      paymentStatus {
-        code
-        isCancelable
-      }
-      shipmentStatus {
-        code
-        isCancelable
-      }
+      canCancel
       cancelApi
     }
   }

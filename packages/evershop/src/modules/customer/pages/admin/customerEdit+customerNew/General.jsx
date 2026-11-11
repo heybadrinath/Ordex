@@ -4,15 +4,21 @@ import { CardContent, CardTitle } from '@components/common/ui/Card.js';
 import { _ } from '@evershop/evershop/lib/locale/translate/_';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { UserRound } from 'lucide-react';
 
 function FullName({ fullName }) {
   return (
-    <CardContent>
-      <CardTitle className="mb-2">{_('Full Name')}</CardTitle>
-      <div>
-        <span>{fullName}</span>
-      </div>
-    </CardContent>
+    <div className="customer-profile-identity">
+      <span className="customer-profile-avatar">
+        {fullName
+          ?.split(' ')
+          .map((word) => word[0])
+          .slice(0, 2)
+          .join('') || <UserRound size={24} />}
+      </span>
+      <span className="editor-overview-label">Customer profile</span>
+      <h2>{fullName}</h2>
+    </div>
   );
 }
 
@@ -69,7 +75,7 @@ Status.propTypes = {
 
 export default function General({ customer }) {
   return (
-    <Card>
+    <Card className="customer-profile-details">
       <Area
         id="customerEditInformation"
         className="space-y-3"
