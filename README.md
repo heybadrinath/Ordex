@@ -24,6 +24,8 @@ For a closer look at the completed return, open the [seller audit log for DX-104
 
 ## How the agent works
 
+The [Ordex technical guide for judges](https://whimsical-tank-5e9.notion.site/Ordex-How-the-agent-works-3fffa691b6ea816da19cc8b5130450a1) traces the live cases from customer request to verified store action. It covers the model contract, refund and approval rules, knowledge retrieval, worker recovery, and the code behind each step.
+
 1. **Load the evidence.** The worker reads the signed-in customer’s order, items, payment, delivery, and return records from PostgreSQL. It uses full-text search to find relevant passages from published customer-safe guidance.
 2. **Choose a next step.** Gemini 3.5 Flash-Lite reads the conversation and evidence and returns a structured decision. It can select an order-status answer, cite a published passage, ask for missing details, propose a return or cancellation, or hand the case to the seller. Straightforward return-policy questions can use the configured policy directly.
 3. **Check the rules and act.** The server enforces order ownership, item quantities, the return window, refund limits, exact customer consent, inspection, and seller approval where required. Eligible actions run through the store’s commerce services. The server prevents duplicate actions and verifies the resulting order or payment record before reporting success.
