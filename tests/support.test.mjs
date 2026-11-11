@@ -795,6 +795,43 @@ test('temporary knowledge model failures are retried without losing the draft', 
     revision: saved.revision
   });
 });
+test('repeated knowledge model failures preserve the original for seller review', async () => {
+  const actor = 'Fixture seller';
+  const body = 'Gift wrapping uses recyclable paper.';
+  const doc = await knowledge.saveKnowledge(actor, {
+    title: 'Synthetic verbatim fallback FAQ',
+    body,
+    audience: 'public'
+  });
+  providerStatus = 503;
+  await runner.tick({ documentId: doc.document_id });
+  await db.query(
+    'UPDATE support_knowledge SET retry_at=now() WHERE document_id=$1',
+    [doc.document_id]
+  );
+  await runner.tick({ documentId: doc.document_id });
+  providerStatus = 200;
+
+  const saved = (await knowledge.knowledgeList()).find(
+    (item) => item.document_id === doc.document_id
+  );
+  assert.equal(saved.state, 'ready');
+  assert.equal(saved.analysis.reviewMode, 'verbatim-fallback');
+  assert.equal(saved.analysis.effectiveText, body);
+  assert.deepEqual(saved.analysis.facts, []);
+  assert.match(saved.analysis.summary, /original source text/);
+
+  await knowledge.knowledgeCommand(actor, {
+    command: 'publish',
+    documentId: doc.document_id,
+    revision: saved.revision
+  });
+  assert.ok(
+    (await knowledge.retrieve('gift wrapping recyclable paper')).some(
+      (source) => source.document_id === doc.document_id
+    )
+  );
+});
 test('document extraction accepts real text formats and rejects disguised or empty files', async () => {
   const text =
     'Synthetic return guidance. Return items within seven days of delivery.';

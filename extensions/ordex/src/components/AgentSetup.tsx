@@ -498,6 +498,12 @@ export default function AgentSetup({ overview, reload }) {
                         ? 'Review in progress. You can leave this page; the draft is saved.'
                         : 'This source has not been reviewed yet.')}
                   </p>
+                  {doc.analysis?.reviewMode === 'verbatim-fallback' && (
+                    <p className="support-notice" role="status">
+                      AI review was unavailable. The original text is preserved
+                      unchanged; review it before publishing.
+                    </p>
+                  )}
                   {doc.analysis?.facts?.map((f, i) => (
                     <div className="knowledge-fact" key={i}>
                       <strong>{f.fact}</strong>
