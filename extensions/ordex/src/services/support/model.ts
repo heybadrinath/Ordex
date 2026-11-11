@@ -1,7 +1,7 @@
 import { audit, fail, pool, transaction } from './db.js';
 import { interactionOutput } from './modelResponse.js';
 
-export const modelName = process.env.SUPPORT_MODEL || 'gemini-3.8-flash';
+export const modelName = process.env.SUPPORT_MODEL || 'gemini-3.5-flash-lite';
 export const limits = {
   daily: 16,
   minute: 4,
