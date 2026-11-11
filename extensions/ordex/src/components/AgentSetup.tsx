@@ -364,7 +364,7 @@ export default function AgentSetup({ overview, reload }) {
                     Paste store guidance in your own words. The agent will ask
                     about unclear rules before you publish.
                   </p>
-                  {doc.state === 'failed' && (
+                  {doc?.state === 'failed' && (
                     <Button
                       type="button"
                       disabled={!!busy}
