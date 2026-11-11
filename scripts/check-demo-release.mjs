@@ -18,7 +18,7 @@ try {
 } catch {
   check(false, 'Resolve patch whitespace errors reported by git diff --check');
 }
-for (const file of ['README.md', 'DEMO.md', 'UPSTREAM.md', 'ASSET_CREDITS.md', 'LICENSE', 'package-lock.json'])
+for (const file of ['README.md', 'UPSTREAM.md', 'ASSET_CREDITS.md', 'LICENSE', 'package-lock.json'])
   check(existsSync(new URL(`../${file}`, import.meta.url)), `${file} is present`);
 
 // Include untracked source in the review; nothing is staged or published here.

@@ -1,85 +1,57 @@
-# Ordex — Seller Rescue
+# Ordex · Seller Rescue
 
-Ordex is a synthetic online shop built to demonstrate **Seller Rescue**, an AI support agent for small merchants. It investigates order and delivery issues, guides customers through returns, and can carry an eligible refund or cancellation through the store's real application services. A seller can inspect the evidence, approve an exact action, take over a conversation, or hand it back to the agent.
+Ordex is a demo store for **AgentX PS-04: Autonomous support agent for online sellers**. Customers can ask about an order, check delivery, or start a return in the store. The agent looks up the relevant records and handles what it can under the seller’s rules. The seller can see what happened and step in when a decision needs them.
 
-This repository contains the application and local demo setup. The current version has been exercised locally; the complete online web, worker, database, and AI flow still needs to be verified on the hackathon deployment.
+## Try the live demo
 
-## Try the demo locally
+[Open the storefront](https://site--ordex-web--l244vqzv62g9.code.run/) and sign in with these shared demo accounts. Orders, payments, refunds, and courier events use synthetic data.
 
-Requirements: Node.js 22, npm 10, and PostgreSQL 16.
-
-```sh
-npm ci
-npm run demo:setup
-npm run build
-RUN_BACKGROUND_WORKERS=false npm start
-```
-
-In a second terminal, start the background worker:
-
-```sh
-npm run start:worker
-```
-
-Open the storefront at [localhost:3000](http://localhost:3000). `demo:setup` compiles the project, applies migrations, and creates synthetic store data. Without a `.env` file it creates a local `ordex_demo` database using the current PostgreSQL user; set `PGUSER` if needed. To use another database, copy `.env.example` to `.env` and provide its connection settings.
-
-| Demo account | Email | Password | Where to sign in |
+| Account | Email | Password | Sign in |
 | --- | --- | --- | --- |
-| Customer — Maya | `maya@ordex.example` | `Explore123!` | Storefront → Sign in |
-| Customer — Arjun | `arjun@ordex.example` | `Explore123!` | Storefront → Sign in |
-| Seller | `seller@ordex.example` | `DemoStore123!` | [`/admin`](http://localhost:3000/admin) |
+| Customer · Maya Shah | `maya@ordex.example` | `Explore123!` | [Customer sign-in](https://site--ordex-web--l244vqzv62g9.code.run/account/login) |
+| Seller · Ordex Studio | `seller@ordex.example` | `DemoStore123!` | [Seller sign-in](https://site--ordex-web--l244vqzv62g9.code.run/admin/login) |
 
-These shared credentials are for the seeded local demo only. They do not grant access to a hosted instance. The online demo needs separately provisioned accounts; do not reuse these passwords for deployment.
+After signing in, open the walkthrough links below.
 
-To enable live model decisions and document review, set `GEMINI_API_KEY` in the server environment. The default model is `gemini-3.5-flash-lite` and can be changed with `SUPPORT_MODEL`. The application has no paid-model fallback or automatic plan upgrade. Temporary provider failures are retried; unsupported answers remain saved for seller review.
-
-## Product features
-
-- **Order support:** a signed-in customer opens a persistent conversation for an order they own. The agent reads current order, item, payment, delivery, and published store-policy evidence.
-- **Returns and refunds:** the agent proposes exact items, quantities, reason, and amount. The customer confirms the proposal; the seller records physical receipt and inspection. Only then can an eligible synthetic refund proceed. Damaged returns do not silently restock inventory.
-- **Order cancellation:** a fully unshipped order can be canceled after the customer confirms the exact proposal. The demo payment reversal and stock restoration happen once; cases with fulfillment or return activity go to seller review.
-- **Delivery watch:** a background worker checks demo dispatch and delivery targets and synthetic courier exceptions, saves follow-up work, and can post a customer update or escalate a seller brief.
-- **Seller controls:** review approvals and action history, pause automated work, take over a case, or explicitly hand the conversation back to the agent with private context.
-- **Operations view:** agent setup and Health show worker liveness, model results, queued cases, usage, and verified outcomes as separate signals.
-
-## How AI is used
-
-The model interprets the customer's request and selects a **typed next step** from the application's supported actions. It can ask a follow-up question, summarize relevant evidence, prepare a return or cancellation proposal, or wait for a customer or seller decision. PostgreSQL full-text search retrieves published customer-safe store knowledge; private seller notes are kept out of customer answers.
-
-The model does not directly change commerce records or decide whether it has permission to act. Server-side services recheck account ownership, current order state, policy version, customer consent, item quantities, payment balance, cumulative refund limits, inspection, approval, and duplicate protection. Mutations use the existing commerce services and database transactions. The application verifies the resulting ledger or order state before telling the customer an action completed. Provider errors leave the case saved for retry or seller review; there is no silent model switch.
-
-Payments and courier events are simulated. The demo uses synthetic customers, orders, addresses, payment references, and delivery events; it does not make real payments, refunds, courier bookings, or external customer contact.
-
-## Demo walkthrough
-
-For the suggested three-minute judging walkthrough, return/refund and cancellation journeys, delivery-watch example, and six-slide story, see [DEMO.md](DEMO.md). Useful local pages:
-
-| Page | Path |
+| What to try | What to look for |
 | --- | --- |
-| Customer support | `/account/support` |
-| Customer returns | `/account/returns` |
-| Seller support and audit | `/admin/support` |
-| Delivery watch | `/admin/support?view=delivery` |
-| Agent knowledge, permissions, and health | `/admin/agent-setup` |
+| **1. Ask a customer question** · [Order DX-1042](https://site--ordex-web--l244vqzv62g9.code.run/account/support?case=ade1c5e8-f92c-45c1-8584-137b3dbbec83) | Ask “Are checkout payments and Demo courier tracking events simulated?” The agent can answer from the published FAQ and cite the passage. The saved conversation also shows a return-window answer based on the seller’s policy. |
+| **2. Inspect a completed return** · [Order DX-1041](https://site--ordex-web--l244vqzv62g9.code.run/account/support?case=e681f5ca-47e8-45a2-8a03-9a5059192c34) | Follow the chipped-mug report through the agent’s exact return proposal, customer confirmation, seller receipt and inspection, and the verified ₹590 simulated refund. |
+| **3. See when the seller steps in** · [Delivery case DX-1046](https://site--ordex-web--l244vqzv62g9.code.run/admin/support?case=d89bcca2-3caa-4e77-8004-c24b9d9cfef7) | The worker spotted a courier exception and raised it in the seller inbox. Open the seller brief to see the order evidence, what’s unresolved, and the decision the seller needs to make. The inbox also gives sellers approval, takeover, and audit controls. |
+| **4. Inspect the agent’s rules** · [Agent Setup](https://site--ordex-web--l244vqzv62g9.code.run/admin/agent-setup) | Open **Knowledge** to see the published FAQ and **Permissions** to see return windows, refund limits, and approval rules. Use **Test a request** to preview how a request fits those rules. **Health** shows worker status and the last model result. |
 
-## Architecture and verification
+For a closer look at the completed return, open the [seller audit log for DX-1041](https://site--ordex-web--l244vqzv62g9.code.run/admin/support?view=audit&case=e681f5ca-47e8-45a2-8a03-9a5059192c34). Compare the agent’s proposal with the refund receipt. The proposal shows what the agent intended to do, and the receipt shows what the store recorded after confirmation and inspection.
 
-EverShop 2.3.0 provides the storefront, admin, catalog, inventory, accounts, checkout, orders, and native commerce services. The `extensions/ordex` extension adds returns, support cases, policy and knowledge records, approvals, audit history, and delivery follow-up. PostgreSQL stores application data and worker leases. The web process serves requests; one background worker processes agent and scheduled work.
+## How the agent works
 
-Compile and build:
+1. **Load the evidence.** The worker reads the signed-in customer’s order, items, payment, delivery, and return records from PostgreSQL. It uses full-text search to find relevant passages from published customer-safe guidance.
+2. **Choose a next step.** Gemini 3.5 Flash-Lite reads the conversation and evidence and returns a structured decision. It can select an order-status answer, cite a published passage, ask for missing details, propose a return or cancellation, or hand the case to the seller. Straightforward return-policy questions can use the configured policy directly.
+3. **Check the rules and act.** The server enforces order ownership, item quantities, the return window, refund limits, exact customer consent, inspection, and seller approval where required. Eligible actions run through the store’s commerce services. The server prevents duplicate actions and verifies the resulting order or payment record before reporting success.
+4. **Save the outcome.** Conversations, approvals, model activity, and action receipts are saved for seller review. The worker also checks for delivery exceptions and follows up on saved work. If the model is unavailable, Ordex keeps the request for retry or seller review.
 
-```sh
-npm run compile:all
-npm run typecheck
-npm run build
-```
+In **Agent Setup**, the model can also review draft store guidance and flag ambiguities. A seller reviews and publishes the source before it can be retrieved for a customer answer.
 
-`npm run check:release` also runs release-scope and hosting checks plus a source preflight. Database suites create synthetic test data and must run against a disposable database with the worker stopped; see [docs/agent-support.md](docs/agent-support.md) for test setup and operational details. Local checks do not establish hosted readiness.
+| Situation | What Ordex does |
+| --- | --- |
+| A return exceeds the seller’s refund limit | The case waits for the seller to approve the specific action and amount. |
+| A customer confirms a return | The agent can create the return. A refund still waits for the seller to record receipt and inspection. |
+| A seller takes over a conversation | Automated work pauses for that case until the seller explicitly hands it back. |
+| A model request or worker run is interrupted | The case stays in PostgreSQL. The worker can resume saved work, with duplicate protection on commerce actions. |
 
-For a hosted setup, run the same tested revision as a web service and a separate worker, with a persistent PostgreSQL database. Configure secrets only in the host's secret store. Initialize a new hosted database once with a private `ORDEX_ADMIN_PASSWORD` of at least 16 characters, then remove that setup-only variable. Uploaded media still needs shared persistent storage. The hosted worker, database persistence, model access, and full customer-to-refund journey remain to be verified before presenting an online demo.
+## Where to read the code
 
-## Project scope and credits
+Most of the hackathon code is in `extensions/ordex/src/`. Start with [`agent.ts`](extensions/ordex/src/services/support/agent.ts): `decide()` defines the model’s prompt and decision contract, and `tick()` is the worker entry point.
 
-The active demo scope is catalog, inventory, customers, orders, delivery, synthetic payments, and returns. CMS authoring, blog, page builder, marketing pages, coupons, outbound webhooks, and real payment integrations are disabled in `config/default.json`.
+| Path | What’s there |
+| --- | --- |
+| [`extensions/ordex/src/services/support/`](extensions/ordex/src/services/support/) | Agent workflow in [`agent.ts`](extensions/ordex/src/services/support/agent.ts), order context and seller controls in [`cases.ts`](extensions/ordex/src/services/support/cases.ts), model calls and limits in [`model.ts`](extensions/ordex/src/services/support/model.ts), knowledge review and retrieval in [`knowledge.ts`](extensions/ordex/src/services/support/knowledge.ts), and proactive checks in [`delivery.ts`](extensions/ordex/src/services/support/delivery.ts). |
+| [`extensions/ordex/src/services/`](extensions/ordex/src/services/) | Commerce actions and their safeguards in [`returns.ts`](extensions/ordex/src/services/returns.ts) and [`cancellations.ts`](extensions/ordex/src/services/cancellations.ts). |
+| [`extensions/ordex/src/api/`](extensions/ordex/src/api/) | Customer and seller support endpoints used by the UI. |
+| [`extensions/ordex/src/pages/`](extensions/ordex/src/pages/) and [`components/`](extensions/ordex/src/components/) | Customer support, seller inbox, and Agent Setup screens. |
+| [`extensions/ordex/src/migration/`](extensions/ordex/src/migration/) | PostgreSQL schema for support cases, knowledge, audit records, and worker state. |
+| [`tests/support.test.mjs`](tests/support.test.mjs) | Support integration scenarios covering decisions, policy checks, and saved outcomes. |
+| [`packages/evershop/`](packages/evershop/) | EverShop 2.3.0 commerce foundation for accounts, catalog, orders, and inventory. Ordex adds the support agent as an extension. |
 
-This repository includes EverShop v2.3.0 under GPL-3.0. Its license and upstream notices are preserved. See [UPSTREAM.md](UPSTREAM.md), [LICENSE](LICENSE), [ASSET_CREDITS.md](ASSET_CREDITS.md), and `LICENSES/` for source and asset attribution.
+The hosted demo runs a web service and a background worker backed by the same PostgreSQL database.
+
+EverShop is included under GPL-3.0. See [upstream notices](UPSTREAM.md), [license](LICENSE), and [asset credits](ASSET_CREDITS.md).
